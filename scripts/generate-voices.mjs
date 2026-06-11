@@ -18,7 +18,7 @@ import { INTRO, BOSS_DEFEAT, COMPANION_CHEER, FLOOR_QUOTES, bossIntroScene, comp
    via eleven_multilingual_v2). Mit `--list` alle verfügbaren ansehen
    und hier nach Geschmack tauschen. */
 const VOICE_IDS = {
-  narrator:  'JBFqnCBsd6RMkjVDRZzb', // George – warme Vorlese-Stimme
+  narrator:  '5KvpaGteYkNayiswuX2h', // vom Nutzer gewählte Erzähler-Stimme
   boss:      'onwK4e9ZLuTAKqWW03F9', // Daniel – tief, autoritär (Schattenfiguren)
   companion: 'FGY2WhTYpPnrIDTdsKH5'  // Laura – hell, lebhaft (Begleiter-Tier)
 };
