@@ -36,7 +36,13 @@ if ('speechSynthesis' in window) speechSynthesis.getVoices();
 export async function loadVoiceManifest() {
   try {
     const r = await fetch('/assets/voice/manifest.json');
-    if (r.ok) MANIFEST = await r.json();
+    if (r.ok) {
+      MANIFEST = await r.json();
+      /* Clips vorladen (HTTP-Cache wärmen): Wiedergabe startet dann auch
+         vollständig, wenn der Hauptthread gerade beschäftigt ist
+         (z.B. Shader-Kompilierung beim ersten Start) */
+      Object.values(MANIFEST).forEach(f => fetch('/assets/voice/' + f).catch(() => {}));
+    }
   } catch (e) { /* kein Manifest → Web-Speech-Fallback */ }
 }
 function clipFor(voiceKey, text) {

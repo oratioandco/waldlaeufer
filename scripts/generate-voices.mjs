@@ -10,7 +10,7 @@
    Die MP3s werden ins Repo committet → der Client braucht weder
    API-Key noch Internet-TTS (DSGVO: keine Laufzeit-Daten an Dritte).
    ===================================================================== */
-import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'fs';
+import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync, unlinkSync } from 'fs';
 import { createHash } from 'crypto';
 import { INTRO, BOSS_DEFEAT, COMPANION_CHEER, FLOOR_QUOTES, bossIntroScene, companionJoinScene } from '../src/story/content.js';
 
@@ -87,5 +87,14 @@ for (const { voice, text } of lines) {
   made++;
   console.log(`✓ [${voice}] ${text.slice(0, 60)}`);
 }
+/* Manifest-Einträge entfernen, deren Zeile es nicht mehr gibt,
+   und verwaiste MP3s löschen (z.B. nach Stimmen-/Text-Änderungen) */
+const valid = new Set(lines.map(l => l.voice + '|' + l.text));
+Object.keys(manifest).forEach(k => { if (!valid.has(k)) delete manifest[k]; });
+const used = new Set(Object.values(manifest));
+let removed = 0;
+readdirSync(OUT).filter(f => f.endsWith('.mp3') && !used.has(f))
+  .forEach(f => { unlinkSync(`${OUT}/${f}`); removed++; });
+
 writeFileSync(`${OUT}/manifest.json`, JSON.stringify(manifest, null, 1));
-console.log(`\nFertig: ${made} neu generiert, ${skipped} unverändert, Manifest: ${Object.keys(manifest).length} Einträge.`);
+console.log(`\nFertig: ${made} neu generiert, ${skipped} unverändert, ${removed} verwaiste gelöscht, Manifest: ${Object.keys(manifest).length} Einträge.`);
