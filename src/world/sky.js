@@ -6,28 +6,32 @@ import { camPos } from '../engine/camera.js';
 import { hash3 } from './terrain.js';
 
 let clouds = [];
+export let skyMat = null, sunSprite = null;
 
 export function buildSky() {
-  const skyMat = new THREE.ShaderMaterial({
+  /* Farben als Uniforms → Atmosphären-System kann Tageszeit steuern */
+  skyMat = new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false,
+    uniforms: {
+      uTop: { value: new THREE.Color(0.33, 0.62, 0.94) },
+      uHor: { value: new THREE.Color(0.90, 0.96, 1.0) }
+    },
     vertexShader: `varying vec3 vP;
       void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
-    fragmentShader: `varying vec3 vP;
+    fragmentShader: `varying vec3 vP;uniform vec3 uTop;uniform vec3 uHor;
       void main(){
         float h=normalize(vP).y*0.5+0.5;
-        vec3 top=vec3(0.33,0.62,0.94);
-        vec3 hor=vec3(0.90,0.96,1.0);
-        gl_FragColor=vec4(mix(hor,top,smoothstep(0.42,0.95,h)),1.0);
+        gl_FragColor=vec4(mix(uHor,uTop,smoothstep(0.42,0.95,h)),1.0);
       }`
   });
   const sky = new THREE.Mesh(new THREE.SphereGeometry(150, 16, 12), skyMat);
   sky.userData.followCam = true;
   scene.add(sky); clouds.push(sky);
-  const sunSp = new THREE.Sprite(new THREE.SpriteMaterial({
+  sunSprite = new THREE.Sprite(new THREE.SpriteMaterial({
     map: glowTex, color: 0xfff6d8, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
-  sunSp.scale.set(55, 55, 1);
-  sunSp.userData.followCamOffset = new THREE.Vector3(70, 80, 35);
-  scene.add(sunSp); clouds.push(sunSp);
+  sunSprite.scale.set(55, 55, 1);
+  sunSprite.userData.followCamOffset = new THREE.Vector3(70, 80, 35);
+  scene.add(sunSprite); clouds.push(sunSprite);
   for (let i = 0; i < 7; i++) {
     const grp = new THREE.Group();
     const n = 2 + Math.floor(hash3(i, 1, 2) * 3);

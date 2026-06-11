@@ -9,7 +9,7 @@ import { QUALITY, qTier, effectivePR } from './quality.js';
 
 THREE.ColorManagement.enabled = false;
 
-export let scene = null, camera = null, renderer = null, sun = null, sunTarget = null;
+export let scene = null, camera = null, renderer = null, sun = null, sunTarget = null, hemi = null;
 export let raycaster = null, pointer = null;
 
 let rtScene = null, rtA = null, rtB = null, postCam = null, postScene = null, postQuad = null;
@@ -30,7 +30,8 @@ export function initRenderer() {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   document.body.appendChild(renderer.domElement);
 
-  scene.add(new THREE.HemisphereLight(0xcfe6ff, 0x77995a, .85 * Math.PI));
+  hemi = new THREE.HemisphereLight(0xcfe6ff, 0x77995a, .85 * Math.PI);
+  scene.add(hemi);
   sun = new THREE.DirectionalLight(0xfff1cf, 1.35 * Math.PI);
   sun.position.set(24, 36, 14);
   sun.castShadow = true;

@@ -12,6 +12,7 @@ import { initCameraInput, updateCamera, rigPos, rigFocus, camPos, camFocus } fro
 import { updateShards } from './engine/effects.js';
 import { buildGround } from './world/terrain.js';
 import { buildSky, updateSky } from './world/sky.js';
+import { updateAtmosphere } from './world/atmosphere.js';
 import { buildGrass, updateGrass } from './world/grass.js';
 import { buildPollen, updatePollen } from './world/vegetation.js';
 import { planFloor, advance } from './world/stations.js';
@@ -41,6 +42,7 @@ function loop(t) {
   updateGrass(time);
   updateMob(time, dt);
   updateSky(dt);
+  updateAtmosphere(dt, time);
   updateCards(dt);
   updatePollen(time, dt);
   updateShards(dt);

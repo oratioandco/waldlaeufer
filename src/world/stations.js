@@ -22,6 +22,7 @@ import { showFloorClear } from '../ui/overlays.js';
 import { sndStep } from '../audio/sfx.js';
 import { say } from '../audio/tts.js';
 import { saveActive } from '../meta/save.js';
+import { setAtmosphere, rebuildFloorFx } from './atmosphere.js';
 
 let pathHeading = Math.PI;
 let pathEnd = new THREE.Vector3(0, 0, 6);
@@ -66,6 +67,8 @@ export function planFloor() {
   scatterGrass(newSegs);
   applyQuality();
   G.stations.forEach(st => { buildSegment(st, st.from); buildStation(st); });
+  rebuildFloorFx(newSegs, G.stations);
+  setAtmosphere(0, G.floor); /* neues Gebiet beginnt am Morgen */
   renderDots();
 }
 
@@ -208,6 +211,9 @@ export function advance() {
   const st = G.stations[G.stIdx];
   worldGroups.push(st.group);
   while (worldGroups.length > 9) { disposeGroup(worldGroups.shift()); }
+
+  /* Tageszeit schreitet mit der Reise voran: Boss = Dämmerung */
+  setAtmosphere(G.stIdx / Math.max(1, G.stations.length - 1), G.floor);
 
   const targetRig = st.pos.clone().addScaledVector(st.dir, -9.2); targetRig.y = 3.7;
   const targetFocus = st.pos.clone(); targetFocus.y = 2.2;
