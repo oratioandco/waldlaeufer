@@ -64,7 +64,8 @@ const manifest = existsSync(`${OUT}/manifest.json`)
 let made = 0, skipped = 0;
 
 for (const { voice, text } of lines) {
-  const id = createHash('md5').update(voice + '|' + text).digest('hex').slice(0, 10);
+  /* Voice-ID im Hash: Stimme in VOICE_IDS tauschen → Clips regenerieren automatisch */
+  const id = createHash('md5').update(VOICE_IDS[voice] + '|' + text).digest('hex').slice(0, 10);
   const file = `${voice}-${id}.mp3`;
   const key = voice + '|' + text;
   if (manifest[key] === file && existsSync(`${OUT}/${file}`)) { skipped++; continue; }
