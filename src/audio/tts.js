@@ -1,4 +1,10 @@
-/* ---------- Sprachausgabe ----------
+/* ---------- Sprachausgabe mit Abspiel-Queue ----------
+   Regel: Ein laufender Clip wird IMMER zu Ende gespielt. Während er
+   läuft, wird höchstens EIN weiterer Wunsch gemerkt (der neueste
+   gewinnt – bei schnellem Tippen entsteht kein Rückstau alter Clips).
+   interrupt=true (z.B. Szenen-WEITER = bewusstes Überspringen)
+   bricht sofort ab.
+
    Drei Wege, alle mit Musik-Ducking (Stimme bleibt IMMER verständlich):
    1. sayGame():  gebackene ElevenLabs-Clips für Wörter, Silben,
       Schildwörter und feste Gameplay-Sätze (Lehrer-Stimme).
@@ -14,10 +20,12 @@ let VOICE_VOL = 1;
 try { VOICE_VOL = +(localStorage.getItem('waldlaeufer.volVoice') ?? 1); } catch (e) {}
 let MANIFEST = null;
 let curAudio = null;
+let current = null;   // laufender Job
+let pending = null;   // gemerkter nächster Job (neuester gewinnt)
 
 export function setVoiceOn(on) {
   VOICE_ON = on;
-  if (!on) stopVoice();
+  if (!on) { pending = null; hardStop(); }
 }
 export function setVoiceVol(v) {
   VOICE_VOL = v;
@@ -26,36 +34,98 @@ export function setVoiceVol(v) {
 }
 export function getVoiceVol() { return VOICE_VOL; }
 
-function stopVoice() {
-  if (curAudio) { curAudio.pause(); curAudio = null; }
+/* ---------- Queue-Kern ---------- */
+function hardStop() {
+  if (curAudio) { curAudio.onended = curAudio.onerror = null; curAudio.pause(); curAudio = null; }
   try { speechSynthesis.cancel(); } catch (e) {}
+  if (current) { clearTimeout(current._t); current = null; }
   duckMusic(false);
 }
-
-export function say(text, rate = .95, pitch = .9) {
-  if (!VOICE_ON) return;
-  stopVoice();
-  try {
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'de-DE'; u.rate = rate; u.pitch = pitch; u.volume = VOICE_VOL;
-    const v = speechSynthesis.getVoices().find(v => v.lang && v.lang.startsWith('de'));
-    if (v) u.voice = v;
-    duckMusic(true);
-    u.onend = u.onerror = () => duckMusic(false);
-    speechSynthesis.speak(u);
-  } catch (e) { duckMusic(false); }
+function startJob(job) {
+  current = job;
+  duckMusic(true);
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    clearTimeout(job._t);
+    curAudio = null;
+    current = null;
+    if (pending) { const j = pending; pending = null; startJob(j); }
+    else duckMusic(false);
+  };
+  /* Sicherheitsnetz: falls onended/onend nie feuert (iOS-Eigenheiten),
+     gibt der Timer die Queue wieder frei */
+  job._t = setTimeout(finish, job.maxMs);
+  job.run(finish);
 }
-if ('speechSynthesis' in window) speechSynthesis.getVoices();
+function requestJob(job, interrupt = false) {
+  if (!VOICE_ON) return;
+  if (interrupt) { pending = null; hardStop(); startJob(job); return; }
+  if (current) { pending = job; return; }
+  startJob(job);
+}
 
-/* ---------- Gebackene Clips ---------- */
+/* ---------- Job-Typen ---------- */
+function speechRun(text, rate, pitch) {
+  return finish => {
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'de-DE'; u.rate = rate; u.pitch = pitch; u.volume = VOICE_VOL;
+      const v = speechSynthesis.getVoices().find(v => v.lang && v.lang.startsWith('de'));
+      if (v) u.voice = v;
+      u.onend = u.onerror = finish;
+      speechSynthesis.speak(u);
+    } catch (e) { finish(); }
+  };
+}
+function speechJob(text, rate = .95, pitch = .9) {
+  return { run: speechRun(text, rate, pitch), maxMs: Math.max(3000, text.length * 150) };
+}
+function clipJob(file, fbText, fbRate, fbPitch) {
+  return {
+    maxMs: 20000,
+    run: finish => {
+      curAudio = new Audio('/assets/voice/' + file);
+      curAudio.volume = VOICE_VOL;
+      curAudio.onended = curAudio.onerror = finish;
+      curAudio.play().catch(() => speechRun(fbText, fbRate, fbPitch)(finish));
+    }
+  };
+}
+function seqJob(steps) {
+  return {
+    maxMs: 20000 * steps.length,
+    run: finish => {
+      let i = 0;
+      const next = () => {
+        if (i >= steps.length) { finish(); return; }
+        const s = steps[i++];
+        const f = clipFor(s.voice, s.text);
+        if (!f) { /* Rest als ein Fallback-Satz sprechen */
+          const v = VOICES[s.voice] || VOICES.narrator;
+          speechRun([s.text, ...steps.slice(i).map(x => x.text)].join(' '), v.rate, v.pitch)(finish);
+          return;
+        }
+        curAudio = new Audio('/assets/voice/' + f);
+        curAudio.volume = VOICE_VOL;
+        curAudio.onended = next;
+        curAudio.onerror = next;
+        curAudio.play().catch(next);
+      };
+      next();
+    }
+  };
+}
+
+/* ---------- Manifest ---------- */
 export async function loadVoiceManifest() {
   try {
     const r = await fetch('/assets/voice/manifest.json');
     if (r.ok) {
       MANIFEST = await r.json();
       /* Clips vorladen (HTTP-Cache wärmen): Wiedergabe startet dann auch
-         vollständig, wenn der Hauptthread gerade beschäftigt ist
-         (z.B. Shader-Kompilierung beim ersten Start) */
+         vollständig, wenn der Hauptthread gerade beschäftigt ist */
       Object.values(MANIFEST).forEach(f => fetch('/assets/voice/' + f).catch(() => {}));
     }
   } catch (e) { /* kein Manifest → Web-Speech-Fallback */ }
@@ -63,52 +133,26 @@ export async function loadVoiceManifest() {
 function clipFor(voiceKey, text) {
   return MANIFEST && MANIFEST[voiceKey + '|' + text];
 }
-function playClip(file) {
-  stopVoice();
-  curAudio = new Audio('/assets/voice/' + file);
-  curAudio.volume = VOICE_VOL;
-  duckMusic(true);
-  curAudio.onended = curAudio.onerror = () => duckMusic(false);
-  return curAudio.play();
+
+/* ---------- Öffentliche API ---------- */
+export function say(text, rate = .95, pitch = .9, interrupt = false) {
+  requestJob(speechJob(text, rate, pitch), interrupt);
 }
-function speechFallback(voiceKey, text) {
-  const v = VOICES[voiceKey] || VOICES.narrator;
-  say(text, v.rate, v.pitch);
-}
+if ('speechSynthesis' in window) speechSynthesis.getVoices();
 
 /* Gameplay: Wörter, Silben, Schildwörter, feste Sätze (Lehrer-Stimme) */
-export function sayGame(text) {
-  if (!VOICE_ON) return;
+export function sayGame(text, interrupt = false) {
   const f = clipFor('word', text);
-  if (!f) { say(text); return; }
-  playClip(f).catch(() => say(text));
+  requestJob(f ? clipJob(f, text, .95, .9) : speechJob(text), interrupt);
 }
 /* Story-Zeilen (Charakterstimmen) */
-export function sayStory(voiceKey, text) {
-  if (!VOICE_ON) return;
+export function sayStory(voiceKey, text, interrupt = false) {
+  const v = VOICES[voiceKey] || VOICES.narrator;
   const f = clipFor(voiceKey, text);
-  if (!f) { speechFallback(voiceKey, text); return; }
-  playClip(f).catch(() => speechFallback(voiceKey, text));
+  requestJob(f ? clipJob(f, text, v.rate, v.pitch) : speechJob(text, v.rate, v.pitch), interrupt);
 }
-/* Mehrere Zeilen nacheinander (z.B. Erzähler + Begleiter-Zitat).
-   Nur wenn alle Clips vorliegen wird verkettet, sonst ein Fallback-Satz. */
+/* Mehrere Zeilen nacheinander (z.B. Erzähler + Begleiter-Zitat) */
 export function sayStorySeq(steps) {
-  if (!VOICE_ON || !steps.length) return;
-  if (!steps.every(s => clipFor(s.voice, s.text))) {
-    speechFallback(steps[0].voice, steps.map(s => s.text).join(' '));
-    return;
-  }
-  stopVoice();
-  duckMusic(true);
-  let i = 0;
-  const playNext = () => {
-    if (i >= steps.length) { curAudio = null; duckMusic(false); return; }
-    const s = steps[i++];
-    curAudio = new Audio('/assets/voice/' + clipFor(s.voice, s.text));
-    curAudio.volume = VOICE_VOL;
-    curAudio.onended = playNext;
-    curAudio.onerror = () => duckMusic(false);
-    curAudio.play().catch(() => duckMusic(false));
-  };
-  playNext();
+  if (!steps.length) return;
+  requestJob(seqJob(steps));
 }

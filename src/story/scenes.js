@@ -35,7 +35,8 @@ function showStep() {
   document.getElementById('sceneIcon').textContent = s.icon;
   document.getElementById('sceneSpeaker').textContent = s.name;
   document.getElementById('sceneText').textContent = s.text;
-  sayStory(s.voice, s.text);
+  /* WEITER = bewusstes Überspringen → laufende Zeile sofort abbrechen */
+  sayStory(s.voice, s.text, true);
   document.getElementById('sceneNextBtn').innerHTML =
     idx < queue.length - 1 ? '▶ &nbsp;WEITER' : '⚔ &nbsp;LOS!';
 }
@@ -43,7 +44,7 @@ function next() {
   idx++;
   if (idx < queue.length) { showStep(); return; }
   document.getElementById('sceneOv').classList.remove('on');
-  try { speechSynthesis.cancel(); } catch (e) {}
+  /* letzte Zeile darf ausklingen – Folge-Sprache reiht sich in die Queue ein */
   const cb = onDoneCb; onDoneCb = null;
   if (cb) cb();
 }
