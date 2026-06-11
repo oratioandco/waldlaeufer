@@ -14,12 +14,20 @@ import { skyMat, sunSprite } from './sky.js';
 import { hash3, hillH } from './terrain.js';
 
 /* Tageszeit-Keyframes: p 0=Morgen … 1=Dämmerung (Boss).
-   Intensitäten in r128-Werten; ×π passiert beim Anwenden. */
+   Intensitäten in r128-Werten; ×π passiert beim Anwenden.
+   sunY = Höhe des Richtungslichts (tiefer = längere, wärmere Schatten),
+   sprY/sprS = Höhe und Größe des sichtbaren Sonnen-Sprites. */
 const STOPS = [
-  { p: 0,   top: 0x6b9ef3, hor: 0xfce6cc, sun: 0xffe2b0, sunI: 1.20, hemiSky: 0xd9e9ff, hemiGr: 0x7f9a58, hemiI: .85, fog: 0xe6e9ef, fogN: 36, fogF: 100, sprite: 0xfff0d0 },
-  { p: .4,  top: 0x549ef0, hor: 0xe6f5ff, sun: 0xfff1cf, sunI: 1.35, hemiSky: 0xcfe6ff, hemiGr: 0x77995a, hemiI: .85, fog: 0xcfe9fb, fogN: 36, fogF: 100, sprite: 0xfff6d8 },
-  { p: .75, top: 0x4d6bcc, hor: 0xffbd85, sun: 0xffc080, sunI: 1.10, hemiSky: 0xe3cfd4, hemiGr: 0x6a7a4a, hemiI: .75, fog: 0xead2bb, fogN: 32, fogF: 92,  sprite: 0xffd9a0 },
-  { p: 1,   top: 0x26265c, hor: 0x855780, sun: 0xb389e8, sunI: .75,  hemiSky: 0x6a5a9a, hemiGr: 0x3a3a52, hemiI: .60, fog: 0x4f4566, fogN: 26, fogF: 78,  sprite: 0xc9a0ff }
+  /* Morgen: weiches, pfirsichfarbenes Dunstlicht */
+  { p: 0,   top: 0x7da9ef, hor: 0xffe2c4, sun: 0xffd9a0, sunI: 1.05, hemiSky: 0xe2ecff, hemiGr: 0x7f9a58, hemiI: .78, fog: 0xeadfd2, fogN: 30, fogF: 92,  sprite: 0xffe8c0, sunY: 28, sprY: 56, sprS: 55 },
+  /* Tag: helle Referenz (Prototyp-Look) */
+  { p: .35, top: 0x549ef0, hor: 0xe6f5ff, sun: 0xfff1cf, sunI: 1.35, hemiSky: 0xcfe6ff, hemiGr: 0x77995a, hemiI: .85, fog: 0xcfe9fb, fogN: 36, fogF: 100, sprite: 0xfff6d8, sunY: 38, sprY: 80, sprS: 55 },
+  /* Später Nachmittag: erstes Anwärmen */
+  { p: .6,  top: 0x4d7ad9, hor: 0xffd9a3, sun: 0xffd998, sunI: 1.15, hemiSky: 0xe8dcc8, hemiGr: 0x6f8a50, hemiI: .78, fog: 0xeedec0, fogN: 33, fogF: 94,  sprite: 0xffe3ae, sunY: 26, sprY: 58, sprS: 58 },
+  /* GOLDEN HOUR: tiefe Sonne, sattes Gold, lange Schatten */
+  { p: .85, top: 0x3f5cb8, hor: 0xff9d4d, sun: 0xff9d50, sunI: 1.0,  hemiSky: 0xe8b890, hemiGr: 0x5a6a40, hemiI: .66, fog: 0xf0b070, fogN: 28, fogF: 84,  sprite: 0xffb060, sunY: 14, sprY: 34, sprS: 68 },
+  /* Dämmerung (Boss): dunkel, tiefes Blauviolett */
+  { p: 1,   top: 0x191a45, hor: 0x6e4070, sun: 0x9f7be0, sunI: .55,  hemiSky: 0x55477e, hemiGr: 0x2c2c40, hemiI: .50, fog: 0x3d3552, fogN: 22, fogF: 70,  sprite: 0xc9a0ff, sunY: 10, sprY: 26, sprS: 60 }
 ];
 /* dezente Farbstimmung je Gebiet (Hue-Shift auf Himmel + Nebel) */
 const FLOOR_HUE = [0, .025, -.035, .045, -.02, .06];
@@ -29,8 +37,9 @@ const cur = {
   sun: new THREE.Color(0xfff1cf), sunI: 1.35,
   hemiSky: new THREE.Color(0xcfe6ff), hemiGr: new THREE.Color(0x77995a), hemiI: .85,
   fog: new THREE.Color(0xcfe9fb), fogN: 36, fogF: 100,
-  sprite: new THREE.Color(0xfff6d8)
+  sprite: new THREE.Color(0xfff6d8), sunY: 38, sprY: 80, sprS: 55
 };
+export function currentSunHeight() { return cur.sunY; }
 let tgt = null;
 
 function lerpStop(p) {
@@ -46,7 +55,8 @@ function lerpStop(p) {
     sun: col(a.sun, b.sun), sunI: num(a.sunI, b.sunI),
     hemiSky: col(a.hemiSky, b.hemiSky), hemiGr: col(a.hemiGr, b.hemiGr), hemiI: num(a.hemiI, b.hemiI),
     fog: col(a.fog, b.fog), fogN: num(a.fogN, b.fogN), fogF: num(a.fogF, b.fogF),
-    sprite: col(a.sprite, b.sprite)
+    sprite: col(a.sprite, b.sprite),
+    sunY: num(a.sunY, b.sunY), sprY: num(a.sprY, b.sprY), sprS: num(a.sprS, b.sprS)
   };
 }
 
@@ -62,6 +72,7 @@ export function setAtmosphere(progress, floor, snap = false) {
     cur.hemiSky.copy(tgt.hemiSky); cur.hemiGr.copy(tgt.hemiGr);
     cur.fog.copy(tgt.fog); cur.sprite.copy(tgt.sprite);
     cur.sunI = tgt.sunI; cur.hemiI = tgt.hemiI; cur.fogN = tgt.fogN; cur.fogF = tgt.fogF;
+    cur.sunY = tgt.sunY; cur.sprY = tgt.sprY; cur.sprS = tgt.sprS;
   }
 }
 
@@ -123,6 +134,9 @@ export function updateAtmosphere(dt, time) {
   cur.hemiI += (tgt.hemiI - cur.hemiI) * k;
   cur.fogN += (tgt.fogN - cur.fogN) * k;
   cur.fogF += (tgt.fogF - cur.fogF) * k;
+  cur.sunY += (tgt.sunY - cur.sunY) * k;
+  cur.sprY += (tgt.sprY - cur.sprY) * k;
+  cur.sprS += (tgt.sprS - cur.sprS) * k;
 
   skyMat.uniforms.uTop.value.copy(cur.top);
   skyMat.uniforms.uHor.value.copy(cur.hor);
@@ -132,7 +146,11 @@ export function updateAtmosphere(dt, time) {
   scene.fog.color.copy(cur.fog);
   scene.fog.near = cur.fogN; scene.fog.far = cur.fogF;
   scene.background.copy(cur.hor);
-  if (sunSprite) sunSprite.material.color.copy(cur.sprite);
+  if (sunSprite) {
+    sunSprite.material.color.copy(cur.sprite);
+    sunSprite.userData.followCamOffset.y = cur.sprY;
+    sunSprite.scale.set(cur.sprS, cur.sprS, 1);
+  }
 
   const q = QUALITY[qTier];
   if (mistGroup) {

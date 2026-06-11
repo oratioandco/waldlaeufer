@@ -1,6 +1,7 @@
 /* ---------- Kamera-Rig (Schwebe-Reise + Maus-Parallaxe + Shake) ---------- */
 import * as THREE from 'three';
 import { camera, sun, sunTarget } from './renderer.js';
+import { currentSunHeight } from '../world/atmosphere.js';
 
 export const rigPos = new THREE.Vector3(), rigFocus = new THREE.Vector3();
 export const camPos = new THREE.Vector3(), camFocus = new THREE.Vector3();
@@ -23,7 +24,8 @@ export function updateCamera(dt) {
   camera.lookAt(camFocus);
 
   if (sun) {
-    sun.position.set(camPos.x + 24, 36, camPos.z + 14);
+    /* Sonnenhöhe folgt der Tageszeit: tief = lange Golden-Hour-Schatten */
+    sun.position.set(camPos.x + 24, currentSunHeight(), camPos.z + 14);
     sunTarget.position.set(camPos.x, 0, camPos.z - 8);
   }
 }
