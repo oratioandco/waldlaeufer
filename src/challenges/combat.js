@@ -1,0 +1,93 @@
+/* ---------- Kampf: Zauber abfeuern, Befreien, Gegnerzug ----------
+   Fehlerfreies Lesen → KRITISCH + Combo (Belohnung statt Bestrafung). */
+import * as THREE from 'three';
+import { screenShake } from '../engine/camera.js';
+import { addAnim } from '../engine/anims.js';
+import { burst, shootSpell } from '../engine/effects.js';
+import { G } from '../state.js';
+import { M, flashModel, tintRage, setMobHp, freeMobVisual } from '../creatures/mob.js';
+import { stationDone } from '../world/stations.js';
+import { rigPos } from '../engine/camera.js';
+import { renderHearts } from '../ui/hud.js';
+import { announce, flyText } from '../ui/feedback.js';
+import { ovOff } from '../ui/overlays.js';
+import { sndBoom, sndFree, sndGrowl, tone } from '../audio/sfx.js';
+import { startWordChallenge } from './spell.js';
+import { startBlitz } from './blitz.js';
+import { spawnGemReward } from './reward.js';
+
+export function castSpell() {
+  const crit = G.errors === 0;
+  G.combo = crit ? G.combo + 1 : 0;
+  const target = M.group.position.clone().add(new THREE.Vector3(0, M.group.userData.hoverY > 0 ? .3 : 1.4, 0));
+  shootSpell(target, () => {
+    sndBoom(); screenShake(crit ? 1.4 : 1);
+    burst(target, crit ? 30 : 20, [0xb6f7c2, 0x46d68a, 0xffffff, 0xffd34a]);
+    {
+      let t = 0;
+      addAnim({ update(dt) {
+        t += dt * 7;
+        flashModel(Math.max(0, 1 - t));
+        if (t >= 1) { flashModel(0); return true; } return false;
+      } });
+    }
+    let dmg = 30 + Math.floor(Math.random() * 8) + (crit ? 22 : 0) + G.buff;
+    if (G.buff) { G.buff = 0; document.getElementById('buffTag').classList.remove('on'); }
+    if (G.combo >= 2) dmg = Math.round(dmg * (1 + Math.min(.5, G.combo * .1)));
+    G.mob.hp -= dmg; setMobHp();
+    flyText(target.clone().add(new THREE.Vector3(0, 2.3, 0)), '-' + dmg, crit ? '#ffd34a' : '#b6f7c2', crit ? 40 : 30);
+    if (crit) announce('KRITISCH!', 700);
+    if (G.combo >= 2) {
+      const c = document.getElementById('comboTag');
+      c.textContent = `🔥 COMBO x${G.combo}`; c.classList.add('on');
+    } else document.getElementById('comboTag').classList.remove('on');
+
+    setTimeout(() => {
+      document.getElementById('spellWord').innerHTML = '';
+      if (G.mob.hp <= 0) killMob();
+      else mobTurn();
+    }, 650);
+  });
+}
+export function killMob() {
+  sndFree();
+  const pos = M.group.position.clone();
+  burst(pos.clone().add(new THREE.Vector3(0, 1, 0)), 34,
+    [0xffffff, 0xffe9a3, G.mob.boss ? 0x9b59c9 : 0x46d68a], true);
+  announce(G.mob.boss ? 'BESIEGT!' : 'BEFREIT! 🕊', 1000);
+  /* Tier wird befreit: Verzauberung fällt ab, es fliegt davon */
+  freeMobVisual();
+  document.getElementById('mobBar').classList.remove('on');
+  screenShake(1.2);
+
+  const g = G.mob.boss ? 8 : 3 + Math.floor(Math.random() * 3);
+  /* Loot fällt vor den Geist Richtung Spieler – kollidiert nicht
+     mit der parallel laufenden Befreiungs-Szene des Tiers */
+  const drop = pos.clone().add(rigPos.clone().sub(pos).setY(0).normalize().multiplyScalar(2.2));
+  drop.y = .5;
+
+  G.kills++; G.mob = null; G.word = null; G.busy = true; G.mode = null;
+  spawnGemReward(drop, g, () => setTimeout(stationDone, 250));
+}
+
+/* ---------- Gegnerzug ---------- */
+export function mobTurn() {
+  if (Math.random() < .5) { setTimeout(() => startWordChallenge('spell'), 500); return; }
+  sndGrowl();
+  {
+    let t = 0;
+    addAnim({ update(dt) {
+      t += dt * 5;
+      tintRage(Math.abs(Math.sin(t)));
+      if (t > 4) { tintRage(0); return true; } return false;
+    } });
+  }
+  setTimeout(() => startBlitz('fight'), 700);
+}
+
+export function revive() {
+  ovOff('deadOv');
+  G.hearts = 5; renderHearts();
+  tone(523, .12); tone(784, .14, 'square', .1, .1);
+  setTimeout(() => startWordChallenge('spell'), 400);
+}

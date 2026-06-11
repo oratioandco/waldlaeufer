@@ -1,0 +1,89 @@
+{
+  "_hinweis": "Wortlisten der Lern-Engine. Hier können die Förderwörter der Therapeutin 1:1 eingesetzt werden. w = Wort, s = Silben in Lesereihenfolge. Stufen folgen der lautgetreuen Progression (Reuter-Liehr).",
+  "tierNames": {
+    "1": "Stufe 1 · offene Silben",
+    "2": "Stufe 2 · mehrsilbig",
+    "3": "Stufe 3 · Konsonantenhäufung",
+    "4": "Stufe 4 · Klasse 4/5"
+  },
+  "tiers": {
+    "1": [
+      {"w": "Oma", "s": ["O", "ma"]},
+      {"w": "Nase", "s": ["Na", "se"]},
+      {"w": "Hase", "s": ["Ha", "se"]},
+      {"w": "Rose", "s": ["Ro", "se"]},
+      {"w": "Wiese", "s": ["Wie", "se"]},
+      {"w": "Esel", "s": ["E", "sel"]},
+      {"w": "Igel", "s": ["I", "gel"]},
+      {"w": "Rabe", "s": ["Ra", "be"]},
+      {"w": "Feder", "s": ["Fe", "der"]},
+      {"w": "Bogen", "s": ["Bo", "gen"]},
+      {"w": "Nebel", "s": ["Ne", "bel"]},
+      {"w": "Hagel", "s": ["Ha", "gel"]},
+      {"w": "Biene", "s": ["Bie", "ne"]},
+      {"w": "Eule", "s": ["Eu", "le"]}
+    ],
+    "2": [
+      {"w": "Banane", "s": ["Ba", "na", "ne"]},
+      {"w": "Tomate", "s": ["To", "ma", "te"]},
+      {"w": "Rakete", "s": ["Ra", "ke", "te"]},
+      {"w": "Lawine", "s": ["La", "wi", "ne"]},
+      {"w": "Kamera", "s": ["Ka", "me", "ra"]},
+      {"w": "Ananas", "s": ["A", "na", "nas"]},
+      {"w": "Salami", "s": ["Sa", "la", "mi"]},
+      {"w": "Telefon", "s": ["Te", "le", "fon"]},
+      {"w": "Tornado", "s": ["Tor", "na", "do"]},
+      {"w": "Krokodil", "s": ["Kro", "ko", "dil"]},
+      {"w": "Pyramide", "s": ["Py", "ra", "mi", "de"]},
+      {"w": "Marmelade", "s": ["Mar", "me", "la", "de"]}
+    ],
+    "3": [
+      {"w": "Drache", "s": ["Dra", "che"]},
+      {"w": "Schlange", "s": ["Schlan", "ge"]},
+      {"w": "Donner", "s": ["Don", "ner"]},
+      {"w": "Schatten", "s": ["Schat", "ten"]},
+      {"w": "Monster", "s": ["Mons", "ter"]},
+      {"w": "Springer", "s": ["Sprin", "ger"]},
+      {"w": "Splitter", "s": ["Split", "ter"]},
+      {"w": "Kristall", "s": ["Kris", "tall"]},
+      {"w": "Skelett", "s": ["Ske", "lett"]},
+      {"w": "Diamant", "s": ["Di", "a", "mant"]},
+      {"w": "Sturmwind", "s": ["Sturm", "wind"]},
+      {"w": "Schmetterling", "s": ["Schmet", "ter", "ling"]}
+    ],
+    "4": [
+      {"w": "Geheimnis", "s": ["Ge", "heim", "nis"]},
+      {"w": "Abenteuer", "s": ["A", "ben", "teu", "er"]},
+      {"w": "Augenblick", "s": ["Au", "gen", "blick"]},
+      {"w": "Freundschaft", "s": ["Freund", "schaft"]},
+      {"w": "Entdecker", "s": ["Ent", "de", "cker"]},
+      {"w": "Verwandlung", "s": ["Ver", "wand", "lung"]},
+      {"w": "Beschützer", "s": ["Be", "schüt", "zer"]},
+      {"w": "Zauberkraft", "s": ["Zau", "ber", "kraft"]},
+      {"w": "Königreich", "s": ["Kö", "nig", "reich"]},
+      {"w": "Unsichtbar", "s": ["Un", "sicht", "bar"]},
+      {"w": "Verzauberung", "s": ["Ver", "zau", "be", "rung"]},
+      {"w": "Geisterstunde", "s": ["Geis", "ter", "stun", "de"]}
+    ]
+  },
+  "shields": [
+    {"w": "und", "d": ["uns", "rund"]},
+    {"w": "der", "d": ["den", "dem"]},
+    {"w": "die", "d": ["dir", "sie"]},
+    {"w": "das", "d": ["des", "was"]},
+    {"w": "ist", "d": ["im", "ihr"]},
+    {"w": "mit", "d": ["mir", "mut"]},
+    {"w": "auf", "d": ["aus", "an"]},
+    {"w": "ein", "d": ["kein", "eins"]},
+    {"w": "ich", "d": ["dich", "ach"]},
+    {"w": "sie", "d": ["wie", "sei"]},
+    {"w": "nicht", "d": ["licht", "nichts"]},
+    {"w": "auch", "d": ["aus", "ach"]},
+    {"w": "sind", "d": ["sand", "seid"]},
+    {"w": "wir", "d": ["wer", "wie"]},
+    {"w": "dann", "d": ["denn", "dran"]},
+    {"w": "noch", "d": ["nach", "doch"]},
+    {"w": "sehr", "d": ["mehr", "sieht"]},
+    {"w": "wieder", "d": ["weiter", "wider"]}
+  ]
+}

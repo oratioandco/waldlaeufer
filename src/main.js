@@ -1,0 +1,155 @@
+/* =====================================================================
+   WALDLÄUFER – Bootstrap & Hauptschleife
+   1:1-Port der Referenz-Implementierung (waldlaeufer-final.html)
+   auf Vite + ES-Module. Therapie-Invarianten siehe CLAUDE.md.
+   ===================================================================== */
+import './ui/style.css';
+import { initRenderer, renderFrame, raycaster, pointer, camera } from './engine/renderer.js';
+import { autoGovern } from './engine/quality.js';
+import { initTextures } from './engine/textures.js';
+import { updateAnims } from './engine/anims.js';
+import { initCameraInput, updateCamera, rigPos, rigFocus, camPos, camFocus } from './engine/camera.js';
+import { updateShards } from './engine/effects.js';
+import { buildGround } from './world/terrain.js';
+import { buildSky, updateSky } from './world/sky.js';
+import { buildGrass, updateGrass } from './world/grass.js';
+import { buildPollen, updatePollen } from './world/vegetation.js';
+import { planFloor, advance } from './world/stations.js';
+import { loadModels } from './creatures/models.js';
+import { updateMob } from './creatures/mob.js';
+import { cards, updateCards } from './challenges/cards.js';
+import { tapCard, speakSpell } from './challenges/spell.js';
+import { tapBefehl, befehlTargets } from './challenges/befehl.js';
+import { revive } from './challenges/combat.js';
+import { G } from './state.js';
+import { renderHearts, renderHUD } from './ui/hud.js';
+import { announce } from './ui/feedback.js';
+import { wireOverlays } from './ui/overlays.js';
+import { ac, sndBird } from './audio/sfx.js';
+import { listProfiles, createProfile, selectProfile, saveActive } from './meta/save.js';
+
+let birdT = 4;
+
+/* ---------- Loop ---------- */
+let lastT = 0;
+function loop(t) {
+  requestAnimationFrame(loop);
+  const dt = Math.min(.05, (t - lastT) / 1000); lastT = t;
+  const time = t / 1000;
+  autoGovern(dt);
+
+  updateGrass(time);
+  updateMob(time, dt);
+  updateSky(dt);
+  updateCards(dt);
+  updatePollen(time, dt);
+  updateShards(dt);
+  /* Snapshot-Iteration: neu gestartete Animationen gehen nie verloren */
+  updateAnims(dt);
+
+  birdT -= dt;
+  if (birdT < 0) { birdT = 6 + Math.random() * 9; sndBird(); }
+
+  updateCamera(dt);
+  renderFrame();
+}
+
+/* ---------- Tap-Routing ---------- */
+function onTap(e) {
+  ac();
+  if (G.busy) return;
+  pointer.x = (e.clientX / innerWidth) * 2 - 1;
+  pointer.y = -(e.clientY / innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  if (G.mode === 'befehl') {
+    const hits = raycaster.intersectObjects(befehlTargets, true);
+    if (hits.length) {
+      let o = hits[0].object;
+      while (o && !o.userData.color) o = o.parent;
+      if (o) tapBefehl(o);
+    }
+    return;
+  }
+  if (!G.word) return;
+  const hits = raycaster.intersectObjects(cards.filter(r => !r.userData.dead));
+  if (hits.length) tapCard(hits[0].object);
+}
+
+/* ---------- Start ---------- */
+function initThree() {
+  initRenderer();
+  initTextures();
+  buildSky();
+  buildGround();
+  buildGrass();
+  buildPollen();
+  loadModels();
+  initCameraInput();
+  document.querySelector('canvas').addEventListener('pointerdown', onTap);
+  requestAnimationFrame(loop);
+}
+
+wireOverlays();
+document.getElementById('hornBtn').addEventListener('click', speakSpell);
+document.getElementById('reviveBtn').addEventListener('click', revive);
+addEventListener('pagehide', saveActive);
+
+function startGame() {
+  ac();
+  document.getElementById('startOv').classList.remove('on');
+  document.getElementById('hud').classList.add('on');
+  initThree();
+  renderHearts(); renderHUD();
+  document.getElementById('floorTag').textContent = 'GEBIET ' + G.floor;
+  rigPos.set(0, 3.7, 14); rigFocus.set(0, 2.2, 0);
+  camPos.copy(rigPos); camFocus.copy(rigFocus);
+  planFloor();
+  announce('GEBIET ' + G.floor, 1200);
+  if (innerHeight > innerWidth) setTimeout(() => announce('🔄 Quer halten!', 1600), 1600);
+  setTimeout(advance, 2200);
+}
+
+/* ---------- Profil-Auswahl (lokale Speicherstände, kein Account) ---------- */
+let newPlayerMode = false;
+function renderStartProfiles() {
+  const list = document.getElementById('profileList');
+  const row = document.getElementById('newPlayerRow');
+  const btn = document.getElementById('startBtn');
+  const profiles = listProfiles();
+  list.innerHTML = '';
+  profiles.forEach(p => {
+    const b = document.createElement('button');
+    b.className = 'profileBtn';
+    const name = document.createElement('span');
+    name.textContent = '▶ ' + p.name;
+    const meta = document.createElement('small');
+    meta.textContent = p.data ? `Gebiet ${p.data.floor} · 💎 ${p.data.gems}` : 'Neu';
+    b.append(name, meta);
+    b.addEventListener('pointerdown', () => { selectProfile(p.id); startGame(); });
+    list.appendChild(b);
+  });
+  newPlayerMode = !profiles.length;
+  row.style.display = newPlayerMode ? 'block' : 'none';
+  btn.textContent = newPlayerMode ? "⚔  LOS GEHT'S" : '✨  NEUER WALDLÄUFER';
+}
+renderStartProfiles();
+
+document.getElementById('startBtn').addEventListener('pointerdown', () => {
+  const row = document.getElementById('newPlayerRow');
+  const btn = document.getElementById('startBtn');
+  if (!newPlayerMode) {
+    /* erst Namensfeld einblenden, Start beim zweiten Tap */
+    newPlayerMode = true;
+    row.style.display = 'block';
+    btn.textContent = "⚔  LOS GEHT'S";
+    document.getElementById('newName').focus();
+    return;
+  }
+  const name = (document.getElementById('newName').value.trim() || 'WALDLÄUFER')
+    .toUpperCase().slice(0, 12);
+  createProfile(name);
+  startGame();
+});
+document.getElementById('newName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('startBtn').dispatchEvent(new Event('pointerdown'));
+});
