@@ -28,6 +28,8 @@ import { announce } from './ui/feedback.js';
 import { wireOverlays } from './ui/overlays.js';
 import { ac, sndBird } from './audio/sfx.js';
 import { listProfiles, createProfile, selectProfile, saveActive } from './meta/save.js';
+import { initScenes, playScene } from './story/scenes.js';
+import { INTRO } from './story/content.js';
 
 let birdT = 4;
 
@@ -92,6 +94,7 @@ function initThree() {
 }
 
 wireOverlays();
+initScenes();
 document.getElementById('hornBtn').addEventListener('click', speakSpell);
 document.getElementById('reviveBtn').addEventListener('click', revive);
 addEventListener('pagehide', saveActive);
@@ -106,9 +109,15 @@ function startGame() {
   rigPos.set(0, 3.7, 14); rigFocus.set(0, 2.2, 0);
   camPos.copy(rigPos); camFocus.copy(rigFocus);
   planFloor();
-  announce('GEBIET ' + G.floor, 1200);
-  if (innerHeight > innerWidth) setTimeout(() => announce('🔄 Quer halten!', 1600), 1600);
-  setTimeout(advance, 2200);
+  const begin = () => {
+    announce('GEBIET ' + G.floor, 1200);
+    if (innerHeight > innerWidth) setTimeout(() => announce('🔄 Quer halten!', 1600), 1600);
+    setTimeout(advance, 2000);
+  };
+  /* Rahmenhandlung beim allerersten Start dieses Profils (vorgelesen) */
+  if (!G.seenIntro) {
+    playScene(INTRO, () => { G.seenIntro = true; saveActive(); begin(); });
+  } else begin();
 }
 
 /* ---------- Profil-Auswahl (lokale Speicherstände, kein Account) ---------- */

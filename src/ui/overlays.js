@@ -10,6 +10,7 @@ import { say, setVoiceOn } from '../audio/tts.js';
 import { sndWin } from '../audio/sfx.js';
 import { setQuality, setRES } from '../engine/quality.js';
 import { saveActive } from '../meta/save.js';
+import { FLOOR_QUOTES } from '../story/content.js';
 
 export function ovOn(id) { document.getElementById(id).classList.add('on'); }
 export function ovOff(id) { document.getElementById(id).classList.remove('on'); }
@@ -39,15 +40,17 @@ export function openSettings() { ovOn('setOv'); }
 /* ---------- Gebiet geschafft ---------- */
 export function showFloorClear() {
   sndWin();
+  const quote = FLOOR_QUOTES[(G.floor - 1) % FLOOR_QUOTES.length];
   document.getElementById('floorSub').innerHTML =
-    `Du hast den <b style="color:#e9d5ff">${BOSSES[Math.min(G.floor - 1, BOSSES.length - 1)].name}</b> bezwungen<br>und seine Figur erbeutet:`;
+    `Du hast den <b style="color:#e9d5ff">${BOSSES[Math.min(G.floor - 1, BOSSES.length - 1)].name}</b> bezwungen<br>und seine Figur erbeutet:` +
+    (G.companion ? `<br><i style="color:#b8ffd9">${G.companion.icon} „${quote}"</i>` : '');
   document.getElementById('trophyRow').textContent = G.trophies.join(' ');
   document.getElementById('floorStats').innerHTML = `
     <div class="stat"><div class="n">${G.gems}</div><div class="l">💎 GESAMT</div></div>
     <div class="stat"><div class="n">${G.kills}</div><div class="l">BEFREIT</div></div>
     <div class="stat"><div class="n">${G.floor}</div><div class="l">GEBIET</div></div>`;
   ovOn('floorOv');
-  say('Gebiet geschafft! Du hast die Figur erbeutet.', 1, .95);
+  say('Gebiet geschafft! Du hast die Figur erbeutet. ' + (G.companion ? quote : ''), 1, .95);
 }
 function nextFloor() {
   ovOff('floorOv');

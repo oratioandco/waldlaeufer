@@ -15,6 +15,8 @@ import { sndBoom, sndFree, sndGrowl, tone } from '../audio/sfx.js';
 import { startWordChallenge } from './spell.js';
 import { startBlitz } from './blitz.js';
 import { spawnGemReward } from './reward.js';
+import { playScene, showBubble } from '../story/scenes.js';
+import { companionJoinScene, COMPANION_CHEER, BOSS_DEFEAT } from '../story/content.js';
 
 export function castSpell() {
   const crit = G.errors === 0;
@@ -52,22 +54,36 @@ export function castSpell() {
 export function killMob() {
   sndFree();
   const pos = M.group.position.clone();
+  const wasBoss = G.mob.boss, animal = G.mob.animal, bossSym = G.mob.def.sym;
   burst(pos.clone().add(new THREE.Vector3(0, 1, 0)), 34,
-    [0xffffff, 0xffe9a3, G.mob.boss ? 0x9b59c9 : 0x46d68a], true);
-  announce(G.mob.boss ? 'BESIEGT!' : 'BEFREIT! 🕊', 1000);
+    [0xffffff, 0xffe9a3, wasBoss ? 0x9b59c9 : 0x46d68a], true);
+  announce(wasBoss ? 'BESIEGT!' : 'BEFREIT! 🕊', 1000);
   /* Tier wird befreit: Verzauberung fällt ab, es fliegt davon */
   freeMobVisual();
   document.getElementById('mobBar').classList.remove('on');
   screenShake(1.2);
 
-  const g = G.mob.boss ? 8 : 3 + Math.floor(Math.random() * 3);
+  const g = wasBoss ? 8 : 3 + Math.floor(Math.random() * 3);
   /* Loot fällt vor den Geist Richtung Spieler – kollidiert nicht
      mit der parallel laufenden Befreiungs-Szene des Tiers */
   const drop = pos.clone().add(rigPos.clone().sub(pos).setY(0).normalize().multiplyScalar(2.2));
   drop.y = .5;
 
   G.kills++; G.mob = null; G.word = null; G.busy = true; G.mode = null;
-  spawnGemReward(drop, g, () => setTimeout(stationDone, 250));
+
+  let afterReward = () => setTimeout(stationDone, 250);
+  if (wasBoss) {
+    /* Boss-Abgangszeile (gewaltarm: der Schatten zerfällt) */
+    setTimeout(() => showBubble(bossSym, BOSS_DEFEAT[Math.min(G.floor - 1, BOSS_DEFEAT.length - 1)], 'boss'), 600);
+  } else if (!G.companion) {
+    /* Das erste befreite Tier wird Begleiter und Erzähler-Stimme */
+    G.companion = { key: animal.key, icon: animal.icon, name: animal.name };
+    afterReward = () => playScene(companionJoinScene(G.companion), () => setTimeout(stationDone, 250));
+  } else if (Math.random() < .35) {
+    setTimeout(() => showBubble(G.companion.icon,
+      COMPANION_CHEER[Math.floor(Math.random() * COMPANION_CHEER.length)]), 1600);
+  }
+  spawnGemReward(drop, g, afterReward);
 }
 
 /* ---------- Gegnerzug ---------- */

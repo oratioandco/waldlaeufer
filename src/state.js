@@ -4,5 +4,6 @@ export const G = {
   word: null, idx: 0, errors: 0, busy: true, mode: null,
   mob: null, recentErr: [],
   stations: [], stIdx: -1, state: 'idle',
-  befehlSeq: [], befehlPos: 0, befehlSentence: ''
+  befehlSeq: [], befehlPos: 0, befehlSentence: '',
+  companion: null, seenIntro: false
 };

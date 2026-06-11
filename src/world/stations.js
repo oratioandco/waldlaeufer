@@ -23,6 +23,8 @@ import { sndStep } from '../audio/sfx.js';
 import { say } from '../audio/tts.js';
 import { saveActive } from '../meta/save.js';
 import { setAtmosphere, rebuildFloorFx } from './atmosphere.js';
+import { playScene } from '../story/scenes.js';
+import { bossIntroScene } from '../story/content.js';
 
 let pathHeading = Math.PI;
 let pathEnd = new THREE.Vector3(0, 0, 6);
@@ -238,7 +240,11 @@ export function advance() {
 function arrive(st) {
   G.state = 'encounter';
   if (st.type === 'MOB') { spawnMob(st, false); setTimeout(() => startWordChallenge('spell'), 800); }
-  else if (st.type === 'BOSS') { spawnMob(st, true); setTimeout(() => startWordChallenge('spell'), 900); }
+  else if (st.type === 'BOSS') {
+    spawnMob(st, true);
+    /* Boss stellt sich vor (vorgelesen), dann beginnt der Kampf */
+    setTimeout(() => playScene(bossIntroScene(G.floor), () => startWordChallenge('spell')), 1000);
+  }
   else if (st.type === 'TOR') { announce('DER BACH!', 900); say('Ein Bach! Zaubere das Wort, dann wächst die Brücke.', 1, .9); setTimeout(() => startWordChallenge('gate'), 800); }
   else if (st.type === 'TRUHE') { setTimeout(startChest, 500); }
   else if (st.type === 'BEFEHL') { setTimeout(() => startBefehl(st), 500); }

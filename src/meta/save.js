@@ -49,6 +49,7 @@ export function saveActive() {
 function collectAll() {
   return {
     floor: G.floor, gems: G.gems, trophies: G.trophies, kills: G.kills,
+    companion: G.companion, seenIntro: G.seenIntro,
     learning: serializeLearning()
   };
 }
@@ -57,5 +58,7 @@ function restoreAll(d) {
   G.gems = d.gems || 0;
   G.trophies = d.trophies || [];
   G.kills = d.kills || 0;
+  G.companion = d.companion || null;
+  G.seenIntro = !!d.seenIntro;
   restoreLearning(d.learning);
 }
