@@ -95,6 +95,17 @@ Dev-Server mit `--host` starten → Live-Test auf dem iPad im selben WLAN.
   beim Gebietswechsel; Wiedereinstieg am Anfang des aktuellen Gebiets.
   Neue Spielzustände (z.B. Kosmetik) gehören in collectAll/restoreAll.
 
+## Deployment
+
+- **Live:** https://waldlaeufer.oratio.co (HTTPS via Traefik/Let's Encrypt)
+- **Auto-Deploy:** Push auf `main` → GitHub-App-Webhook → Coolify baut
+  (statischer Nixpacks-Build, `publish_directory: dist`).
+- Repo: `oratioandco/waldlaeufer` (privat) · Coolify-App-UUID:
+  `aifvy3jyq90bky60fwjv2fuu` · manuell: `coolify deploy aifvy3jyq90bky60fwjv2fuu`
+- Webhook-Route: nur `coolify.oratio.co/webhooks` ist öffentlich
+  (`/data/coolify/proxy/dynamic/coolify-webhooks.yaml` auf dem Coolify-Host);
+  Dashboard/API bleiben Tailscale-only.
+
 ## Roadmap (gewünschte Features, priorisiert)
 
 **1. Atmosphäre** – dynamisches Licht (Tageszeit-Verlauf pro Gebiet:
