@@ -27,6 +27,7 @@ import { renderHearts, renderHUD } from './ui/hud.js';
 import { announce } from './ui/feedback.js';
 import { wireOverlays } from './ui/overlays.js';
 import { ac, sndBird } from './audio/sfx.js';
+import { loadVoiceManifest } from './audio/tts.js';
 import { listProfiles, createProfile, selectProfile, saveActive } from './meta/save.js';
 import { initScenes, playScene } from './story/scenes.js';
 import { INTRO } from './story/content.js';
@@ -95,6 +96,7 @@ function initThree() {
 
 wireOverlays();
 initScenes();
+loadVoiceManifest();
 document.getElementById('hornBtn').addEventListener('click', speakSpell);
 document.getElementById('reviveBtn').addEventListener('click', revive);
 addEventListener('pagehide', saveActive);

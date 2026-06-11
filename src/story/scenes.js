@@ -5,8 +5,7 @@
    nie Pflicht-Lesehürde. Dazu: Sprechblase für beiläufige Kommentare
    des Begleiter-Tiers (blockiert nie den Spielfluss).
    ===================================================================== */
-import { say } from '../audio/tts.js';
-import { VOICES } from './content.js';
+import { sayStory } from '../audio/tts.js';
 
 let queue = [], idx = 0, onDoneCb = null;
 let TEXT_ON = false;
@@ -36,8 +35,7 @@ function showStep() {
   document.getElementById('sceneIcon').textContent = s.icon;
   document.getElementById('sceneSpeaker').textContent = s.name;
   document.getElementById('sceneText').textContent = s.text;
-  const v = VOICES[s.voice] || VOICES.narrator;
-  say(s.text, v.rate, v.pitch);
+  sayStory(s.voice, s.text);
   document.getElementById('sceneNextBtn').innerHTML =
     idx < queue.length - 1 ? '▶ &nbsp;WEITER' : '⚔ &nbsp;LOS!';
 }
@@ -57,8 +55,7 @@ export function showBubble(icon, text, voice = 'companion') {
   document.getElementById('bubbleIcon').textContent = icon;
   document.getElementById('bubbleText').textContent = text;
   b.classList.add('on');
-  const v = VOICES[voice] || VOICES.companion;
-  say(text, v.rate, v.pitch);
+  sayStory(voice, text);
   clearTimeout(bubbleTimer);
   bubbleTimer = setTimeout(() => b.classList.remove('on'), 3500);
 }

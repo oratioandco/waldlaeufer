@@ -6,7 +6,7 @@ import { BOSSES } from '../creatures/data.js';
 import { planFloor, advance } from '../world/stations.js';
 import { renderHearts } from './hud.js';
 import { announce } from './feedback.js';
-import { say, setVoiceOn } from '../audio/tts.js';
+import { say, setVoiceOn, sayStorySeq } from '../audio/tts.js';
 import { sndWin } from '../audio/sfx.js';
 import { setQuality, setRES } from '../engine/quality.js';
 import { saveActive } from '../meta/save.js';
@@ -50,7 +50,9 @@ export function showFloorClear() {
     <div class="stat"><div class="n">${G.kills}</div><div class="l">BEFREIT</div></div>
     <div class="stat"><div class="n">${G.floor}</div><div class="l">GEBIET</div></div>`;
   ovOn('floorOv');
-  say('Gebiet geschafft! Du hast die Figur erbeutet. ' + (G.companion ? quote : ''), 1, .95);
+  const seq = [{ voice: 'narrator', text: 'Gebiet geschafft! Du hast die Figur erbeutet.' }];
+  if (G.companion) seq.push({ voice: 'companion', text: quote });
+  sayStorySeq(seq);
 }
 function nextFloor() {
   ovOff('floorOv');

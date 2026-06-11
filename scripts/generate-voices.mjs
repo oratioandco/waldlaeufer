@@ -1,0 +1,90 @@
+/* =====================================================================
+   STIMMEN-GENERATOR (einmalig beim Entwickeln, ElevenLabs)
+   Liest alle festen Story-Zeilen aus src/story/content.js, generiert
+   pro Zeile eine MP3 mit der passenden Charakterstimme und schreibt
+   public/assets/voice/manifest.json für die Laufzeit-Zuordnung.
+
+   Aufruf:   npm run voices          (generiert nur fehlende Clips)
+             npm run voices -- --list   (verfügbare Stimmen anzeigen)
+
+   Die MP3s werden ins Repo committet → der Client braucht weder
+   API-Key noch Internet-TTS (DSGVO: keine Laufzeit-Daten an Dritte).
+   ===================================================================== */
+import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'fs';
+import { createHash } from 'crypto';
+import { INTRO, BOSS_DEFEAT, COMPANION_CHEER, FLOOR_QUOTES, bossIntroScene, companionJoinScene } from '../src/story/content.js';
+
+/* Stimmen-Zuordnung (ElevenLabs Premade-Voices, alle Deutsch-fähig
+   via eleven_multilingual_v2). Mit `--list` alle verfügbaren ansehen
+   und hier nach Geschmack tauschen. */
+const VOICE_IDS = {
+  narrator:  'JBFqnCBsd6RMkjVDRZzb', // George – warme Vorlese-Stimme
+  boss:      'onwK4e9ZLuTAKqWW03F9', // Daniel – tief, autoritär (Schattenfiguren)
+  companion: 'FGY2WhTYpPnrIDTdsKH5'  // Laura – hell, lebhaft (Begleiter-Tier)
+};
+const MODEL = 'eleven_multilingual_v2';
+const OUT = 'public/assets/voice';
+
+/* ---------- API-Key aus .env oder Umgebung ---------- */
+const env = {};
+if (existsSync('.env')) readFileSync('.env', 'utf8').split('\n').forEach(l => {
+  const m = l.match(/^\s*([A-Z_]+)\s*=\s*(.+?)\s*$/); if (m) env[m[1]] = m[2];
+});
+const KEY = process.env.ELEVENLABS_API_KEY || env.ELEVENLABS_API_KEY;
+if (!KEY || KEY.includes('hier-deinen')) {
+  console.error('✗ Kein API-Key. Bitte ELEVENLABS_API_KEY in .env eintragen.');
+  process.exit(1);
+}
+
+/* ---------- --list: verfügbare Stimmen anzeigen ---------- */
+if (process.argv.includes('--list')) {
+  const r = await fetch('https://api.elevenlabs.io/v1/voices', { headers: { 'xi-api-key': KEY } });
+  const d = await r.json();
+  d.voices.forEach(v => console.log(`${v.voice_id}  ${v.name}  (${(v.labels && Object.values(v.labels).join(', ')) || ''})`));
+  process.exit(0);
+}
+
+/* ---------- Alle festen Story-Zeilen einsammeln ---------- */
+const lines = [];
+const add = (voice, text) => {
+  if (!lines.some(l => l.voice === voice && l.text === text)) lines.push({ voice, text });
+};
+INTRO.forEach(s => add(s.voice, s.text));
+for (let f = 1; f <= 6; f++) bossIntroScene(f).forEach(s => add(s.voice, s.text));
+BOSS_DEFEAT.forEach(t => add('boss', t));
+companionJoinScene({ icon: '', name: '' }).forEach(s => add(s.voice, s.text));
+COMPANION_CHEER.forEach(t => add('companion', t));
+FLOOR_QUOTES.forEach(t => add('companion', t));
+add('narrator', 'Gebiet geschafft! Du hast die Figur erbeutet.');
+
+/* ---------- Generieren (inkrementell: vorhandene Clips bleiben) ---------- */
+mkdirSync(OUT, { recursive: true });
+const manifest = existsSync(`${OUT}/manifest.json`)
+  ? JSON.parse(readFileSync(`${OUT}/manifest.json`, 'utf8')) : {};
+let made = 0, skipped = 0;
+
+for (const { voice, text } of lines) {
+  const id = createHash('md5').update(voice + '|' + text).digest('hex').slice(0, 10);
+  const file = `${voice}-${id}.mp3`;
+  const key = voice + '|' + text;
+  if (manifest[key] === file && existsSync(`${OUT}/${file}`)) { skipped++; continue; }
+
+  const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_IDS[voice]}?output_format=mp3_44100_128`, {
+    method: 'POST',
+    headers: { 'xi-api-key': KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      text, model_id: MODEL,
+      voice_settings: { stability: .5, similarity_boost: .75, style: voice === 'boss' ? .35 : .2 }
+    })
+  });
+  if (!r.ok) {
+    console.error(`✗ ${voice}: "${text.slice(0, 40)}…" → HTTP ${r.status}: ${(await r.text()).slice(0, 200)}`);
+    continue;
+  }
+  writeFileSync(`${OUT}/${file}`, Buffer.from(await r.arrayBuffer()));
+  manifest[key] = file;
+  made++;
+  console.log(`✓ [${voice}] ${text.slice(0, 60)}`);
+}
+writeFileSync(`${OUT}/manifest.json`, JSON.stringify(manifest, null, 1));
+console.log(`\nFertig: ${made} neu generiert, ${skipped} unverändert, Manifest: ${Object.keys(manifest).length} Einträge.`);
