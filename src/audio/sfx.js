@@ -1,11 +1,20 @@
 /* ---------- WebAudio-Synth-SFX ---------- */
 let AC = null;
+let SFX_VOL = 1;
+try { SFX_VOL = +(localStorage.getItem('waldlaeufer.volSfx') ?? 1); } catch (e) {}
+export function setSfxVol(v) {
+  SFX_VOL = v;
+  try { localStorage.setItem('waldlaeufer.volSfx', String(v)); } catch (e) {}
+}
+export function getSfxVol() { return SFX_VOL; }
+
 export function ac() {
   if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
   if (AC.state === 'suspended') AC.resume();
   return AC;
 }
 export function tone(f, dur = .12, type = 'square', vol = .12, when = 0, slide = 0) {
+  vol *= SFX_VOL; if (vol <= 0) return;
   try {
     const a = ac(), t = a.currentTime + when, o = a.createOscillator(), g = a.createGain();
     o.type = type; o.frequency.setValueAtTime(f, t);
@@ -15,6 +24,7 @@ export function tone(f, dur = .12, type = 'square', vol = .12, when = 0, slide =
   } catch (e) {}
 }
 export function noise(dur = .2, vol = .18, freq = 800, when = 0) {
+  vol *= SFX_VOL; if (vol <= 0) return;
   try {
     const a = ac(), t = a.currentTime + when, len = a.sampleRate * dur, buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
     for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);

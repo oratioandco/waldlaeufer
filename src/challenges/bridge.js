@@ -5,13 +5,13 @@ import { burst } from '../engine/effects.js';
 import { G } from '../state.js';
 import { stationDone } from '../world/stations.js';
 import { sndBridge } from '../audio/sfx.js';
-import { say } from '../audio/tts.js';
+import { sayGame } from '../audio/tts.js';
 import { spawnGemReward } from './reward.js';
 
 export function openBridge() {
   const st = G.stations[G.stIdx];
   sndBridge();
-  say('Die Brücke wächst!', 1, .9);
+  sayGame('Die Brücke wächst!');
   burst(st.pos.clone().add(new THREE.Vector3(0, .6, 0)), 14, [0x8a5f33, 0xb6f7c2]);
   st.objs.planks.forEach((plank, k) => {
     let t = -k * .18;

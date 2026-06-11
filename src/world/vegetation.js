@@ -5,10 +5,8 @@ import { glowSprite, blobShadow, glowTex } from '../engine/textures.js';
 import { camPos } from '../engine/camera.js';
 import { hash3 } from './terrain.js';
 
-export const COLORS = [
-  { name: 'rote',  hex: 0xff4d5e }, { name: 'blaue', hex: 0x3a8bff }, { name: 'grüne', hex: 0x35c468 },
-  { name: 'gelbe', hex: 0xffd34a }, { name: 'lila',  hex: 0xb266ff }
-];
+export { COLORS } from './colors.js';
+import { COLORS } from './colors.js';
 
 /* Dekor, das auf NIEDRIG ausgeblendet wird */
 export const extraDecor = [];

@@ -11,7 +11,8 @@ import { activeTier } from '../learning/engine.js';
 import { stationDone } from '../world/stations.js';
 import { announce } from '../ui/feedback.js';
 import { sndCard, sndChest, sndFizzle, tone } from '../audio/sfx.js';
-import { say } from '../audio/tts.js';
+import { sayGame } from '../audio/tts.js';
+import { BEFEHL_VERBS, befehlOne, befehlTwo, befehlHelp } from '../learning/speech-lines.js';
 import { spawnGemReward } from './reward.js';
 
 export let befehlTargets = [];
@@ -25,10 +26,10 @@ export function startBefehl(st) {
   G.befehlSeq = twoStep ? [shuffled[0], shuffled[1]] : [shuffled[0]];
   G.befehlPos = 0;
   if (twoStep) {
-    G.befehlSentence = `Tippe zuerst die ${G.befehlSeq[0].name} und dann die ${G.befehlSeq[1].name} Blume an`;
+    G.befehlSentence = befehlTwo(G.befehlSeq[0].name, G.befehlSeq[1].name);
   } else {
-    const verb = ['Tippe', 'Berühre', 'Wähle'][Math.floor(Math.random() * 3)];
-    G.befehlSentence = `${verb} die ${G.befehlSeq[0].name} Blume` + (verb === 'Tippe' ? ' an' : '');
+    const verb = BEFEHL_VERBS[Math.floor(Math.random() * BEFEHL_VERBS.length)];
+    G.befehlSentence = befehlOne(verb, G.befehlSeq[0].name);
   }
   const sw = document.getElementById('spellWord');
   sw.innerHTML = `<div class="wslot wsentence">${G.befehlSentence}</div>`;
@@ -45,7 +46,7 @@ export function tapBefehl(flower) {
       G.busy = true;
       sndChest();
       announce('RICHTIG!', 800);
-      say('Richtig! Die Blumen stärken deine Wortmagie.', 1, .95);
+      sayGame('Richtig! Die Blumen stärken deine Wortmagie.');
       G.buff = 15;
       document.getElementById('buffTag').classList.add('on');
       document.getElementById('spellWord').innerHTML = '';
@@ -60,7 +61,7 @@ export function tapBefehl(flower) {
     sndFizzle();
     burst(flower.position.clone().add(new THREE.Vector3(0, 1.6, 0)), 6, [0x6a7a6a, c.hex]);
     if (G.errors === 1) {
-      say(G.befehlSentence, .8);
+      sayGame(G.befehlSentence);
     } else {
       const correct = befehlTargets.find(t2 => t2.userData.color.name === want.name);
       if (correct) {
@@ -71,7 +72,7 @@ export function tapBefehl(flower) {
           if (t > 15) { correct.scale.setScalar(b); return true; } return false;
         } });
       }
-      say('Such die ' + want.name + ' Blume.', .8);
+      sayGame(befehlHelp(want.name));
     }
   }
 }

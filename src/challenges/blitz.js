@@ -16,7 +16,8 @@ import { announce, flyText, flashRed } from '../ui/feedback.js';
 import { spawnGemReward } from './reward.js';
 import { ovOn } from '../ui/overlays.js';
 import { sndChest, sndBlock, sndHurt, tone } from '../audio/sfx.js';
-import { say } from '../audio/tts.js';
+import { sayGame } from '../audio/tts.js';
+import { shieldWas } from '../learning/speech-lines.js';
 import { startWordChallenge } from './spell.js';
 import { killMob } from './combat.js';
 import { rigPos } from '../engine/camera.js';
@@ -25,7 +26,7 @@ let shieldItem = null, parryTimer = null, parryDeadline = null, parryCtx = 'figh
 
 export function startChest() {
   announce('SCHATZTRUHE', 900);
-  say('Eine Truhe! Merk dir das Schloss-Wort.', 1, .9);
+  sayGame('Eine Truhe! Merk dir das Schloss-Wort.');
   setTimeout(() => startBlitz('chest'), 900);
 }
 export function startBlitz(ctx) {
@@ -40,7 +41,7 @@ export function startBlitz(ctx) {
   const c = document.getElementById('parryChoices');
   c.innerHTML = ''; w.textContent = shieldItem.w;
   ov.classList.add('on');
-  say(shieldItem.w, .85);
+  sayGame(shieldItem.w);
   tone(980, .1, 'sine', .1);
   document.getElementById('parryRingFill').style.width = '100%';
 
@@ -69,7 +70,7 @@ function blitzAnswer(btn, choice) {
     btn.classList.add('ok');
     if (parryCtx === 'chest') { sndChest(); announce('RICHTIG!', 900); }
     else { sndBlock(); announce('RICHTIG! 🛡', 900); }
-    say(parryCtx === 'chest' ? 'Richtig! Die Truhe öffnet sich.' : 'Richtig! Du hast den Angriff abgewehrt.', 1, .95);
+    sayGame(parryCtx === 'chest' ? 'Richtig! Die Truhe öffnet sich.' : 'Richtig! Du hast den Angriff abgewehrt.');
     setTimeout(() => { closeBlitz(); blitzSuccess(); }, 650);
   } else {
     btn.classList.add('no');
@@ -82,7 +83,7 @@ function blitzFail() {
   shieldStats[shieldItem.w].fails++;
   document.querySelectorAll('.pbtn').forEach(b => b.style.pointerEvents = 'none');
   [...document.querySelectorAll('.pbtn')].find(b => b.textContent === shieldItem.w)?.classList.add('ok');
-  say('Das Wort war: ' + shieldItem.w, .78);
+  sayGame(shieldWas(shieldItem.w));
   setTimeout(() => { closeBlitz(); blitzFailed(); }, 1400);
 }
 function closeBlitz() {

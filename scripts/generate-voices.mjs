@@ -13,6 +13,8 @@
 import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync, unlinkSync } from 'fs';
 import { createHash } from 'crypto';
 import { INTRO, BOSS_DEFEAT, COMPANION_CHEER, FLOOR_QUOTES, bossIntroScene, companionJoinScene } from '../src/story/content.js';
+import { BEFEHL_VERBS, zauberePhrase, syllableRead, shieldWas, befehlOne, befehlTwo, befehlHelp, FIXED_GAMEPLAY } from '../src/learning/speech-lines.js';
+import { COLORS } from '../src/world/colors.js';
 
 /* Stimmen-Zuordnung (ElevenLabs Premade-Voices, alle Deutsch-fähig
    via eleven_multilingual_v2). Mit `--list` alle verfügbaren ansehen
@@ -20,7 +22,8 @@ import { INTRO, BOSS_DEFEAT, COMPANION_CHEER, FLOOR_QUOTES, bossIntroScene, comp
 const VOICE_IDS = {
   narrator:  '5KvpaGteYkNayiswuX2h', // vom Nutzer gewählte Erzähler-Stimme
   boss:      'onwK4e9ZLuTAKqWW03F9', // Daniel – tief, autoritär (Schattenfiguren)
-  companion: 'FGY2WhTYpPnrIDTdsKH5'  // Laura – hell, lebhaft (Begleiter-Tier)
+  companion: 'FGY2WhTYpPnrIDTdsKH5', // Laura – hell, lebhaft (Begleiter-Tier)
+  word:      '5KvpaGteYkNayiswuX2h'  // Lehrer-Stimme: Wörter, Silben, Gameplay-Sätze
 };
 const MODEL = 'eleven_multilingual_v2';
 const OUT = 'public/assets/voice';
@@ -56,6 +59,26 @@ companionJoinScene({ icon: '', name: '' }).forEach(s => add(s.voice, s.text));
 COMPANION_CHEER.forEach(t => add('companion', t));
 FLOOR_QUOTES.forEach(t => add('companion', t));
 add('narrator', 'Gebiet geschafft! Du hast die Figur erbeutet.');
+
+/* ---------- Gameplay: Wörter, Silben, Schildwörter, Sätze ----------
+   Quelle ist words.json → tauscht die Therapeutin Wörter aus, erzeugt
+   der nächste Lauf automatisch die fehlenden Clips. */
+const WORDS = JSON.parse(readFileSync('src/learning/words.json', 'utf8'));
+Object.values(WORDS.tiers).flat().forEach(w => {
+  add('word', w.w);                  // das Wort allein (Scaffolding-Stufe 1)
+  add('word', zauberePhrase(w.w));   // „Zaubere: …" (Aufgaben-Start)
+  add('word', syllableRead(w));      // „O, ma. Oma" (📯-Button)
+  w.s.forEach(s => add('word', s));  // einzelne Silben (Karten-Tap, Stufe 2)
+});
+WORDS.shields.forEach(s => { add('word', s.w); add('word', shieldWas(s.w)); });
+COLORS.forEach(c => {
+  add('word', befehlHelp(c.name));
+  BEFEHL_VERBS.forEach(v => add('word', befehlOne(v, c.name)));
+});
+COLORS.forEach(a => COLORS.forEach(b => {
+  if (a.name !== b.name) add('word', befehlTwo(a.name, b.name));
+}));
+FIXED_GAMEPLAY.forEach(t => add('word', t));
 
 /* ---------- Generieren (inkrementell: vorhandene Clips bleiben) ---------- */
 mkdirSync(OUT, { recursive: true });

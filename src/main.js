@@ -28,6 +28,7 @@ import { announce } from './ui/feedback.js';
 import { wireOverlays } from './ui/overlays.js';
 import { ac, sndBird } from './audio/sfx.js';
 import { loadVoiceManifest } from './audio/tts.js';
+import { playTitleMusic, playLevelMusic } from './audio/music.js';
 import { listProfiles, createProfile, selectProfile, saveActive } from './meta/save.js';
 import { initScenes, playScene } from './story/scenes.js';
 import { INTRO } from './story/content.js';
@@ -97,12 +98,18 @@ function initThree() {
 wireOverlays();
 initScenes();
 loadVoiceManifest();
+/* Titelsong ab der ersten Berührung des Startbildschirms
+   (vorher blockiert der Browser Autoplay) */
+document.addEventListener('pointerdown', () => {
+  if (document.getElementById('startOv').classList.contains('on')) playTitleMusic();
+}, { once: true });
 document.getElementById('hornBtn').addEventListener('click', speakSpell);
 document.getElementById('reviveBtn').addEventListener('click', revive);
 addEventListener('pagehide', saveActive);
 
 function startGame() {
   ac();
+  playLevelMusic(G.floor);
   document.getElementById('startOv').classList.remove('on');
   document.getElementById('hud').classList.add('on');
   initThree();

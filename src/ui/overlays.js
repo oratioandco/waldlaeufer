@@ -6,8 +6,9 @@ import { BOSSES } from '../creatures/data.js';
 import { planFloor, advance } from '../world/stations.js';
 import { renderHearts } from './hud.js';
 import { announce } from './feedback.js';
-import { say, setVoiceOn, sayStorySeq } from '../audio/tts.js';
-import { sndWin } from '../audio/sfx.js';
+import { setVoiceOn, setVoiceVol, getVoiceVol, sayStorySeq } from '../audio/tts.js';
+import { sndWin, setSfxVol, getSfxVol, sndGem } from '../audio/sfx.js';
+import { setMusicVol, getMusicVol, playLevelMusic } from '../audio/music.js';
 import { setQuality, setRES } from '../engine/quality.js';
 import { saveActive } from '../meta/save.js';
 import { FLOOR_QUOTES } from '../story/content.js';
@@ -57,6 +58,7 @@ export function showFloorClear() {
 function nextFloor() {
   ovOff('floorOv');
   G.floor++; G.hearts = Math.min(5, G.hearts + 2); renderHearts();
+  playLevelMusic(G.floor); /* Track-Wechsel je Gebiet (hell/düster) */
   saveActive(); /* Checkpoint: neues Gebiet ist der Wiedereinstiegspunkt */
   document.getElementById('floorTag').textContent = 'GEBIET ' + G.floor;
   announce('GEBIET ' + G.floor, 1200);
@@ -86,5 +88,18 @@ export function wireOverlays() {
     const t = document.getElementById('voiceToggle');
     t.classList.toggle('on');
     setVoiceOn(t.classList.contains('on'));
+  });
+
+  /* Getrennte Lautstärken für Stimme/Musik/Effekte (persistiert) */
+  const vols = [
+    ['volVoice', getVoiceVol, setVoiceVol, null],
+    ['volMusic', getMusicVol, setMusicVol, null],
+    ['volSfx', getSfxVol, setSfxVol, () => sndGem(0)] /* Hör-Feedback */
+  ];
+  vols.forEach(([id, get, set, sample]) => {
+    const el = document.getElementById(id);
+    el.value = Math.round(get() * 100);
+    el.addEventListener('input', e => set(e.target.value / 100));
+    if (sample) el.addEventListener('change', sample);
   });
 }

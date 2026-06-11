@@ -59,6 +59,18 @@
       <label>Erzähler-Stimme<span class="hint">spricht die Zauberwörter</span></label>
       <div class="toggle on" id="voiceToggle"></div>
     </div>
+    <div class="setRow">
+      <label>Stimme<span class="hint">Lautstärke der Sprache</span></label>
+      <input type="range" id="volVoice" min="20" max="100" step="5" value="100">
+    </div>
+    <div class="setRow">
+      <label>Musik<span class="hint">wird bei Sprache automatisch leiser</span></label>
+      <input type="range" id="volMusic" min="0" max="100" step="5" value="35">
+    </div>
+    <div class="setRow">
+      <label>Effekte<span class="hint">Klänge und Geräusche</span></label>
+      <input type="range" id="volSfx" min="0" max="100" step="5" value="100">
+    </div>
     <button class="play" style="margin-top:14px" id="setDoneBtn">FERTIG</button>
   </div>
 </div>
