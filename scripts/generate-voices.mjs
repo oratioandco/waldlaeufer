@@ -12,7 +12,7 @@
    ===================================================================== */
 import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync, unlinkSync } from 'fs';
 import { createHash } from 'crypto';
-import { INTRO, BOSS_DEFEAT, COMPANION_CHEER, FLOOR_QUOTES, FLOOR_DONE, UI_LINES, bossIntroScene, companionJoinScene } from '../src/story/content.js';
+import { INTRO, BOSS_DEFEAT, COMPANION_CHEER, FLOOR_QUOTES, FLOOR_DONE, FLOOR_DONE_ALL, UI_LINES, bossIntroScene, companionJoinScene } from '../src/story/content.js';
 import { BEFEHL_VERBS, zauberePhrase, syllableRead, shieldWas, befehlOne, befehlTwo, befehlHelp, FIXED_GAMEPLAY } from '../src/learning/speech-lines.js';
 import { COLORS } from '../src/world/colors.js';
 
@@ -59,6 +59,7 @@ companionJoinScene({ icon: '', name: '' }).forEach(s => add(s.voice, s.text));
 COMPANION_CHEER.forEach(t => add('companion', t));
 FLOOR_QUOTES.forEach(t => add('companion', t));
 add('narrator', FLOOR_DONE);
+add('narrator', FLOOR_DONE_ALL);
 /* Audio-First-UI-Zeilen: shieldAlert spricht die Lehrer-Stimme, Rest Erzähler */
 add('word', UI_LINES.shieldAlert);
 ['welcomeBack', 'welcomeNew', 'dead', 'rotate'].forEach(k => add('narrator', UI_LINES[k]));

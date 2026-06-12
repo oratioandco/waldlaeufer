@@ -13,7 +13,7 @@ import { setMusicVol, getMusicVol, playLevelMusic } from '../audio/music.js';
 import { refreshAmbience } from '../audio/ambience.js';
 import { setQuality, setRES } from '../engine/quality.js';
 import { saveActive } from '../meta/save.js';
-import { FLOOR_QUOTES, FLOOR_DONE } from '../story/content.js';
+import { FLOOR_QUOTES, FLOOR_DONE, FLOOR_DONE_ALL } from '../story/content.js';
 
 export function ovOn(id) { document.getElementById(id).classList.add('on'); }
 export function ovOff(id) { document.getElementById(id).classList.remove('on'); }
@@ -54,8 +54,10 @@ export function showFloorClear() {
     <div class="stat"><div class="n">${G.kills}</div><div class="l">TIERE BEFREIT</div></div>
     <div class="stat"><div class="n">${G.trophies.length}</div><div class="l">WÄCHTER</div></div>`;
   ovOn('floorOv');
-  const seq = [{ voice: 'narrator', text: FLOOR_DONE }];
-  if (G.companion) seq.push({ voice: 'companion', text: quote });
+  /* Runden-Abschluss (alle 6 Wächter): großer Moment + Überleitung */
+  const allFreed = G.floor % 6 === 0;
+  const seq = [{ voice: 'narrator', text: allFreed ? FLOOR_DONE_ALL : FLOOR_DONE }];
+  if (G.companion && !allFreed) seq.push({ voice: 'companion', text: quote });
   sayStorySeq(seq);
 }
 function nextFloor() {

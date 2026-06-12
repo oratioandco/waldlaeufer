@@ -98,7 +98,9 @@ export function killMob() {
 
 /* ---------- Gegnerzug ---------- */
 export function mobTurn() {
-  if (Math.random() < .5) { setTimeout(() => startWordChallenge('spell'), 500); return; }
+  /* höhere Runden: Geister greifen öfter an (mehr Blitzlesen-Druck) */
+  const round = Math.floor((G.floor - 1) / 6);
+  if (Math.random() < Math.max(.3, .5 - round * .08)) { setTimeout(() => startWordChallenge('spell'), 500); return; }
   sndGrowl();
   /* hörbares Angriffs-Signal – optional: entfällt, wenn gerade gesprochen wird */
   sayGame(UI_LINES.shieldAlert, false, true);

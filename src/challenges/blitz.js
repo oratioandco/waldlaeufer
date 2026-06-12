@@ -56,10 +56,14 @@ export function startBlitz(ctx) {
       b.addEventListener('pointerdown', () => { sndTap(); blitzAnswer(b, o); });
       c.appendChild(b);
     });
-    const T = 6000; parryDeadline = Date.now() + T;
+    /* Blitz-Timer wird in höheren Runden schneller (Mechanik-Tempo) */
+    const round = Math.floor((G.floor - 1) / 6);
+    const T = Math.max(3500, 6000 - round * 700);
+    parryDeadline = Date.now() + T;
+    const total = T;
     parryTimer = setInterval(() => {
       const left = Math.max(0, parryDeadline - Date.now());
-      document.getElementById('parryRingFill').style.width = (left / T * 100) + '%';
+      document.getElementById('parryRingFill').style.width = (left / total * 100) + '%';
       if (left <= 0) { clearInterval(parryTimer); blitzFail(); }
     }, 80);
   }, 1300);

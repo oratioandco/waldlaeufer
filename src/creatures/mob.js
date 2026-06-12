@@ -106,7 +106,11 @@ export function spawnMob(st, isBoss) {
   M.group.scale.setScalar(.001);
   scene.add(M.group);
 
-  const hp = (isBoss ? def.hp : animal.hp) + (G.floor >= 4 ? 20 : 0);
+  /* Runde 2+ (nach dem erlösten König): Schatten-Echos werden zäher.
+     Schwierigkeit wächst primär über Mechanik-Tempo (Blitz-Timer,
+     Angriffsfrequenz), HP nur moderat – NIE über schwerere Wörter. */
+  const round = Math.floor((G.floor - 1) / 6);
+  const hp = Math.round(((isBoss ? def.hp : animal.hp) + (G.floor >= 4 ? 20 : 0)) * (1 + round * .2));
   G.mob = { def, animal, name: isBoss ? def.name : animal.name, hp, max: hp, boss: isBoss, st,
     color: isBoss ? 0x9b59c9 : animal.fb.color };
   const grp = M.group;

@@ -60,6 +60,8 @@ export const COMPANION_CHEER = [
   'Deine Wortmagie wird immer stärker!'
 ];
 export const FLOOR_DONE = 'Gebiet geschafft! Ein Wächter des Waldes ist wieder frei.';
+/* nach Gebiet 6: alle Wächter frei → Überleitung in Runde 2 */
+export const FLOOR_DONE_ALL = 'Alle Wächter sind frei – der ganze Wald jubelt! Doch kleine Schattenreste verstecken sich noch. Die Jagd geht weiter, Waldläufer!';
 /* Audio-First: kindgerichtete UI-Momente, die sonst Lese-Hürden wären */
 export const UI_LINES = {
   welcomeBack: 'Willkommen zurück, Waldläufer! Tippe auf deinen Namen.',
