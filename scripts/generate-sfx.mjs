@@ -13,8 +13,8 @@ const SFX = [
   /* Gameplay-Kern */
   { f: 'card-correct',   d: 0.8, p: 'Soft magical chime pluck, warm wooden marimba note with a tiny sparkle tail, positive feedback, children s game, short' },
   { f: 'card-wrong',     d: 1.0, p: 'Soft gentle magical fizzle, small puff of air with two descending friendly woodwind notes, mild, no harshness' },
-  { f: 'spell-cast',     d: 1.2, p: 'Magical spell cast whoosh, bright shimmering energy orb flying away, fantasy children s game' },
-  { f: 'spell-hit',      d: 1.2, p: 'Soft magical burst impact, sparkly poof with a deep warm thump, satisfying but not violent' },
+  { f: 'spell-cast',     d: 1.0, p: 'Quick clean magical whoosh, a glowing energy orb launching forward with a bright shimmer trail, polished fantasy game spell sound, no voices' },
+  { f: 'spell-hit',      d: 1.0, p: 'Round magical impact: soft deep boom with glittering fairy dust sparkles scattering, satisfying video game hit confirm, pleasing, no harshness, no voices' },
   { f: 'shield-correct', d: 1.0, p: 'Bright crystal shield ting, magical deflection chime, heroic, short' },
   { f: 'player-hit',     d: 1.0, p: 'Soft cartoonish bonk with a brief dizzy wobble, mild setback sound for a kids game, not scary' },
   { f: 'heart-lost',     d: 1.2, p: 'Soft sad descending three-note flute phrase, gentle and brief, kids game' },
