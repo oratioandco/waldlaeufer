@@ -112,7 +112,9 @@ export function tapCard(r) {
       if (t > 13) { r.position.copy(ox); return true; } return false;
     } });
     if (G.errors === 1) {
-      sayGame(G.word.w);
+      /* Fehler-Scaffolding UNMITTELBAR (Kontiguität!): laufende
+         Ansage wird unterbrochen, die Hilfe darf nicht warten */
+      sayGame(G.word.w, true);
     } else {
       const correct = cards.find(b => !b.userData.dead && b.userData.correctIndex === G.idx);
       if (correct) {
@@ -122,7 +124,7 @@ export function tapCard(r) {
           correct.scale.setScalar(base + Math.sin(t) * .16 * Math.max(0, 1 - t / 15));
           if (t > 15) { correct.scale.setScalar(base); return true; } return false;
         } });
-        sayGame(G.word.s[G.idx]);
+        sayGame(G.word.s[G.idx], true); /* Scaffolding sofort */
       }
     }
   }

@@ -18,7 +18,7 @@ import { spawnGemReward } from './reward.js';
 export let befehlTargets = [];
 
 export function startBefehl(st) {
-  announce('BEFEHLS-BLUMEN', 900);
+  announce('FLÜSTERBLUMEN', 900);
   G.mode = 'befehl'; G.errors = 0; G.busy = false;
   befehlTargets = st.objs.flowers;
   const twoStep = activeTier >= 3 && Math.random() < .6;
@@ -61,7 +61,7 @@ export function tapBefehl(flower) {
     sndFizzle();
     burst(flower.position.clone().add(new THREE.Vector3(0, 1.6, 0)), 6, [0x6a7a6a, c.hex]);
     if (G.errors === 1) {
-      sayGame(G.befehlSentence);
+      sayGame(G.befehlSentence, true); /* Scaffolding sofort */
     } else {
       const correct = befehlTargets.find(t2 => t2.userData.color.name === want.name);
       if (correct) {
@@ -72,7 +72,7 @@ export function tapBefehl(flower) {
           if (t > 15) { correct.scale.setScalar(b); return true; } return false;
         } });
       }
-      sayGame(befehlHelp(want.name));
+      sayGame(befehlHelp(want.name), true); /* Scaffolding sofort */
     }
   }
 }

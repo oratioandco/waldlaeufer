@@ -25,8 +25,11 @@ Diese Prinzipien sind das Fundament. Kein Feature darf sie verwässern.
      Konsonantenhäufungen → Klasse 4/5 (Morpheme, Komposita).
 3. **Drei Leseebenen als drei Mechaniken:** Zaubern/Brücken = Dekodieren;
    Schildwort-Blitzlesen (häufige Funktionswörter + visuell ähnliche
-   Distraktoren) = Automatisierung; Befehls-Blumen (Satz lesen, in Handlung
+   Distraktoren) = Automatisierung; Flüsterblumen (Satz lesen, in Handlung
    übersetzen, KEIN Vorsprechen vor dem ersten Fehler) = Sinnentnahme.
+   Begriffs-Stil: deutsches Kinderfantasy-Vokabular (Flüsterblumen,
+   Schlüsselwort, Volltreffer) – keine technisch-militärischen oder
+   Gamer-Anglizismen in kindgerichteten Texten.
 4. **Fehler kosten nie Punkte oder Fortschritt.** Gestuftes Scaffolding:
    1. Fehler → Wort wird vorgesprochen; 2. Fehler → richtige Karte pulsiert +
    Silbe wird gesprochen. Fehlerfreies Lesen → KRITISCH + Combo (Belohnung

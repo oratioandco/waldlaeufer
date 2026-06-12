@@ -20,7 +20,7 @@ export const befehlHelp = color => `Such die ${color} Blume.`;
 export const FIXED_GAMEPLAY = [
   'Ein Bach! Zaubere das Wort, dann wächst die Brücke.',
   'Die Brücke wächst!',
-  'Eine Truhe! Merk dir das Schloss-Wort.',
+  'Eine Truhe! Merk dir das Schlüsselwort.',
   'Richtig! Die Truhe öffnet sich.',
   'Richtig! Du hast den Angriff abgewehrt.',
   'Richtig! Die Blumen stärken deine Wortmagie.'

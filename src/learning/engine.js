@@ -61,8 +61,9 @@ export function reportWord(w, errorFree) {
   if (errorFree) { s.box = Math.min(4, s.box + 1); SESSION.clean++; }
   else {
     s.errs++; s.box = Math.max(0, s.box - 1);
-    /* gezielte Wiedervorlage nach 2–3 anderen Wörtern */
-    reviewQueue.push({ w, at: wordCounter + 2 + Math.floor(Math.random() * 2) });
+    /* gezielte Wiedervorlage nach 2–3 ANDEREN Wörtern (verteiltes
+       Wiederholen): +3/+4 → es liegen wirklich 2–3 Wörter dazwischen */
+    reviewQueue.push({ w, at: wordCounter + 3 + Math.floor(Math.random() * 2) });
   }
 }
 

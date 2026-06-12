@@ -27,7 +27,7 @@ let shieldItem = null, parryTimer = null, parryDeadline = null, parryCtx = 'figh
 
 export function startChest() {
   announce('SCHATZTRUHE', 900);
-  sayGame('Eine Truhe! Merk dir das Schloss-Wort.');
+  sayGame('Eine Truhe! Merk dir das Schlüsselwort.');
   setTimeout(() => startBlitz('chest'), 900);
 }
 export function startBlitz(ctx) {
@@ -37,7 +37,7 @@ export function startBlitz(ctx) {
   const ov = document.getElementById('parry');
   ov.classList.toggle('chest', ctx === 'chest');
   document.getElementById('parryTag').textContent =
-    ctx === 'chest' ? '🔒 Schloss-Wort!' : '⚠ Angriff – Schildwort!';
+    ctx === 'chest' ? '🗝 Schlüsselwort!' : '⚠ Angriff – Schildwort!';
   const w = document.getElementById('parryWord');
   const c = document.getElementById('parryChoices');
   c.innerHTML = ''; w.textContent = shieldItem.w;
@@ -88,7 +88,7 @@ function blitzFail() {
   shieldStats[shieldItem.w].fails++;
   document.querySelectorAll('.pbtn').forEach(b => b.style.pointerEvents = 'none');
   [...document.querySelectorAll('.pbtn')].find(b => b.textContent === shieldItem.w)?.classList.add('ok');
-  sayGame(shieldWas(shieldItem.w));
+  sayGame(shieldWas(shieldItem.w), true); /* Auflösung sofort */
   setTimeout(() => { closeBlitz(); blitzFailed(); }, 1400);
 }
 function closeBlitz() {
