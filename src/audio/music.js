@@ -3,9 +3,14 @@
    Die Stimme muss IMMER verständlich bleiben → während Sprach-Clips
    wird die Musik automatisch leiser gezogen.
    ===================================================================== */
+/* Generierte Stücke (Klangkonzept in scripts/generate-music.mjs) mit
+   Fallback auf die ursprünglich hinzugefügten Tracks */
 const TRACKS = {
-  title: '/assets/music/title.mp3',
-  levels: ['/assets/music/grove.mp3', '/assets/music/cursed-glades.mp3']
+  title: '/assets/music/theme-title.mp3',
+  titleFallback: '/assets/music/title.mp3',
+  levels: ['/assets/music/explore-bright.mp3', '/assets/music/explore-dusk.mp3'],
+  levelsFallback: ['/assets/music/grove.mp3', '/assets/music/cursed-glades.mp3'],
+  boss: '/assets/music/boss-theme.mp3'
 };
 let MUSIC_VOL = .35;
 try { MUSIC_VOL = +(localStorage.getItem('waldlaeufer.volMusic') ?? .35); } catch (e) {}
@@ -29,12 +34,13 @@ function fadeTo(audio, vol, ms, onDone) {
   }, 50);
 }
 
-function play(key, src) {
+function play(key, src, fallbackSrc) {
   if (currentKey === key) return;
   currentKey = key;
   const next = new Audio(src);
   next.loop = true;
   next.volume = 0;
+  if (fallbackSrc) next.onerror = () => { next.onerror = null; next.src = fallbackSrc; next.play().catch(() => {}); };
   next.play().catch(() => { currentKey = null; }); // Autoplay-Block → später erneut
   const prev = current;
   current = next;
@@ -46,11 +52,15 @@ function play(key, src) {
   }
 }
 
-export function playTitleMusic() { play('title', TRACKS.title); }
-/* Level-Track wechselt je Gebiet (1: hell, 2: düster, dann im Wechsel) */
+export function playTitleMusic() { play('title', TRACKS.title, TRACKS.titleFallback); }
+/* Level-Track wechselt je Gebiet (hell/dämmrig im Wechsel) */
 export function playLevelMusic(floor) {
   const i = (floor - 1) % TRACKS.levels.length;
-  play('level' + i, TRACKS.levels[i]);
+  play('level' + i, TRACKS.levels[i], TRACKS.levelsFallback[i]);
+}
+/* Eigenes Boss-Thema (Roadmap 4) – fällt ohne Datei auf Level-Track zurück */
+export function playBossMusic(floor) {
+  play('boss', TRACKS.boss, TRACKS.levels[(floor - 1) % TRACKS.levels.length]);
 }
 export function stopMusic() {
   if (current) { const c = current; fadeTo(c, 0, 600, () => c.pause()); }

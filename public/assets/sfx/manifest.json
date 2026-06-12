@@ -1,1 +1,24 @@
-[]
+[
+ "card-correct.mp3",
+ "card-wrong.mp3",
+ "spell-cast.mp3",
+ "spell-hit.mp3",
+ "shield-correct.mp3",
+ "player-hit.mp3",
+ "heart-lost.mp3",
+ "gem-collect.mp3",
+ "critical-sting.mp3",
+ "victory-fanfare.mp3",
+ "ghost-appear.mp3",
+ "animal-free.mp3",
+ "bridge-grow.mp3",
+ "chest-open.mp3",
+ "footstep-1.mp3",
+ "footstep-2.mp3",
+ "bird-chirp.mp3",
+ "ui-tap.mp3",
+ "ambience-forest-day.mp3",
+ "ambience-forest-dusk.mp3",
+ "creek-water.mp3",
+ "boss-aura.mp3"
+]

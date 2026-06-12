@@ -26,6 +26,7 @@ import { setAtmosphere, rebuildFloorFx } from './atmosphere.js';
 import { playScene } from '../story/scenes.js';
 import { bossIntroScene } from '../story/content.js';
 import { setAmbienceProgress, setCreek, setBossAura } from '../audio/ambience.js';
+import { playBossMusic } from '../audio/music.js';
 
 let pathHeading = Math.PI;
 let pathEnd = new THREE.Vector3(0, 0, 6);
@@ -247,6 +248,7 @@ function arrive(st) {
   else if (st.type === 'BOSS') {
     spawnMob(st, true);
     setBossAura(true);
+    playBossMusic(G.floor);
     /* Boss stellt sich vor (vorgelesen), dann beginnt der Kampf */
     setTimeout(() => playScene(bossIntroScene(G.floor), () => startWordChallenge('spell')), 1000);
   }

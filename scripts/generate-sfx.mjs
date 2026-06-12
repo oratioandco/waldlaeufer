@@ -26,10 +26,10 @@ const SFX = [
   { f: 'animal-free',    d: 2.5, p: 'Magical liberation shimmer, rising harp glissando with fluttering bird wings taking off, joyful release' },
   { f: 'bridge-grow',    d: 2.0, p: 'Wooden planks magically growing and snapping into place, creaking wood with magical shimmer' },
   { f: 'chest-open',     d: 1.5, p: 'Old wooden treasure chest creaking open followed by a golden sparkle reveal' },
-  { f: 'footstep-1',     d: 0.4, p: 'Single soft footstep on a dirt forest path, natural, very short' },
-  { f: 'footstep-2',     d: 0.4, p: 'Single soft footstep on a dirt forest path with slight gravel, natural, very short' },
+  { f: 'footstep-1',     d: 0.5, p: 'Single soft footstep on a dirt forest path, natural, very short' },
+  { f: 'footstep-2',     d: 0.5, p: 'Single soft footstep on a dirt forest path with slight gravel, natural, very short' },
   { f: 'bird-chirp',     d: 1.0, p: 'Single cheerful songbird chirp phrase, two short tweets, forest bird' },
-  { f: 'ui-tap',         d: 0.3, p: 'Tiny soft wooden tap click, friendly UI button, very short' },
+  { f: 'ui-tap',         d: 0.5, p: 'Tiny soft wooden tap click, friendly UI button, very short' },
   /* Ambience-Loops */
   { f: 'ambience-forest-day',  d: 20, loop: true, p: 'Peaceful forest ambience, gentle songbirds, soft wind in leaves, distant insects, daytime, seamless loop' },
   { f: 'ambience-forest-dusk', d: 20, loop: true, p: 'Calm evening forest ambience, crickets, soft owl hoots, gentle breeze, mysterious but peaceful, seamless loop' },

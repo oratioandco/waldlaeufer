@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview --host",
     "voices": "node scripts/generate-voices.mjs",
-    "sfx": "node scripts/generate-sfx.mjs"
+    "sfx": "node scripts/generate-sfx.mjs",
+    "music": "node scripts/generate-music.mjs"
   },
   "dependencies": {
     "three": "^0.166.0"

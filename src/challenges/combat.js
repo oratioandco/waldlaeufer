@@ -13,6 +13,7 @@ import { announce, flyText } from '../ui/feedback.js';
 import { ovOff } from '../ui/overlays.js';
 import { sndBoom, sndFree, sndGrowl, sndCrit, tone } from '../audio/sfx.js';
 import { setBossAura } from '../audio/ambience.js';
+import { playLevelMusic } from '../audio/music.js';
 import { startWordChallenge } from './spell.js';
 import { startBlitz } from './blitz.js';
 import { spawnGemReward } from './reward.js';
@@ -76,6 +77,7 @@ export function killMob() {
   let afterReward = () => setTimeout(stationDone, 250);
   if (wasBoss) {
     setBossAura(false); /* die Schatten-Aura verklingt mit der Erlösung */
+    playLevelMusic(G.floor); /* Boss-Thema endet, Wald-Musik kehrt zurück */
     /* Boss-Abgangszeile (gewaltarm: der Schatten zerfällt) */
     setTimeout(() => showBubble(bossSym, BOSS_DEFEAT[Math.min(G.floor - 1, BOSS_DEFEAT.length - 1)], 'boss'), 600);
   } else if (!G.companion) {
