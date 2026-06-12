@@ -7,8 +7,9 @@ import { planFloor, advance } from '../world/stations.js';
 import { renderHearts } from './hud.js';
 import { announce } from './feedback.js';
 import { setVoiceOn, setVoiceVol, getVoiceVol, sayStorySeq } from '../audio/tts.js';
-import { sndWin, setSfxVol, getSfxVol, sndGem } from '../audio/sfx.js';
+import { sndWin, setSfxVol, getSfxVol, sndGem, sndTap } from '../audio/sfx.js';
 import { setMusicVol, getMusicVol, playLevelMusic } from '../audio/music.js';
+import { refreshAmbience } from '../audio/ambience.js';
 import { setQuality, setRES } from '../engine/quality.js';
 import { saveActive } from '../meta/save.js';
 import { FLOOR_QUOTES, FLOOR_DONE } from '../story/content.js';
@@ -94,7 +95,7 @@ export function wireOverlays() {
   /* Getrennte Lautstärken für Stimme/Musik/Effekte (persistiert) */
   const vols = [
     ['volVoice', getVoiceVol, setVoiceVol, null],
-    ['volMusic', getMusicVol, setMusicVol, null],
+    ['volMusic', getMusicVol, setMusicVol, refreshAmbience],
     ['volSfx', getSfxVol, setSfxVol, () => sndGem(0)] /* Hör-Feedback */
   ];
   vols.forEach(([id, get, set, sample]) => {
@@ -103,4 +104,8 @@ export function wireOverlays() {
     el.addEventListener('input', e => set(e.target.value / 100));
     if (sample) el.addEventListener('change', sample);
   });
+
+  /* dezentes Tap-Feedback auf allen statischen Buttons */
+  document.querySelectorAll('.play, .ghost, .chip, #settingsBtn, #pauseBtn, #hornBtn').forEach(b =>
+    b.addEventListener('pointerdown', sndTap));
 }

@@ -25,6 +25,7 @@ import { saveActive } from '../meta/save.js';
 import { setAtmosphere, rebuildFloorFx } from './atmosphere.js';
 import { playScene } from '../story/scenes.js';
 import { bossIntroScene } from '../story/content.js';
+import { setAmbienceProgress, setCreek, setBossAura } from '../audio/ambience.js';
 
 let pathHeading = Math.PI;
 let pathEnd = new THREE.Vector3(0, 0, 6);
@@ -215,7 +216,10 @@ export function advance() {
   while (worldGroups.length > 9) { disposeGroup(worldGroups.shift()); }
 
   /* Tageszeit schreitet mit der Reise voran: Boss = Dämmerung */
-  setAtmosphere(G.stIdx / Math.max(1, G.stations.length - 1), G.floor);
+  const progress = G.stIdx / Math.max(1, G.stations.length - 1);
+  setAtmosphere(progress, G.floor);
+  setAmbienceProgress(progress);
+  setCreek(false); setBossAura(false); /* stationsgebundene Klänge enden beim Aufbruch */
 
   const targetRig = st.pos.clone().addScaledVector(st.dir, -9.2); targetRig.y = 3.7;
   const targetFocus = st.pos.clone(); targetFocus.y = 2.2;
@@ -242,10 +246,11 @@ function arrive(st) {
   if (st.type === 'MOB') { spawnMob(st, false); setTimeout(() => startWordChallenge('spell'), 800); }
   else if (st.type === 'BOSS') {
     spawnMob(st, true);
+    setBossAura(true);
     /* Boss stellt sich vor (vorgelesen), dann beginnt der Kampf */
     setTimeout(() => playScene(bossIntroScene(G.floor), () => startWordChallenge('spell')), 1000);
   }
-  else if (st.type === 'TOR') { announce('DER BACH!', 900); sayGame('Ein Bach! Zaubere das Wort, dann wächst die Brücke.'); setTimeout(() => startWordChallenge('gate'), 800); }
+  else if (st.type === 'TOR') { setCreek(true); announce('DER BACH!', 900); sayGame('Ein Bach! Zaubere das Wort, dann wächst die Brücke.'); setTimeout(() => startWordChallenge('gate'), 800); }
   else if (st.type === 'TRUHE') { setTimeout(startChest, 500); }
   else if (st.type === 'BEFEHL') { setTimeout(() => startBefehl(st), 500); }
 }

@@ -11,7 +11,8 @@ import { rigPos } from '../engine/camera.js';
 import { renderHearts } from '../ui/hud.js';
 import { announce, flyText } from '../ui/feedback.js';
 import { ovOff } from '../ui/overlays.js';
-import { sndBoom, sndFree, sndGrowl, tone } from '../audio/sfx.js';
+import { sndBoom, sndFree, sndGrowl, sndCrit, tone } from '../audio/sfx.js';
+import { setBossAura } from '../audio/ambience.js';
 import { startWordChallenge } from './spell.js';
 import { startBlitz } from './blitz.js';
 import { spawnGemReward } from './reward.js';
@@ -39,7 +40,7 @@ export function castSpell() {
     if (G.combo >= 2) dmg = Math.round(dmg * (1 + Math.min(.5, G.combo * .1)));
     G.mob.hp -= dmg; setMobHp();
     flyText(target.clone().add(new THREE.Vector3(0, 2.3, 0)), '-' + dmg, crit ? '#ffd34a' : '#b6f7c2', crit ? 40 : 30);
-    if (crit) announce('KRITISCH!', 700);
+    if (crit) { announce('KRITISCH!', 700); sndCrit(); }
     if (G.combo >= 2) {
       const c = document.getElementById('comboTag');
       c.textContent = `🔥 COMBO x${G.combo}`; c.classList.add('on');
@@ -74,6 +75,7 @@ export function killMob() {
 
   let afterReward = () => setTimeout(stationDone, 250);
   if (wasBoss) {
+    setBossAura(false); /* die Schatten-Aura verklingt mit der Erlösung */
     /* Boss-Abgangszeile (gewaltarm: der Schatten zerfällt) */
     setTimeout(() => showBubble(bossSym, BOSS_DEFEAT[Math.min(G.floor - 1, BOSS_DEFEAT.length - 1)], 'boss'), 600);
   } else if (!G.companion) {

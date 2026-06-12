@@ -15,7 +15,7 @@ import { renderHearts } from '../ui/hud.js';
 import { announce, flyText, flashRed } from '../ui/feedback.js';
 import { spawnGemReward } from './reward.js';
 import { ovOn } from '../ui/overlays.js';
-import { sndChest, sndBlock, sndHurt, tone } from '../audio/sfx.js';
+import { sndChest, sndBlock, sndHurt, sndHeart, sndTap, tone } from '../audio/sfx.js';
 import { sayGame, sayStory } from '../audio/tts.js';
 import { shieldWas } from '../learning/speech-lines.js';
 import { UI_LINES } from '../story/content.js';
@@ -53,7 +53,7 @@ export function startBlitz(ctx) {
     opts.forEach(o => {
       const b = document.createElement('button');
       b.className = 'pbtn'; b.textContent = o;
-      b.addEventListener('pointerdown', () => blitzAnswer(b, o));
+      b.addEventListener('pointerdown', () => { sndTap(); blitzAnswer(b, o); });
       c.appendChild(b);
     });
     const T = 6000; parryDeadline = Date.now() + T;
@@ -117,7 +117,7 @@ function blitzFailed() {
         if (this.t >= Math.PI) { grp.position.copy(oz); return true; } return false;
       } });
     }
-    G.hearts--; renderHearts();
+    G.hearts--; renderHearts(); sndHeart();
     if (G.hearts <= 0) {
       setTimeout(() => { ovOn('deadOv'); sayStory('narrator', UI_LINES.dead); }, 700);
     }

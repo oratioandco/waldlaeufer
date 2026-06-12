@@ -26,7 +26,8 @@ import { G } from './state.js';
 import { renderHearts, renderHUD } from './ui/hud.js';
 import { announce } from './ui/feedback.js';
 import { wireOverlays } from './ui/overlays.js';
-import { ac, sndBird } from './audio/sfx.js';
+import { ac, sndBird, loadSfx } from './audio/sfx.js';
+import { startAmbience } from './audio/ambience.js';
 import { loadVoiceManifest } from './audio/tts.js';
 import { playTitleMusic, playLevelMusic } from './audio/music.js';
 import { listProfiles, createProfile, selectProfile, saveActive } from './meta/save.js';
@@ -113,6 +114,7 @@ function initThree() {
 wireOverlays();
 initScenes();
 loadVoiceManifest();
+loadSfx();
 /* Titelsong + gesprochene Begrüßung ab der ersten Berührung des
    Startbildschirms (vorher blockiert der Browser Autoplay).
    Audio-First: niemand muss den Startbildschirm LESEN können. */
@@ -130,6 +132,7 @@ addEventListener('pagehide', saveActive);
 function startGame() {
   ac();
   playLevelMusic(G.floor);
+  startAmbience();
   document.getElementById('startOv').classList.remove('on');
   document.getElementById('hud').classList.add('on');
   initThree();
