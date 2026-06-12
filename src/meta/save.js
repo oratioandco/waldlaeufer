@@ -4,7 +4,7 @@
    Bewusst ohne Backend: Lerndaten eines Kindes bleiben auf dem Gerät.
    ===================================================================== */
 import { G } from '../state.js';
-import { serializeLearning, restoreLearning } from '../learning/engine.js';
+import { serializeLearning, restoreLearning, SESSION } from '../learning/engine.js';
 
 const KEY = 'waldlaeufer.save.v1';
 
@@ -44,14 +44,31 @@ export function selectProfile(id) {
   if (s.profiles[id].data) restoreAll(s.profiles[id].data);
   sessionStarted = true;
 }
+/* Session-Historie: ein Eintrag pro Spielsitzung, fortgeschrieben
+   bei jedem Speichern (fürs Eltern-/Therapeuten-Panel) */
+let sessionStamp = null;
+
 export function saveActive() {
   if (!sessionStarted) return;
   const s = readStore();
   const id = s.activeId;
   if (!id || !s.profiles[id]) return;
-  s.profiles[id].data = collectAll();
+  const data = collectAll();
+  data.history = (s.profiles[id].data && s.profiles[id].data.history) || [];
+  if (SESSION.words > 0) {
+    if (!sessionStamp) { sessionStamp = Date.now(); data.history.push({ t: sessionStamp, w: 0, c: 0 }); }
+    const entry = data.history.find(h => h.t === sessionStamp);
+    if (entry) { entry.w = SESSION.words; entry.c = SESSION.clean; }
+    if (data.history.length > 30) data.history = data.history.slice(-30);
+  }
+  s.profiles[id].data = data;
   s.profiles[id].updated = Date.now();
   writeStore(s);
+}
+export function getHistory() {
+  const s = readStore();
+  const p = s.profiles[s.activeId];
+  return (p && p.data && p.data.history) || [];
 }
 
 function collectAll() {

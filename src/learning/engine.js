@@ -19,8 +19,31 @@ export let activeTier = 1;
 let wordCounter = 0, reviewQueue = [], lastWord = '';
 export const SESSION = { words: 0, clean: 0 };
 
+/* Eigene Förderwörter (Eltern/Therapeut:in, pro Profil): ersetzen
+   den Pool der jeweiligen Stufe – exakt die Förderpraxis
+   („Wörter der Woche"). Lernstand bleibt wortbasiert erhalten. */
+let customTiers = { 1: [], 2: [], 3: [], 4: [] };
+export function setCustomWords(tier, words) {
+  customTiers[tier] = words;
+  words.forEach((w, order) => {
+    if (!LEX[w.w]) LEX[w.w] = { ...w, tier: +tier, order, box: 0, seen: 0, errs: 0 };
+  });
+}
+export function getCustomWords() { return customTiers; }
+export function poolFor(t) {
+  const c = customTiers[t];
+  return (c && c.length) ? c : TIER_WORDS[t];
+}
+export function allWords() {
+  const out = [...Object.values(TIER_WORDS).flat()];
+  Object.values(customTiers).flat().forEach(w => {
+    if (!out.some(o => o.w === w.w)) out.push(w);
+  });
+  return out;
+}
+
 export function tierMastery(t) {
-  const list = TIER_WORDS[t];
+  const list = poolFor(t);
   const ok = list.filter(w => LEX[w.w].box >= 2).length;
   return ok / list.length;
 }
@@ -41,7 +64,7 @@ export function nextWord() {
   /* 2) 20% Festigung: gemeisterte Wörter niedrigerer Stufen flüssig halten */
   if (activeTier > 1 && Math.random() < .2) {
     const pool = [];
-    for (let t = 1; t < activeTier; t++) TIER_WORDS[t].forEach(w => {
+    for (let t = 1; t < activeTier; t++) poolFor(t).forEach(w => {
       if (LEX[w.w].box >= 2 && w.w !== lastWord) pool.push(LEX[w.w]); });
     if (pool.length) {
       const pick = pool[Math.floor(Math.random() * pool.length)];
@@ -49,10 +72,10 @@ export function nextWord() {
     }
   }
   /* 3) Aktive Stufe: niedrigste Box zuerst, dann Einführungsreihenfolge */
-  const cand = TIER_WORDS[activeTier].map(w => LEX[w.w])
+  const cand = poolFor(activeTier).map(w => LEX[w.w])
     .filter(s => s.w !== lastWord)
     .sort((a, b) => (a.box - b.box) || (a.seen - b.seen) || (a.order - b.order));
-  const pick = cand[0] || LEX[TIER_WORDS[activeTier][0].w];
+  const pick = cand[0] || LEX[poolFor(activeTier)[0].w];
   lastWord = pick.w; return pick;
 }
 export function reportWord(w, errorFree) {
@@ -74,10 +97,11 @@ export function serializeLearning() {
   Object.values(LEX).forEach(s => { words[s.w] = { b: s.box, n: s.seen, e: s.errs }; });
   const shields = {};
   Object.entries(shieldStats).forEach(([w, v]) => shields[w] = v.fails);
-  return { tier: activeTier, words, shields };
+  return { tier: activeTier, words, shields, custom: customTiers };
 }
 export function restoreLearning(d) {
   if (!d) return;
+  if (d.custom) Object.entries(d.custom).forEach(([t, ws]) => setCustomWords(+t, ws || []));
   Object.entries(d.words || {}).forEach(([w, v]) => {
     if (LEX[w]) { LEX[w].box = v.b || 0; LEX[w].seen = v.n || 0; LEX[w].errs = v.e || 0; }
   });

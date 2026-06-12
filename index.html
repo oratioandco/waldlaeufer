@@ -103,6 +103,25 @@
       <div id="reportStats"></div>
       <div id="reportBars"></div>
     </div>
+    <div id="histBox">
+      <h3>📅 Letzte Sitzungen</h3>
+      <div id="histList"></div>
+    </div>
+    <h3>🛠 Eigene Förderwörter</h3>
+    <p>Ein Wort pro Zeile, Silben mit Bindestrich getrennt (z.&nbsp;B. <b>Ba-na-ne</b>).
+    Die Liste ersetzt die gewählte Stufe für dieses Profil – ideal für die
+    aktuellen Wörter aus der Lerntherapie. Leeren stellt die Standard-Wörter wieder her.</p>
+    <div id="cwRow">
+      <select id="cwTier">
+        <option value="1">Stufe 1 · offene Silben</option>
+        <option value="2">Stufe 2 · mehrsilbig</option>
+        <option value="3">Stufe 3 · Konsonantenhäufung</option>
+        <option value="4">Stufe 4 · Klasse 4/5</option>
+      </select>
+      <textarea id="cwWords" rows="5" placeholder="Ba-na-ne&#10;To-ma-te&#10;Ra-ke-te"></textarea>
+      <button class="play" id="cwSave" style="margin-top:8px">FÖRDERWÖRTER SPEICHERN</button>
+      <div id="cwStatus"></div>
+    </div>
     <h3>Strukturierte Wortauswahl statt Zufall</h3>
     <p>Die Wörter folgen einem <b>Spaced-Repetition-System</b> (Leitner-Prinzip): Jedes Wort hat eine Beherrschungsstufe. Fehlerfreie Wörter steigen auf und kommen seltener; Fehlerwörter werden nach 2–3 anderen Wörtern gezielt erneut geübt (verteiltes Wiederholen – wirksamer als sofortige Massierung). Neue Wörter werden erst eingeführt, wenn die aktuelle Stufe zu ~70&nbsp;% beherrscht ist (<b>Mastery-Gating</b>). Die Schwierigkeitsstufen folgen der lautgetreuen Progression (Reuter-Liehr): offene 2-Silber → mehrsilbig → Konsonantenhäufungen → Klasse&nbsp;4/5 mit Vor-/Nachsilben und Komposita aus dem Grundwortschatz.</p>
     <h3>Zaubern &amp; Brücken = Silbensynthese (Dekodieren)</h3>

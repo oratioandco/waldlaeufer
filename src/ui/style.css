@@ -206,6 +206,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;heigh
 .mbar div{height:100%;background:linear-gradient(90deg,#46d68a,#9fe86f);border-radius:6px}
 .mbarWrap b{width:38px;text-align:right;color:#9fe86f}
 
+#histBox{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:14px;
+  padding:12px 16px;margin:14px 0}
+#histList{font-size:12px;color:#c4dcc9;line-height:1.9}
+#histList b{color:#9fe86f}
+#cwRow select,#cwRow textarea{width:100%;margin:6px 0;padding:10px 12px;border-radius:10px;
+  border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.07);color:#eafbf0;
+  font-family:inherit;font-size:14px;-webkit-user-select:text;user-select:text}
+#cwRow textarea{letter-spacing:.08em;line-height:1.7;resize:vertical}
+#cwStatus{font-size:12px;color:#9fe86f;margin-top:6px;min-height:16px}
+
 @media (max-width:640px){
   .wslot{min-width:54px;height:46px;font-size:21px}
   .wsentence{font-size:17px}

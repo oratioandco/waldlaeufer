@@ -1,7 +1,8 @@
 /* ---------- Overlays: Pause, Einstellungen, Gebiet geschafft,
    Eltern-Panel mit Live-Lern-Report ---------- */
 import { G } from '../state.js';
-import { SESSION, activeTier, tierMastery, TIER_NAMES } from '../learning/engine.js';
+import { SESSION, activeTier, tierMastery, TIER_NAMES, getCustomWords, setCustomWords } from '../learning/engine.js';
+import { getHistory } from '../meta/save.js';
 import { BOSSES } from '../creatures/data.js';
 import { planFloor, advance } from '../world/stations.js';
 import { biomeFor } from '../world/biomes.js';
@@ -37,7 +38,42 @@ export function openAdult() {
     return `<div class="mbarWrap"><span>${TIER_NAMES[t]}</span>
       <div class="mbar"><div style="width:${m}%"></div></div><b>${m}%</b></div>`;
   }).join('');
+  /* Sitzungs-Historie (über Sitzungen hinweg, fürs Therapie-Gespräch) */
+  const hist = getHistory().slice(-8).reverse();
+  document.getElementById('histList').innerHTML = hist.length
+    ? hist.map(h => {
+        const d = new Date(h.t);
+        const q = h.w ? Math.round(h.c / h.w * 100) : 0;
+        return `${d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
+          &nbsp;·&nbsp; <b>${h.w}</b> Wörter &nbsp;·&nbsp; <b>${q}%</b> fehlerfrei`;
+      }).join('<br>')
+    : 'Noch keine abgeschlossenen Sitzungen.';
+  loadCustomWordsUI();
   ovOn('adultOv');
+}
+
+/* ---------- Förderwörter-Editor ---------- */
+function loadCustomWordsUI() {
+  const tier = +document.getElementById('cwTier').value;
+  const words = getCustomWords()[tier] || [];
+  document.getElementById('cwWords').value = words.map(w => w.s.join('-')).join('\n');
+  document.getElementById('cwStatus').textContent = '';
+}
+function saveCustomWordsUI() {
+  const tier = +document.getElementById('cwTier').value;
+  const lines = document.getElementById('cwWords').value.split('\n')
+    .map(l => l.trim()).filter(Boolean);
+  const words = [];
+  for (const line of lines) {
+    const syl = line.split('-').map(s => s.trim()).filter(Boolean);
+    if (!syl.length) continue;
+    words.push({ w: syl.join(''), s: syl });
+  }
+  setCustomWords(tier, words);
+  saveActive();
+  document.getElementById('cwStatus').textContent = words.length
+    ? `✓ ${words.length} Förderwörter für ${TIER_NAMES[tier]} gespeichert. Neue Wörter sprechen zunächst mit der Systemstimme.`
+    : `✓ Stufe zurückgesetzt – Standard-Wörter sind wieder aktiv.`;
 }
 export function openSettings() { ovOn('setOv'); }
 
@@ -117,6 +153,9 @@ export function wireOverlays() {
     el.addEventListener('input', e => set(e.target.value / 100));
     if (sample) el.addEventListener('change', sample);
   });
+
+  document.getElementById('cwTier').addEventListener('change', loadCustomWordsUI);
+  document.getElementById('cwSave').addEventListener('click', saveCustomWordsUI);
 
   /* dezentes Tap-Feedback auf allen statischen Buttons */
   document.querySelectorAll('.play, .ghost, .chip, #settingsBtn, #pauseBtn, #hornBtn').forEach(b =>

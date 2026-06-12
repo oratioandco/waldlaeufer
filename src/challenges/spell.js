@@ -10,7 +10,7 @@ import { rigPos } from '../engine/camera.js';
 import { addAnim } from '../engine/anims.js';
 import { burst } from '../engine/effects.js';
 import { G } from '../state.js';
-import { nextWord, reportWord, TIER_WORDS, activeTier } from '../learning/engine.js';
+import { nextWord, reportWord, allWords, activeTier } from '../learning/engine.js';
 import { lateral } from '../world/stations.js';
 import { cards, makeCard, clearCards, removeCard, dismissCards } from './cards.js';
 import { castSpell } from './combat.js';
@@ -37,7 +37,7 @@ export function startWordChallenge(mode) {
   const items = G.word.s.map((s, i) => ({ s, i }));
   /* Distraktoren nach BEHERRSCHUNG, nicht nach Gebiet */
   const nDis = Math.min(2, Math.max(0, activeTier - 1));
-  const pool = Object.values(TIER_WORDS).flat().filter(w => w.w !== G.word.w)
+  const pool = allWords().filter(w => w.w !== G.word.w)
     .flatMap(w => w.s).filter(s => !G.word.s.includes(s));
   for (let k = 0; k < nDis && pool.length; k++) {
     items.push({ s: pool.splice(Math.floor(Math.random() * pool.length), 1)[0], i: -1 });
