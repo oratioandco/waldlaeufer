@@ -1,9 +1,13 @@
 /* ---------- Sprachausgabe mit Abspiel-Queue ----------
-   Regel: Ein laufender Clip wird IMMER zu Ende gespielt. Während er
-   läuft, wird höchstens EIN weiterer Wunsch gemerkt (der neueste
-   gewinnt – bei schnellem Tippen entsteht kein Rückstau alter Clips).
-   interrupt=true (z.B. Szenen-WEITER = bewusstes Überspringen)
-   bricht sofort ab.
+   Regeln:
+   - Ein laufender Clip wird IMMER zu Ende gespielt.
+   - Wartende Clips spielen danach in REIHENFOLGE (FIFO).
+   - Kappe gegen Rückstau: max. 4 wartende; läuft sie über, fällt
+     der älteste wartende weg.
+   - optional=true (reine Würz-Sounds wie das Angriffs-Signal) wird
+     gar nicht erst eingereiht, wenn schon gesprochen wird.
+   - interrupt=true (Szenen-WEITER = bewusstes Überspringen) bricht
+     sofort ab und leert die Warteschlange.
 
    Drei Wege, alle mit Musik-Ducking (Stimme bleibt IMMER verständlich):
    1. sayGame():  gebackene ElevenLabs-Clips für Wörter, Silben,
@@ -21,11 +25,12 @@ try { VOICE_VOL = +(localStorage.getItem('waldlaeufer.volVoice') ?? 1); } catch 
 let MANIFEST = null;
 let curAudio = null;
 let current = null;   // laufender Job
-let pending = null;   // gemerkter nächster Job (neuester gewinnt)
+let queue = [];       // wartende Jobs (FIFO)
+const MAX_QUEUE = 4;
 
 export function setVoiceOn(on) {
   VOICE_ON = on;
-  if (!on) { pending = null; hardStop(); }
+  if (!on) { queue = []; hardStop(); }
 }
 export function setVoiceVol(v) {
   VOICE_VOL = v;
@@ -51,7 +56,7 @@ function startJob(job) {
     clearTimeout(job._t);
     curAudio = null;
     current = null;
-    if (pending) { const j = pending; pending = null; startJob(j); }
+    if (queue.length) startJob(queue.shift());
     else duckMusic(false);
   };
   /* Sicherheitsnetz: falls onended/onend nie feuert (iOS-Eigenheiten),
@@ -59,10 +64,15 @@ function startJob(job) {
   job._t = setTimeout(finish, job.maxMs);
   job.run(finish);
 }
-function requestJob(job, interrupt = false) {
+function requestJob(job, interrupt = false, optional = false) {
   if (!VOICE_ON) return;
-  if (interrupt) { pending = null; hardStop(); startJob(job); return; }
-  if (current) { pending = job; return; }
+  if (interrupt) { queue = []; hardStop(); startJob(job); return; }
+  if (current) {
+    if (optional) return; /* Würz-Sound bei Stau: weglassen statt stapeln */
+    queue.push(job);
+    while (queue.length > MAX_QUEUE) queue.shift();
+    return;
+  }
   startJob(job);
 }
 
@@ -141,15 +151,15 @@ export function say(text, rate = .95, pitch = .9, interrupt = false) {
 if ('speechSynthesis' in window) speechSynthesis.getVoices();
 
 /* Gameplay: Wörter, Silben, Schildwörter, feste Sätze (Lehrer-Stimme) */
-export function sayGame(text, interrupt = false) {
+export function sayGame(text, interrupt = false, optional = false) {
   const f = clipFor('word', text);
-  requestJob(f ? clipJob(f, text, .95, .9) : speechJob(text), interrupt);
+  requestJob(f ? clipJob(f, text, .95, .9) : speechJob(text), interrupt, optional);
 }
 /* Story-Zeilen (Charakterstimmen) */
-export function sayStory(voiceKey, text, interrupt = false) {
+export function sayStory(voiceKey, text, interrupt = false, optional = false) {
   const v = VOICES[voiceKey] || VOICES.narrator;
   const f = clipFor(voiceKey, text);
-  requestJob(f ? clipJob(f, text, v.rate, v.pitch) : speechJob(text, v.rate, v.pitch), interrupt);
+  requestJob(f ? clipJob(f, text, v.rate, v.pitch) : speechJob(text, v.rate, v.pitch), interrupt, optional);
 }
 /* Mehrere Zeilen nacheinander (z.B. Erzähler + Begleiter-Zitat) */
 export function sayStorySeq(steps) {

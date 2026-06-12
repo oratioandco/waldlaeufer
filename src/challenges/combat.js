@@ -95,7 +95,8 @@ export function killMob() {
 export function mobTurn() {
   if (Math.random() < .5) { setTimeout(() => startWordChallenge('spell'), 500); return; }
   sndGrowl();
-  sayGame(UI_LINES.shieldAlert); /* hörbares Angriffs-Signal statt nur Text-Banner */
+  /* hörbares Angriffs-Signal – optional: entfällt, wenn gerade gesprochen wird */
+  sayGame(UI_LINES.shieldAlert, false, true);
   {
     let t = 0;
     addAnim({ update(dt) {
