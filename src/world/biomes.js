@@ -48,7 +48,8 @@ export const BIOMES = [
     leaf: { h: .35, hVar: .05, s: .35, l: .26 }, pine: .55, trunk: 0x4a4034,
     treeDensity: .7, bushDensity: 1.3,
     hue: .07, fogMul: 1.5,
-    mood: { fogTint: 0x96a896, k: .45, sunMul: .85, hemiMul: .9 },
+    /* dunkler, satter Moor-Dunst statt heller Milch */
+    mood: { fogTint: 0x7e9682, k: .55, sunMul: .75, hemiMul: .82 },
     particle: { color: 0xaaffcc, size: .28, irrlicht: true } /* Irrlichter! */
   },
   { /* 5 – Schratwald: tiefer Nadelwald, moosige Felsen */
@@ -60,7 +61,8 @@ export const BIOMES = [
     leaf: { h: .38, hVar: .04, s: .45, l: .22 }, pine: .85, trunk: 0x4f3a26,
     treeDensity: 1.45, bushDensity: .8,
     hue: .05, fogMul: 1.25,
-    mood: { fogTint: 0xaabcb4, k: .3, sunMul: .8, hemiMul: .85 },
+    /* tiefer Nadelwald: dunkles Moosgrau, gedämpfte Sonne */
+    mood: { fogTint: 0x70887a, k: .4, sunMul: .68, hemiMul: .75 },
     particle: { color: 0xd0e8ff, size: .12 }
   },
   { /* 6 – Schattenreich: der verdorbene Hof des Königs */
@@ -71,7 +73,7 @@ export const BIOMES = [
     ground: ['#322844', '#2e2440', '#3a2e4e', '#443858', '#2a2238'],
     path: 0x6a5a7e,
     leaf: { h: .76, hVar: .05, s: .30, l: .22 }, pine: .6, trunk: 0x2e2438,
-    treeDensity: .9, bushDensity: .5,
+    treeDensity: 1.5, bushDensity: .6,
     hue: .0, fogMul: 1.35,
     /* minProgress 1: im Schattenreich ist IMMER Geisterstunde */
     mood: { fogTint: 0x3c2f52, k: .6, sunMul: .6, hemiMul: .7, minProgress: 1 },

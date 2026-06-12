@@ -22,7 +22,9 @@ export function buildSky() {
     fragmentShader: `varying vec3 vP;uniform vec3 uTop;uniform vec3 uHor;
       void main(){
         float h=normalize(vP).y*0.5+0.5;
-        gl_FragColor=vec4(mix(uHor,uTop,smoothstep(0.42,0.95,h)),1.0);
+        /* Blau schon knapp über dem Horizont – sonst füllt die
+           Horizontfarbe als flache Wand das halbe Bild */
+        gl_FragColor=vec4(mix(uHor,uTop,smoothstep(0.47,0.72,h)),1.0);
       }`
   });
   const sky = new THREE.Mesh(new THREE.SphereGeometry(150, 16, 12), skyMat);

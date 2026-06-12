@@ -20,16 +20,17 @@ import { setGrassEnv } from './grass.js';
    sunY = Höhe des Richtungslichts (tiefer = längere, wärmere Schatten),
    sprY/sprS = Höhe und Größe des sichtbaren Sonnen-Sprites. */
 const STOPS = [
-  /* Morgen: goldenes Frühlicht statt grauem Dunst */
-  { p: 0,   top: 0x5f97ea, hor: 0xffd9a3, sun: 0xffd28a, sunI: 1.1,  hemiSky: 0xdfe9ff, hemiGr: 0x7f9a58, hemiI: .8,  fog: 0xf2ddba, fogN: 32, fogF: 96,  sprite: 0xffe3a8, sunY: 22, sprY: 48, sprS: 60 },
+  /* Morgen: goldenes Frühlicht – KLAR bis ~46 m, Dunst nur in der Ferne
+     (vorher fogN 32 → „milchige Suppe" über dem ganzen Bild) */
+  { p: 0,   top: 0x5f97ea, hor: 0xffdcae, sun: 0xffd28a, sunI: 1.2,  hemiSky: 0xdfe9ff, hemiGr: 0x7f9a58, hemiI: .68, fog: 0xecdfc2, fogN: 46, fogF: 132, sprite: 0xffe3a8, sunY: 22, sprY: 48, sprS: 60 },
   /* Tag: helle Referenz (Prototyp-Look) */
-  { p: .35, top: 0x549ef0, hor: 0xe6f5ff, sun: 0xfff1cf, sunI: 1.35, hemiSky: 0xcfe6ff, hemiGr: 0x77995a, hemiI: .85, fog: 0xcfe9fb, fogN: 36, fogF: 100, sprite: 0xfff6d8, sunY: 38, sprY: 80, sprS: 55 },
+  { p: .35, top: 0x549ef0, hor: 0xe6f5ff, sun: 0xfff1cf, sunI: 1.35, hemiSky: 0xcfe6ff, hemiGr: 0x77995a, hemiI: .85, fog: 0xcfe9fb, fogN: 50, fogF: 140, sprite: 0xfff6d8, sunY: 38, sprY: 80, sprS: 55 },
   /* Später Nachmittag: erstes Anwärmen */
-  { p: .6,  top: 0x4d7ad9, hor: 0xffd9a3, sun: 0xffd998, sunI: 1.15, hemiSky: 0xe8dcc8, hemiGr: 0x6f8a50, hemiI: .78, fog: 0xeedec0, fogN: 33, fogF: 94,  sprite: 0xffe3ae, sunY: 26, sprY: 58, sprS: 58 },
+  { p: .6,  top: 0x4d7ad9, hor: 0xffd9a3, sun: 0xffd998, sunI: 1.15, hemiSky: 0xe8dcc8, hemiGr: 0x6f8a50, hemiI: .78, fog: 0xeedec0, fogN: 46, fogF: 126, sprite: 0xffe3ae, sunY: 26, sprY: 58, sprS: 58 },
   /* GOLDEN HOUR: tiefe Sonne, sattes Gold, lange Schatten */
-  { p: .85, top: 0x3f5cb8, hor: 0xff9d4d, sun: 0xff9d50, sunI: 1.0,  hemiSky: 0xe8b890, hemiGr: 0x5a6a40, hemiI: .66, fog: 0xf0b070, fogN: 28, fogF: 84,  sprite: 0xffb060, sunY: 14, sprY: 34, sprS: 68 },
+  { p: .85, top: 0x3f5cb8, hor: 0xff9d4d, sun: 0xff9d50, sunI: 1.0,  hemiSky: 0xe8b890, hemiGr: 0x5a6a40, hemiI: .66, fog: 0xf0b070, fogN: 38, fogF: 108, sprite: 0xffb060, sunY: 14, sprY: 34, sprS: 68 },
   /* Dämmerung (Boss): dunkel, tiefes Blauviolett */
-  { p: 1,   top: 0x191a45, hor: 0x6e4070, sun: 0x9f7be0, sunI: .55,  hemiSky: 0x55477e, hemiGr: 0x2c2c40, hemiI: .50, fog: 0x3d3552, fogN: 22, fogF: 70,  sprite: 0xc9a0ff, sunY: 10, sprY: 26, sprS: 60 }
+  { p: 1,   top: 0x191a45, hor: 0x6e4070, sun: 0x9f7be0, sunI: .55,  hemiSky: 0x55477e, hemiGr: 0x2c2c40, hemiI: .50, fog: 0x3d3552, fogN: 26, fogF: 82,  sprite: 0xc9a0ff, sunY: 10, sprY: 26, sprS: 60 }
 ];
 
 const cur = {
