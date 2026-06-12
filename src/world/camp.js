@@ -11,6 +11,7 @@ import { addAnim, easeOut } from '../engine/anims.js';
 import { glowSprite } from '../engine/textures.js';
 import { G } from '../state.js';
 import { ANIMALS, BOSSES } from '../creatures/data.js';
+import { loadModelOnce, pickClip } from '../creatures/models.js';
 import { BOSS_DEFEAT, COMPANION_CHEER } from '../story/content.js';
 import { sayStory } from '../audio/tts.js';
 import { sndTap } from '../audio/sfx.js';
@@ -80,14 +81,41 @@ export function enterCamp() {
     return false;
   } });
 
-  /* Befreite Wächter im Halbkreis hinter dem Feuer */
+  /* Befreite Wächter im Halbkreis hinter dem Feuer – wo es ein echtes
+     Modell gibt, sitzt das Tier leibhaftig am Feuer (Idle-Animation),
+     sonst Emoji-Sprite auf Podest */
+  const campMixers = [];
   const freedBosses = BOSSES.filter(b => G.trophies.includes(b.trophy));
   freedBosses.forEach((b, i) => {
     const a = Math.PI * (.25 + .5 * (i / Math.max(1, freedBosses.length - 1 || 1)));
     const p = center.clone().add(new THREE.Vector3(Math.cos(a) * 6.5, 0, -Math.abs(Math.sin(a)) * 6.5));
+    const say = { voice: 'boss', text: BOSS_DEFEAT[BOSSES.indexOf(b)] };
+    if (b.model) {
+      loadModelOnce(b.model.key, b.model.url, { toon: true }).then(model => {
+        if (!model || !campGrp) return;
+        const holder = new THREE.Group();
+        const ms = model.scene;
+        ms.position.set(0, 0, 0); ms.rotation.set(0, 0, 0);
+        ms.scale.setScalar(b.model.scale);
+        holder.add(ms);
+        holder.position.set(p.x, 0, p.z);
+        /* Blick zum Feuer */
+        holder.rotation.y = Math.atan2(center.x - p.x, center.z - p.z);
+        holder.userData.campSay = say;
+        holder.userData.grounded = true;
+        campGrp.add(holder);
+        campTargets.push(holder);
+        if (model.clips.length) {
+          const mix = new THREE.AnimationMixer(ms);
+          mix.clipAction(pickClip(model.clips, 'Idle', 'Idle_2', 'Eating')).play();
+          campMixers.push(mix);
+        }
+      });
+      return;
+    }
     const sp = emojiSprite(b.sym, 2.6);
     sp.position.set(p.x, 1.6, p.z);
-    sp.userData.campSay = { voice: 'boss', text: BOSS_DEFEAT[BOSSES.indexOf(b)] };
+    sp.userData.campSay = say;
     campGrp.add(sp);
     campTargets.push(sp);
     const podest = new THREE.Mesh(new THREE.CylinderGeometry(.9, 1.1, .5, 8),
@@ -95,6 +123,12 @@ export function enterCamp() {
     podest.position.set(p.x, .25, p.z);
     campGrp.add(podest);
   });
+  /* Wächter-Animationen treiben, solange das Lager steht */
+  addAnim({ update(dt) {
+    if (!campGrp) return true;
+    campMixers.forEach(m => m.update(dt));
+    return false;
+  } });
 
   /* Befreite Tierarten näher am Feuer */
   const species = ANIMALS.filter(a => (G.freedSpecies[a.key] || 0) > 0);
@@ -114,6 +148,7 @@ export function enterCamp() {
     if (!campGrp) return true;
     this.t += dt;
     campTargets.forEach(s => {
+      if (s.userData.grounded) return; /* echte Tiere stehen fest am Boden */
       const b = s.userData.bob || 0;
       s.position.y = (s.userData.baseY ?? (s.userData.baseY = s.position.y)) + Math.sin(this.t * 1.4 + b) * .1;
     });

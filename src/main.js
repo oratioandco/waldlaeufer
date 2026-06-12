@@ -64,6 +64,29 @@ if (import.meta.env.DEV) {
       const from = G.stations[Math.max(0, i - 1)].pos;
       rigPos.set(from.x, 3.7, from.z); camPos.copy(rigPos);
       advance();
+    },
+    /* Tiermodell-Sichtung: __dbg.reveal('horse'|'wolf'|'fox'|'stag') */
+    async reveal(key) {
+      const { revealFreedAnimal } = await import('./creatures/mob.js');
+      const { ANIMALS, BOSSES } = await import('./creatures/data.js');
+      const { loadModelOnce } = await import('./creatures/models.js');
+      let a = ANIMALS.find(x => x.key === key);
+      if (!a) {
+        const b = BOSSES.find(x => x.model && x.model.key === 'g_' + key);
+        if (!b) return 'unbekannt: ' + key;
+        await loadModelOnce(b.model.key, b.model.url, { toon: true });
+        a = { key: b.model.key, scale: b.model.scale, grounded: true, y: 0 };
+      } else await loadModelOnce(a.key, a.url, { toon: a.toon });
+      revealFreedAnimal(a, rigFocus.clone());
+      return 'ok';
+    },
+    /* Lager-Sichtung mit allen Wächtern */
+    async camp() {
+      const { enterCamp } = await import('./world/camp.js');
+      G.trophies = ['🐺', '🐻', '🦊', '🦅', '🦌', '👑'];
+      G.freedSpecies = { parrot: 1, flamingo: 1, stork: 1, horse: 1 };
+      enterCamp();
+      return 'ok';
     }
   };
 }

@@ -9,6 +9,7 @@ import { scene } from '../engine/renderer.js';
 import { camPos, camFocus } from '../engine/camera.js';
 import { G } from '../state.js';
 import { ANIMALS } from './data.js';
+import { prepModel, pickClip } from './models.js';
 
 let grp = null, mixer = null, loadedKey = null, loading = false;
 
@@ -21,17 +22,14 @@ function ensureCompanion() {
   new GLTFLoader().load(animal.url, g => {
     if (grp) { scene.remove(grp); if (mixer) mixer.stopAllAction(); }
     grp = new THREE.Group();
-    g.scene.traverse(o => {
-      if (o.isMesh) { o.castShadow = true; if (o.material) o.material.side = THREE.DoubleSide; }
-    });
+    prepModel(g.scene, { toon: animal.toon });
     g.scene.scale.setScalar(animal.scale * .38); /* klein – Begleiter, kein Hauptdarsteller */
     grp.add(g.scene);
     mixer = null;
     if (g.animations.length) {
       mixer = new THREE.AnimationMixer(g.scene);
-      const act = mixer.clipAction(g.animations[0]);
-      act.timeScale = animal.key === 'horse' ? .55 : 1;
-      act.play();
+      /* Begleiter trabt mit → Gallop; Vögel haben nur ihren Flug-Clip */
+      mixer.clipAction(pickClip(g.animations, 'Gallop', 'Walk')).play();
     }
     grp.position.copy(camPos).add(new THREE.Vector3(2, -1, -3));
     scene.add(grp);

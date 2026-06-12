@@ -15,7 +15,7 @@ import { glowSprite, blobShadow } from '../engine/textures.js';
 import { GLSL_NOISE } from '../world/terrain.js';
 import { G } from '../state.js';
 import { ANIMALS, BOSSES } from './data.js';
-import { MODELS } from './models.js';
+import { MODELS, loadModelOnce, pickClip } from './models.js';
 import { sndGrowl } from '../audio/sfx.js';
 import { announce } from '../ui/feedback.js';
 
@@ -67,6 +67,8 @@ export function spawnMob(st, isBoss) {
   M.group = new THREE.Group();
   const animal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
   const def = isBoss ? BOSSES[Math.min(G.floor - 1, BOSSES.length - 1)] : animal;
+  /* Wächter-Modell schon beim Boss-Spawn vorladen → Befreiung ist sofort da */
+  if (isBoss && def.model) loadModelOnce(def.model.key, def.model.url, { toon: true });
 
   /* Schattengeist-Blob (Augen zur Kamera via lookAt unten) */
   const fb = animal.fb;
@@ -144,6 +146,7 @@ export function setMobHp() {
    erscheint und entkommt (Blickrichtung = Bewegungsrichtung). */
 export function freeMobVisual() {
   const grp = M.group;
+  const boss = G.mob && G.mob.boss ? G.mob.def : null;
   const animal = G.mob && !G.mob.boss ? G.mob.animal : null;
   M.group = null; M.shadow = null; M.mat = null;
   let t = 0;
@@ -155,6 +158,11 @@ export function freeMobVisual() {
     return false;
   } });
   if (animal) revealFreedAnimal(animal, grp.position.clone());
+  /* Wächter mit echtem Modell: erscheint befreit, schaut den Spieler an,
+     kehrt dann in seinen Wald zurück (gleicher Flow wie die Tiere) */
+  else if (boss && boss.model) revealFreedAnimal(
+    { key: boss.model.key, scale: boss.model.scale, grounded: true, y: 0 },
+    grp.position.clone());
 }
 
 let releaseAnimalFn = null;
@@ -164,7 +172,7 @@ export function releaseFreedAnimal() {
   if (releaseAnimalFn) { releaseAnimalFn(); releaseAnimalFn = null; }
 }
 
-function revealFreedAnimal(animal, pos) {
+export function revealFreedAnimal(animal, pos) {
   const model = MODELS[animal.key];
   if (!model) return; /* Modell (noch) nicht geladen → nur Auflösungs-Effekt */
   const g = new THREE.Group();
@@ -172,12 +180,18 @@ function revealFreedAnimal(animal, pos) {
   ms.position.set(0, 0, 0); ms.rotation.set(0, 0, 0);
   ms.scale.setScalar(animal.scale);
   g.add(ms);
-  let mix = null;
+  let mix = null, fleeAct = null;
   if (model.clips.length) {
     mix = new THREE.AnimationMixer(ms);
-    const act = mix.clipAction(model.clips[0]);
-    act.timeScale = animal.key === 'horse' ? .55 : 1;
+    const idle = pickClip(model.clips, 'Idle', 'Idle_2');
+    const act = mix.clipAction(idle);
     act.play();
+    /* Quaternius-Tiere: beim Entkommen in den Galopp wechseln */
+    const gallop = pickClip(model.clips, 'Gallop', 'Walk');
+    if (gallop && gallop !== idle) fleeAct = () => {
+      act.fadeOut(.25);
+      mix.clipAction(gallop).reset().fadeIn(.25).play();
+    };
   }
   /* Das Tier wendet sich dem Spieler zu und BLEIBT, solange gesprochen
      wird (Begleiter-Szene, Jubel) – Abflug erst nach releaseFreedAnimal()
@@ -206,7 +220,7 @@ function revealFreedAnimal(animal, pos) {
       if (released || pt > 12) { phase = 2; pt = 0; }
     } else if (phase === 2) { /* umdrehen */
       g.rotation.y = yawFace + easeInOut(Math.min(1, pt / .5)) * Math.PI;
-      if (pt >= .5) { phase = 3; pt = 0; }
+      if (pt >= .5) { phase = 3; pt = 0; if (fleeAct) fleeAct(); }
     } else { /* entkommen */
       g.position.addScaledVector(dir, dt * (grounded ? 7 : 4));
       if (!grounded) g.position.y += dt * 5;
