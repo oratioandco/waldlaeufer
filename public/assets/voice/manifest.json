@@ -815,5 +815,19 @@
  "word|Zaubere: Heldenmut": "word-8c574b7020.mp3",
  "word|Hel, den, mut. Heldenmut": "word-dd89262d2f.mp3",
  "word|Hel": "word-7e2b47d724.mp3",
- "word|mut": "word-68613879d9.mp3"
+ "word|mut": "word-68613879d9.mp3",
+ "narrator|Gold-Zauber. Kostet 25 Kristalle.": "narrator-8e226dec12.mp3",
+ "narrator|Eis-Zauber. Kostet 25 Kristalle.": "narrator-1ef956f543.mp3",
+ "narrator|Blüten-Zauber. Kostet 25 Kristalle.": "narrator-05f7fa6502.mp3",
+ "narrator|Nacht-Zauber. Kostet 35 Kristalle.": "narrator-9b074a3347.mp3",
+ "narrator|Sonnen-Aura. Kostet 40 Kristalle.": "narrator-228d44f8bd.mp3",
+ "narrator|Mond-Aura. Kostet 40 Kristalle.": "narrator-5b4c7b37b4.mp3",
+ "narrator|Gold-Rahmen. Kostet 60 Kristalle.": "narrator-2cd7b72b68.mp3",
+ "narrator|Blüten-Rahmen. Kostet 60 Kristalle.": "narrator-38e855d0b7.mp3",
+ "narrator|Willkommen am Tauschplatz! Tipp etwas an, ich sage dir, was es kostet.": "narrator-f579e13375.mp3",
+ "narrator|Tipp noch einmal, dann tauschen wir!": "narrator-c686a9d1b6.mp3",
+ "narrator|Getauscht! Das steht dir gut.": "narrator-4182ca675b.mp3",
+ "narrator|Angelegt!": "narrator-5327c35fb1.mp3",
+ "narrator|Abgelegt. Der Wald-Look ist auch schön!": "narrator-931c43e59a.mp3",
+ "narrator|Dafür brauchst du noch ein paar Kristalle mehr. Sammle weiter!": "narrator-d05c1b5bac.mp3"
 }

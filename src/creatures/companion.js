@@ -10,8 +10,25 @@ import { camPos, camFocus } from '../engine/camera.js';
 import { G } from '../state.js';
 import { ANIMALS } from './data.js';
 import { prepModel, pickClip } from './models.js';
+import { glowSprite } from '../engine/textures.js';
+import { auraColor } from '../meta/cosmetics.js';
 
 let grp = null, mixer = null, loadedKey = null, loading = false;
+let aura = null, auraHex = null;
+
+/* Tauschplatz-Aura: Glühen um den Begleiter (an-/ablegbar) */
+function syncAura() {
+  const want = auraColor();
+  if (!grp) return;
+  if (want === auraHex) return;
+  if (aura) { grp.remove(aura); aura = null; }
+  if (want !== null) {
+    aura = glowSprite(want, 3.2);
+    aura.material.opacity = .5;
+    grp.add(aura);
+  }
+  auraHex = want;
+}
 
 function ensureCompanion() {
   if (!G.companion) return;
@@ -42,6 +59,7 @@ const dir = new THREE.Vector3(), right = new THREE.Vector3(), target = new THREE
 export function updateCompanion(dt, time) {
   ensureCompanion();
   if (!grp) return;
+  syncAura();
   if (mixer) mixer.update(dt);
   /* Position: rechts neben der Kamera, leicht voraus, unterhalb des
      Blicks – mit weichem Nachziehen (fühlt sich lebendig an) */

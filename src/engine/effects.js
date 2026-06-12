@@ -6,6 +6,7 @@ import { glowSprite } from './textures.js';
 import { rigPos } from './camera.js';
 import { addAnim } from './anims.js';
 import { sndCast } from '../audio/sfx.js';
+import { spellFx } from '../meta/cosmetics.js';
 
 let shards = [];
 
@@ -27,10 +28,11 @@ export function burst(pos, n, colors, glow = true) {
 }
 export function shootSpell(target, onHit) {
   sndCast();
+  const fx = spellFx(); /* Tauschplatz-Kosmetik: Zauber-Farbe */
   const orb = new THREE.Group();
   orb.add(new THREE.Mesh(new THREE.SphereGeometry(.3, 14, 12),
-    new THREE.MeshBasicMaterial({ color: 0xeafff2 })));
-  orb.add(glowSprite(0x46d68a, 2.4));
+    new THREE.MeshBasicMaterial({ color: fx.orb })));
+  orb.add(glowSprite(fx.glow, 2.4));
   const start = rigPos.clone().add(new THREE.Vector3(0, -1.4, 0));
   orb.position.copy(start); scene.add(orb);
   let t = 0, trailT = 0;
@@ -41,7 +43,7 @@ export function shootSpell(target, onHit) {
     trailT += dt;
     if (trailT > .03 && QUALITY[qTier].extras) {
       trailT = 0;
-      const tr = glowSprite(0x46d68a, 1.0);
+      const tr = glowSprite(fx.glow, 1.0);
       tr.position.copy(orb.position);
       tr.userData.v = new THREE.Vector3(0, 0, 0); tr.userData.life = .32;
       scene.add(tr); shards.push(tr);

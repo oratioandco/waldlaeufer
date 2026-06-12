@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { screenShake } from '../engine/camera.js';
 import { addAnim } from '../engine/anims.js';
 import { burst, shootSpell } from '../engine/effects.js';
+import { spellFx } from '../meta/cosmetics.js';
 import { G } from '../state.js';
 import { M, flashModel, tintRage, setMobHp, freeMobVisual, releaseFreedAnimal } from '../creatures/mob.js';
 import { stationDone } from '../world/stations.js';
@@ -28,7 +29,7 @@ export function castSpell() {
   const target = M.group.position.clone().add(new THREE.Vector3(0, M.group.userData.hoverY > 0 ? .3 : 1.4, 0));
   shootSpell(target, () => {
     sndBoom(); screenShake(crit ? 1.4 : 1);
-    burst(target, crit ? 30 : 20, [0xb6f7c2, 0x46d68a, 0xffffff, 0xffd34a]);
+    burst(target, crit ? 30 : 20, spellFx().burst); /* Zauber-Farbe vom Tauschplatz */
     {
       let t = 0;
       addAnim({ update(dt) {

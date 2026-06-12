@@ -13,7 +13,8 @@
 import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync, unlinkSync } from 'fs';
 import { createHash } from 'crypto';
 import { INTRO, BOSS_DEFEAT, BOSS_RAGE, COMPANION_CHEER, FLOOR_QUOTES, FLOOR_DONE, FLOOR_DONE_ALL, UI_LINES, bossIntroScene, companionJoinScene } from '../src/story/content.js';
-import { BEFEHL_VERBS, zauberePhrase, syllableRead, shieldWas, befehlOne, befehlTwo, befehlHelp, FIXED_GAMEPLAY } from '../src/learning/speech-lines.js';
+import { BEFEHL_VERBS, zauberePhrase, syllableRead, shieldWas, befehlOne, befehlTwo, befehlHelp, FIXED_GAMEPLAY, shopItemLine, SHOP_FIXED } from '../src/learning/speech-lines.js';
+import { SHOP_ITEMS } from '../src/meta/cosmetics.js';
 import { COLORS } from '../src/world/colors.js';
 
 /* Stimmen-Zuordnung (ElevenLabs Premade-Voices, alle Deutsch-fähig
@@ -99,6 +100,9 @@ COLORS.forEach(a => COLORS.forEach(b => {
   if (a.name !== b.name) add('word', befehlTwo(a.name, b.name));
 }));
 FIXED_GAMEPLAY.forEach(t => add('word', t));
+/* Tauschplatz: Erzähler liest jedes Stück + Preis vor (Audio-First) */
+SHOP_ITEMS.forEach(it => add('narrator', shopItemLine(it.name, it.price)));
+SHOP_FIXED.forEach(t => add('narrator', t));
 
 /* ---------- Generieren (inkrementell: vorhandene Clips bleiben) ---------- */
 mkdirSync(OUT, { recursive: true });

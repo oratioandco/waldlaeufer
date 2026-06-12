@@ -4,6 +4,9 @@ import { G } from '../state.js';
 import { SESSION, activeTier, tierMastery, TIER_NAMES, getCustomWords, setCustomWords } from '../learning/engine.js';
 import { getHistory, exportActiveProfile, importProfile } from '../meta/save.js';
 import WORDS from '../learning/words.json';
+import { SHOP_ITEMS, isOwned, isEquipped, buyItem, toggleEquip } from '../meta/cosmetics.js';
+import { shopItemLine, SHOP_FIXED } from '../learning/speech-lines.js';
+import { renderHUD } from './hud.js';
 import { BOSSES } from '../creatures/data.js';
 import { planFloor, advance } from '../world/stations.js';
 import { biomeFor } from '../world/biomes.js';
@@ -140,6 +143,61 @@ function saveCustomWordsUI() {
 }
 export function openSettings() { ovOn('setOv'); }
 
+/* ---------- 💎 Tauschplatz (Audio-First: alles wird vorgelesen) ----------
+   Erster Tipp auf ein neues Stück: Name + Preis werden gesprochen.
+   Zweiter Tipp: tauschen. Besessene Stücke: Tipp legt an/ab.
+   Rein kosmetisch – die Lern-Engine bleibt unberührt. */
+let shopArmed = null;
+function renderShop() {
+  document.getElementById('shopGems').innerHTML = `Deine Kristalle: 💎 <b>${G.gems}</b>`;
+  const grid = document.getElementById('shopGrid');
+  grid.innerHTML = '';
+  SHOP_ITEMS.forEach(it => {
+    const b = document.createElement('button');
+    b.className = 'shopItem'
+      + (isEquipped(it.id) ? ' equipped' : isOwned(it.id) ? ' owned' : '')
+      + (shopArmed === it.id ? ' armed' : '')
+      + (!isOwned(it.id) && G.gems < it.price ? ' locked' : '');
+    b.innerHTML = `<span class="si">${it.icon}</span><span class="sn">${it.name}</span>`
+      + (isOwned(it.id)
+        ? `<span class="sp">${isEquipped(it.id) ? '✓ angelegt' : 'anlegen'}</span>`
+        : `<span class="sp">💎 ${it.price}${shopArmed === it.id ? ' · nochmal tippen!' : ''}</span>`);
+    b.addEventListener('click', () => tapShopItem(it));
+    grid.appendChild(b);
+  });
+}
+function tapShopItem(it) {
+  sndTap();
+  if (isOwned(it.id)) {
+    toggleEquip(it.id);
+    sayStorySeq([{ voice: 'narrator', text: isEquipped(it.id) ? SHOP_FIXED[3] : SHOP_FIXED[4] }]);
+    saveActive(); shopArmed = null; renderShop(); return;
+  }
+  if (G.gems < it.price) {
+    sayStorySeq([
+      { voice: 'narrator', text: shopItemLine(it.name, it.price) },
+      { voice: 'narrator', text: SHOP_FIXED[5] }
+    ]);
+    shopArmed = null; renderShop(); return;
+  }
+  if (shopArmed !== it.id) {
+    shopArmed = it.id;
+    sayStorySeq([
+      { voice: 'narrator', text: shopItemLine(it.name, it.price) },
+      { voice: 'narrator', text: SHOP_FIXED[1] }
+    ]);
+    renderShop(); return;
+  }
+  buyItem(it.id);
+  sndGem();
+  sayStorySeq([{ voice: 'narrator', text: SHOP_FIXED[2] }]);
+  renderHUD(); saveActive(); shopArmed = null; renderShop();
+}
+function openShop() {
+  shopArmed = null; renderShop(); ovOn('shopOv');
+  sayStorySeq([{ voice: 'narrator', text: SHOP_FIXED[0] }]);
+}
+
 /* ---------- Gebiet geschafft ---------- */
 export function showFloorClear() {
   sndWin();
@@ -187,6 +245,8 @@ export function wireOverlays() {
   document.getElementById('campLeaveBtn').addEventListener('click', () => {
     leaveCamp(nextFloor);
   });
+  document.getElementById('shopBtn').addEventListener('click', openShop);
+  document.getElementById('shopCloseBtn').addEventListener('click', () => ovOff('shopOv'));
   document.getElementById('setDoneBtn').addEventListener('click', () => ovOff('setOv'));
   document.getElementById('settingsBtn').addEventListener('click', openSettings);
   document.getElementById('pauseBtn').addEventListener('click', openPause);

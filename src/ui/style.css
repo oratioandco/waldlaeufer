@@ -227,3 +227,25 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;heigh
 
 /* Deaktivierte Panel-Buttons (z.B. Wortlisten auf dem Startbildschirm) */
 button:disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.6); }
+
+/* ---------- 💎 Tauschplatz ---------- */
+#shopCard { max-width: 560px; }
+#shopGrid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+  gap: 10px;
+}
+.shopItem {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 12px 6px 10px; border-radius: 16px; border: 2px solid #ffffff22;
+  background: #ffffff10; color: #fff; cursor: pointer;
+  font: inherit; transition: transform .12s, border-color .12s;
+}
+.shopItem:active { transform: scale(.95); }
+.shopItem .si { font-size: 2em; }
+.shopItem .sn { font-size: .82em; font-weight: 700; }
+.shopItem .sp { font-size: .78em; opacity: .85; }
+.shopItem.armed { border-color: #ffd34a; background: #ffd34a22; }
+.shopItem.owned { border-color: #9fe86f55; }
+.shopItem.equipped { border-color: #9fe86f; background: #9fe86f1d; }
+.shopItem.locked { opacity: .55; }
+#campBar #shopBtn { margin-right: 8px; }

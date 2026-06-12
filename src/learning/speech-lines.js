@@ -25,3 +25,14 @@ export const FIXED_GAMEPLAY = [
   'Richtig! Du hast den Angriff abgewehrt.',
   'Richtig! Die Blumen stärken deine Wortmagie.'
 ];
+
+/* ---------- Tauschplatz (Audio-First: jedes Stück wird vorgelesen) ---------- */
+export const shopItemLine = (name, price) => `${name}. Kostet ${price} Kristalle.`;
+export const SHOP_FIXED = [
+  'Willkommen am Tauschplatz! Tipp etwas an, ich sage dir, was es kostet.',
+  'Tipp noch einmal, dann tauschen wir!',
+  'Getauscht! Das steht dir gut.',
+  'Angelegt!',
+  'Abgelegt. Der Wald-Look ist auch schön!',
+  'Dafür brauchst du noch ein paar Kristalle mehr. Sammle weiter!'
+];

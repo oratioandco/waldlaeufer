@@ -6,6 +6,7 @@
 import * as THREE from 'three';
 import { scene } from '../engine/renderer.js';
 import { camPos } from '../engine/camera.js';
+import { cardFrame } from '../meta/cosmetics.js';
 
 export let cards = [];
 
@@ -32,7 +33,7 @@ function cardTexture(text) {
   grd.addColorStop(0, '#fffdf4'); grd.addColorStop(.7, '#fbf2dc'); grd.addColorStop(1, '#f1e2bd');
   rr(26, 24, 486, 352, 64); ctx.fillStyle = grd; ctx.fill();
   /* warmer Holzrand + inneres Creme-Highlight */
-  ctx.lineWidth = 13; ctx.strokeStyle = '#a4774a'; rr(26, 24, 486, 352, 64); ctx.stroke();
+  ctx.lineWidth = 13; ctx.strokeStyle = cardFrame(); rr(26, 24, 486, 352, 64); ctx.stroke(); /* Rahmen vom Tauschplatz – Lesefläche bleibt weiß */
   ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(255,250,235,.85)';
   rr(36, 34, 476, 342, 54); ctx.stroke();
   /* Silbe: Verdana, dunkelbraun, erhöhter Buchstabenabstand */

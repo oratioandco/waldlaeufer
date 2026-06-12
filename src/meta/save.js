@@ -99,6 +99,7 @@ function collectAll() {
     floor: G.floor, gems: G.gems, trophies: G.trophies, kills: G.kills,
     companion: G.companion, seenIntro: G.seenIntro,
     freedSpecies: G.freedSpecies,
+    cosmetics: G.cosmetics,
     learning: serializeLearning()
   };
 }
@@ -110,5 +111,6 @@ function restoreAll(d) {
   G.companion = d.companion || null;
   G.seenIntro = !!d.seenIntro;
   G.freedSpecies = d.freedSpecies || {};
+  G.cosmetics = d.cosmetics || null;
   restoreLearning(d.learning);
 }
