@@ -1,5 +1,9 @@
-/* ---------- Vegetation & Dekor (Low-Poly, prozedural deformiert) ---------- */
+/* ---------- Vegetation & Dekor ----------
+   Professionelle CC0-Assets (Quaternius Ultimate Stylized Nature,
+   konvertiert nach GLB) je Biom; prozedurale Formen nur noch als
+   Fallback, solange die Modelle laden. ---------- */
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { scene } from '../engine/renderer.js';
 import { glowSprite, blobShadow, glowTex } from '../engine/textures.js';
 import { camPos } from '../engine/camera.js';
@@ -8,6 +12,70 @@ import { hash3 } from './terrain.js';
 export { COLORS } from './colors.js';
 import { COLORS } from './colors.js';
 import { toonMat } from '../engine/materials.js';
+
+/* ---------- Natur-Asset-Bibliothek ---------- */
+const NATURE = {};
+const NATURE_KEYS = [
+  'NormalTree_1', 'NormalTree_2', 'BirchTree_1', 'BirchTree_2',
+  'MapleTree_1', 'MapleTree_2', 'PineTree_1', 'PineTree_2',
+  'DeadTree_1', 'DeadTree_2', 'Bush', 'Bush_Large', 'Grass_Large',
+  'Rock_1', 'Rock_2', 'Rock_3', 'Flower_1_Clump', 'Flower_3_Clump'
+];
+/* Grundskalierung je Modellfamilie (nach Sichtung feinjustieren) */
+const NATURE_SCALE = { Tree: 1, Dead: 1, Bush: 1, Grass: 1, Rock: 1, Flower: 1 };
+function familyScale(key) {
+  if (key.includes('Rock')) return NATURE_SCALE.Rock;
+  if (key.includes('Bush')) return NATURE_SCALE.Bush;
+  if (key.includes('Grass')) return NATURE_SCALE.Grass;
+  if (key.includes('Flower')) return NATURE_SCALE.Flower;
+  if (key.includes('Dead')) return NATURE_SCALE.Dead;
+  return NATURE_SCALE.Tree;
+}
+export function loadNature() {
+  const loader = new GLTFLoader();
+  return Promise.all(NATURE_KEYS.map(k => new Promise(res => {
+    loader.load(`/assets/models/nature/${k}.glb`, g => {
+      g.scene.traverse(o => { if (o.isMesh) o.castShadow = true; });
+      NATURE[k] = g.scene;
+      res();
+    }, undefined, () => res()); /* Fehler → prozeduraler Fallback bleibt */
+  })));
+}
+/* Die GLBs kommen ohne Texturen, aber mit sprechenden Material-Namen
+   (BirchTree_Bark, _Leaves, Rock …). Wir mappen Namen → Toon-Farben,
+   LAUB bekommt die Biomfarbe → volle Stimmungs-Kontrolle. Gecacht. */
+const matCache = new Map();
+function natureMaterial(matName, biome) {
+  const L = biome.leaf;
+  const key = matName + '|' + biome.name + '|' + (biome.assetTint || '');
+  if (matCache.has(key)) return matCache.get(key);
+  let c;
+  if (matName === 'BirchTree_Bark') c = new THREE.Color(0xece8dc);
+  else if (matName.includes('Bark')) c = new THREE.Color(biome.trunk);
+  else if (matName.includes('Leaves')) c = new THREE.Color().setHSL(L.h, L.s, L.l);
+  else if (matName === 'Bush_Leaves') c = new THREE.Color().setHSL(L.h + .02, L.s * .9, Math.max(.14, L.l - .05));
+  else if (matName === 'Grass') c = new THREE.Color().setHSL(L.h + .03, L.s * .8, L.l + .06);
+  else if (matName === 'Rock') c = new THREE.Color(0x9aa3a8);
+  else if (matName === 'Flowers') c = new THREE.Color(0xe06a9a);
+  else c = new THREE.Color(0x8a8a8a);
+  if (biome.assetTint) c.multiply(new THREE.Color(biome.assetTint));
+  const m = toonMat({ color: c });
+  matCache.set(key, m);
+  return m;
+}
+function natureClone(key, biome) {
+  const src = NATURE[key];
+  if (!src) return null;
+  const grp = src.clone(true);
+  grp.traverse(o => {
+    if (!o.isMesh) return;
+    o.material = natureMaterial(o.material.name || '', biome);
+  });
+  return grp;
+}
+function pickAsset(list, seed, salt) {
+  return list[Math.floor(hash3(seed, salt, 17) * list.length) % list.length];
+}
 
 /* Dekor, das auf NIEDRIG ausgeblendet wird */
 export const extraDecor = [];
@@ -30,16 +98,28 @@ function castAll(grp) { grp.traverse(o => { if (o.isMesh) o.castShadow = true; }
 const DEFAULT_BIOME = { leaf: { h: .30, hVar: .08, s: .55, l: .38 }, pine: .4, trunk: 0x6e4b2a };
 
 export function makeTree(seed, biome = DEFAULT_BIOME) {
+  /* echtes Asset, wenn geladen + Biom konfiguriert */
+  if (biome.assets) {
+    const key = pickAsset(biome.assets.trees, seed, 1);
+    const m = natureClone(key, biome);
+    if (m) {
+      const g = new THREE.Group();
+      g.add(m);
+      g.scale.setScalar((0.85 + hash3(seed, 12, 12) * 0.7) * familyScale(key));
+      return g;
+    }
+  }
   const grp = new THREE.Group();
   const pine = hash3(seed, 1, 1) < biome.pine;
-  const trunkH = pine ? 1.7 : 1.5 + hash3(seed, 2, 2) * 1.3;
-  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(.17, .3, trunkH, 7),
+  /* Knuddel-Proportionen: dickere Stämme, gedrungene Silhouette */
+  const trunkH = pine ? 1.6 : 1.3 + hash3(seed, 2, 2) * 1.1;
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(.24, .42, trunkH, 8),
     toonMat({ color: biome.trunk }));
   trunk.position.y = trunkH / 2; grp.add(trunk);
   if (biome.birch && !pine) {
     /* Birken: dunkle Querbänder auf hellem Stamm */
     for (let k = 0; k < 3; k++) {
-      const band = new THREE.Mesh(new THREE.CylinderGeometry(.185, .185, .09, 7),
+      const band = new THREE.Mesh(new THREE.CylinderGeometry(.30, .30, .1, 8),
         toonMat({ color: 0x3a3a34 }));
       band.position.y = trunkH * (.25 + k * .27);
       grp.add(band);
@@ -58,9 +138,10 @@ export function makeTree(seed, biome = DEFAULT_BIOME) {
     const c = new THREE.Color().setHSL(L.h + hash3(seed, 4, 4) * L.hVar, L.s, L.l + hash3(seed, 5, 5) * .1);
     const n = 2 + Math.floor(hash3(seed, 6, 6) * 2);
     for (let k = 0; k < n; k++) {
-      const ball = new THREE.Mesh(deformGeo(new THREE.IcosahedronGeometry(1.2 + hash3(seed, k, 7) * .8, 2), .32),
+      /* fettere, rundere Kronen, tiefer angesetzt (gedrungen-knuddelig) */
+      const ball = new THREE.Mesh(deformGeo(new THREE.IcosahedronGeometry(1.45 + hash3(seed, k, 7) * .85, 2), .24),
         toonMat({ color: c.clone().offsetHSL(0, 0, (hash3(seed, k, 8) - .5) * .08) }));
-      ball.position.set((hash3(seed, k, 9) - .5) * 1.5, trunkH + .9 + hash3(seed, k, 10) * 1.3, (hash3(seed, k, 11) - .5) * 1.5);
+      ball.position.set((hash3(seed, k, 9) - .5) * 1.4, trunkH + .65 + hash3(seed, k, 10) * 1.1, (hash3(seed, k, 11) - .5) * 1.4);
       grp.add(ball);
     }
   }
@@ -69,6 +150,16 @@ export function makeTree(seed, biome = DEFAULT_BIOME) {
   return grp;
 }
 export function makeBush(seed, biome = DEFAULT_BIOME) {
+  if (biome.assets) {
+    const key = pickAsset(biome.assets.bushes, seed, 2);
+    const m = natureClone(key, biome);
+    if (m) {
+      const g = new THREE.Group();
+      g.add(m);
+      g.scale.setScalar((0.8 + hash3(seed, 9, 9) * 0.6) * familyScale(key));
+      return g;
+    }
+  }
   const grp = new THREE.Group();
   const L = biome.leaf;
   const c = new THREE.Color().setHSL(L.h + .02, L.s * .9, Math.max(.14, L.l - .06) + hash3(seed, 1, 2) * .1);
@@ -77,7 +168,17 @@ export function makeBush(seed, biome = DEFAULT_BIOME) {
   b.position.y = .55; b.castShadow = true; grp.add(b);
   return grp;
 }
-export function makeStone(seed) {
+export function makeStone(seed, biome) {
+  if (biome && biome.assets) {
+    const key = pickAsset(biome.assets.rocks, seed, 3);
+    const m = natureClone(key, biome);
+    if (m) {
+      const g = new THREE.Group();
+      g.add(m);
+      g.scale.setScalar((0.6 + hash3(seed, 5, 5) * 0.8) * familyScale(key));
+      return g;
+    }
+  }
   const m = new THREE.Mesh(deformGeo(new THREE.IcosahedronGeometry(.4 + hash3(seed, 1, 1) * .7, 1), .6),
     toonMat({ color: 0x9aa3a8 }));
   m.position.y = .25; m.castShadow = true;

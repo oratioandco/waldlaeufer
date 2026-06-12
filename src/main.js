@@ -14,8 +14,8 @@ import { buildGround } from './world/terrain.js';
 import { buildSky, updateSky } from './world/sky.js';
 import { updateAtmosphere } from './world/atmosphere.js';
 import { buildGrass, updateGrass } from './world/grass.js';
-import { buildPollen, updatePollen } from './world/vegetation.js';
-import { planFloor, advance, clearWorldGroups, updateWater } from './world/stations.js';
+import { buildPollen, updatePollen, loadNature } from './world/vegetation.js';
+import { planFloor, advance, clearWorldGroups, resetPath, updateWater } from './world/stations.js';
 import { biomeFor } from './world/biomes.js';
 import { loadModels } from './creatures/models.js';
 import { updateMob, showKingSilhouette, removeKingSilhouette } from './creatures/mob.js';
@@ -157,9 +157,10 @@ wireOverlays();
 initScenes();
 loadVoiceManifest();
 loadSfx();
-/* Lebendiger Startbildschirm: Welt sofort aufbauen, Kamera treibt */
+/* Lebendiger Startbildschirm: Welt sofort aufbauen, Kamera treibt.
+   Natur-Assets zuerst laden, damit schon die Kulisse echt aussieht. */
 initThree();
-planFloor();
+loadNature().then(() => planFloor());
 /* Titelsong + gesprochene Begrüßung ab der ersten Berührung des
    Startbildschirms (vorher blockiert der Browser Autoplay).
    Audio-First: niemand muss den Startbildschirm LESEN können. */
@@ -186,6 +187,7 @@ function startGame() {
   document.getElementById('floorTag').textContent = 'GEBIET ' + G.floor + ' · ' + biomeFor(G.floor).name;
   rigPos.set(0, 3.7, 14); rigFocus.set(0, 2.2, 0);
   camPos.copy(rigPos); camFocus.copy(rigFocus);
+  resetPath(); /* Titel-Kulisse hat den Pfad verschoben */
   planFloor();
   const begin = () => {
     announce('GEBIET ' + G.floor, 1200);

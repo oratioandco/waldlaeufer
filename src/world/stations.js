@@ -80,6 +80,13 @@ export function updateWater(time) {
 
 export function lateral(dir) { return new THREE.Vector3(-dir.z, 0, dir.x); }
 
+/* Spielstart: Route beginnt wieder direkt vor der Kamera (die
+   Titel-Kulisse hat pathEnd sonst schon weit weggeschoben) */
+export function resetPath() {
+  pathHeading = Math.PI;
+  pathEnd = new THREE.Vector3(0, 0, 6);
+}
+
 export function planFloor() {
   /* Unbesuchte Stationen des Vorgebiets entsorgen – sie sind nie in
      worldGroups gelandet und blieben sonst als Geister-Dekor stehen */
@@ -171,7 +178,7 @@ function buildSegment(st, from) {
       const bushT = treeT + .17 * biome.bushDensity;
       if (r1 < treeT) { obj = makeTree(seed + d * 3 + side, biome); type = 'tree'; }
       else if (r1 < bushT) { obj = makeBush(seed + d * 5 + side, biome); type = 'bush'; }
-      else if (r1 < bushT + .13) { obj = makeStone(seed + d * 7 + side); type = 'stone'; }
+      else if (r1 < bushT + .13) { obj = makeStone(seed + d * 7 + side, biome); type = 'stone'; }
       else { obj = makeFlowerPatch(seed + d * 9 + side); type = 'flower'; }
       if (!placeOK(p, type)) return; /* SICHTKORRIDOR */
       const isExtra = hash3(seed, d + 4, side) < .4;
@@ -193,7 +200,7 @@ function buildStation(st) {
     water.rotation.z = Math.atan2(st.dir.x, st.dir.z);
     st.group.add(water);
     for (let k = 0; k < 6; k++) {
-      const s = makeStone(seed + k);
+      const s = makeStone(seed + k, biome);
       const side = k % 2 ? 1 : -1;
       const sp = st.pos.clone()
         .addScaledVector(lat, side * (5 + hash3(seed, k, 1) * 6))

@@ -7,6 +7,7 @@
 export const BIOMES = [
   { /* 1 – Frühlingswald: der vertraute helle Start */
     name: 'WÄCHTERLICHTUNG',
+    assets: { trees: ['NormalTree_1', 'NormalTree_2', 'PineTree_1'], bushes: ['Bush', 'Bush_Large'], rocks: ['Rock_1', 'Rock_2'] },
     grassA: [.18, .40, .14], grassB: [.49, .76, .30],
     ground: ['#5c9c44', '#549441', '#6cae50', '#7fbe5d', '#8d9a4c'],
     path: 0xc9b481,
@@ -17,6 +18,7 @@ export const BIOMES = [
   },
   { /* 2 – Birkenhain: licht, luftig, weiße Stämme */
     name: 'BIRKENHAIN',
+    assets: { trees: ['BirchTree_1', 'BirchTree_2'], bushes: ['Bush'], rocks: ['Rock_1', 'Rock_3'] },
     grassA: [.25, .42, .12], grassB: [.62, .80, .28],
     ground: ['#6da84a', '#62a046', '#7cb656', '#90c468', '#a8b65a'],
     path: 0xd6c594,
@@ -27,6 +29,7 @@ export const BIOMES = [
   },
   { /* 3 – Goldener Herbstwald: orange, rot, warm */
     name: 'HERBSTWALD',
+    assets: { trees: ['MapleTree_1', 'MapleTree_2'], bushes: ['Bush_Large'], rocks: ['Rock_2', 'Rock_3'] },
     grassA: [.34, .28, .08], grassB: [.72, .58, .20],
     ground: ['#9a7a3a', '#8d7034', '#ab8842', '#bd9a50', '#a06a38'],
     path: 0xb89a6e,
@@ -38,6 +41,7 @@ export const BIOMES = [
   },
   { /* 4 – Nebelmoor: sumpfig, dunstig, Irrlichter */
     name: 'NEBELMOOR',
+    assets: { trees: ['DeadTree_1', 'PineTree_2'], bushes: ['Bush_Large', 'Grass_Large'], rocks: ['Rock_1', 'Rock_2'] },
     grassA: [.07, .18, .09], grassB: [.20, .36, .18],
     ground: ['#2e4a2c', '#2a452a', '#365434', '#3e6038', '#34502e'],
     path: 0x8a8268,
@@ -49,6 +53,7 @@ export const BIOMES = [
   },
   { /* 5 – Schratwald: tiefer Nadelwald, moosige Felsen */
     name: 'SCHRATWALD',
+    assets: { trees: ['PineTree_1', 'PineTree_2'], bushes: ['Bush'], rocks: ['Rock_2', 'Rock_3'] },
     grassA: [.05, .14, .07], grassB: [.15, .30, .14],
     ground: ['#2c4630', '#28402c', '#324e36', '#3a5a3e', '#2e482e'],
     path: 0x9a8a72,
@@ -60,6 +65,8 @@ export const BIOMES = [
   },
   { /* 6 – Schattenreich: der verdorbene Hof des Königs */
     name: 'SCHATTENREICH',
+    assets: { trees: ['DeadTree_1', 'DeadTree_2'], bushes: ['Bush'], rocks: ['Rock_1', 'Rock_3'] },
+    assetTint: 0x9a7fd4,
     grassA: [.06, .04, .11], grassB: [.20, .13, .30],
     ground: ['#322844', '#2e2440', '#3a2e4e', '#443858', '#2a2238'],
     path: 0x6a5a7e,

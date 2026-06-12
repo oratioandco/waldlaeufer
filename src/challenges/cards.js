@@ -9,26 +9,41 @@ import { camPos } from '../engine/camera.js';
 
 export let cards = [];
 
+/* Knuddel-Look: doppelte Auflösung (Retina-scharf), runde Ecken,
+   warmer Holzrand mit Creme-Highlight, weicher Schatten.
+   Verdana + Hair-Spaces bleiben (Therapie: Crowding-Reduktion). */
 function cardTexture(text) {
-  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 192;
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 384;
   const ctx = cv.getContext('2d');
-  const r = 26;
-  ctx.beginPath();
-  ctx.moveTo(r, 10); ctx.arcTo(246, 10, 246, 182, r); ctx.arcTo(246, 182, 10, 182, r);
-  ctx.arcTo(10, 182, 10, 10, r); ctx.arcTo(10, 10, 246, 10, r); ctx.closePath();
-  const grd = ctx.createLinearGradient(0, 0, 0, 192);
-  grd.addColorStop(0, '#fdf6e3'); grd.addColorStop(1, '#ecd9ad');
-  ctx.fillStyle = grd; ctx.fill();
-  ctx.lineWidth = 8; ctx.strokeStyle = '#8a5f33'; ctx.stroke();
-  ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(70,214,138,.9)';
-  ctx.shadowColor = '#46d68a'; ctx.shadowBlur = 12; ctx.stroke();
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = '#2b1c0c';
-  let size = text.length <= 3 ? 86 : (text.length <= 5 ? 64 : (text.length <= 7 ? 48 : 38));
+  const rr = (x0, y0, x1, y1, r) => {
+    ctx.beginPath();
+    ctx.moveTo(x0 + r, y0);
+    ctx.arcTo(x1, y0, x1, y1, r); ctx.arcTo(x1, y1, x0, y1, r);
+    ctx.arcTo(x0, y1, x0, y0, r); ctx.arcTo(x0, y0, x1, y0, r);
+    ctx.closePath();
+  };
+  /* weicher Schatten unter der Karte (Tiefe) */
+  ctx.save();
+  ctx.shadowColor = 'rgba(40,25,10,.45)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 10;
+  rr(26, 24, 486, 352, 64); ctx.fillStyle = '#fff'; ctx.fill();
+  ctx.restore();
+  /* Karten-Fläche: cremiger Verlauf */
+  const grd = ctx.createLinearGradient(0, 24, 0, 352);
+  grd.addColorStop(0, '#fffdf4'); grd.addColorStop(.7, '#fbf2dc'); grd.addColorStop(1, '#f1e2bd');
+  rr(26, 24, 486, 352, 64); ctx.fillStyle = grd; ctx.fill();
+  /* warmer Holzrand + inneres Creme-Highlight */
+  ctx.lineWidth = 13; ctx.strokeStyle = '#a4774a'; rr(26, 24, 486, 352, 64); ctx.stroke();
+  ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(255,250,235,.85)';
+  rr(36, 34, 476, 342, 54); ctx.stroke();
+  /* Silbe: Verdana, dunkelbraun, erhöhter Buchstabenabstand */
+  ctx.fillStyle = '#3a2410';
+  let size = text.length <= 3 ? 168 : (text.length <= 5 ? 126 : (text.length <= 7 ? 94 : 74));
   ctx.font = `bold ${size}px Verdana,sans-serif`;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(text.split('').join('\u200a\u200a') /* Hair-Spaces: erhöhter Buchstabenabstand */, 128, 100);
-  return new THREE.CanvasTexture(cv);
+  ctx.fillText(text.split('').join('\u200a\u200a') /* Hair-Spaces */, 256, 192);
+  const tx = new THREE.CanvasTexture(cv);
+  tx.anisotropy = 4;
+  return tx;
 }
 export function makeCard(text, correctIndex) {
   const m = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 1.42),
