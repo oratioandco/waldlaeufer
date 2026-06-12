@@ -4,7 +4,7 @@
    ===================================================================== */
 import { renderer, sun, setupRT } from './renderer.js';
 import { grassMesh, grassPlaced } from '../world/grass.js';
-import { pollenPts, extraDecor } from '../world/vegetation.js';
+import { pollenPts, extraDecor, setForestQuality } from '../world/vegetation.js';
 
 export const QUALITY = [
   { name: 'NIEDRIG', prMul: .8,  shadow: 0,    bloom: false, grass: 900,  extras: false, pollen: false },
@@ -35,6 +35,7 @@ export function applyQuality() {
   if (grassMesh) grassMesh.count = Math.min(grassPlaced(), q.grass);
   if (pollenPts) pollenPts.visible = q.pollen;
   extraDecor.forEach(o => o.visible = q.extras);
+  setForestQuality(q.extras);
   document.querySelectorAll('.chip').forEach(c => {
     c.classList.toggle('on', (qAuto && c.dataset.q === 'auto') || (!qAuto && c.dataset.q == String(qTier)));
   });

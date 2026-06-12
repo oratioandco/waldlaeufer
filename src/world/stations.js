@@ -11,7 +11,7 @@ import { glowSprite } from '../engine/textures.js';
 import { G } from '../state.js';
 import { hash3, hillH, distToClear, setClearArea, groundCenter, reshapeGround, setGroundPalette } from './terrain.js';
 import { scatterGrass, setGrassColors } from './grass.js';
-import { makeTree, makeBush, makeStone, makeFlowerPatch, makeBigFlower, extraDecor, COLORS, setParticleStyle } from './vegetation.js';
+import { makeTree, makeBush, makeStone, makeFlowerPatch, makeBigFlower, extraDecor, COLORS, setParticleStyle, pickTreeKey, buildForest } from './vegetation.js';
 import { biomeFor } from './biomes.js';
 import { spawnMob } from '../creatures/mob.js';
 import { BOSSES } from '../creatures/data.js';
@@ -36,6 +36,7 @@ let worldGroups = [];
 let biome = biomeFor(1);
 let waterMats = [];
 let lastSegOfFloor = null; /* fürs Gras: Anschluss-Stück des Vorgebiets */
+let forestNearAcc = [], forestFarAcc = [];
 
 /* Lebendiges Bach-Wasser: FLIESSENDE Wellen (scrollend), sanfte
    Vertex-Dünung, weißer Uferschaum – weiterhin iPad-billig */
@@ -137,7 +138,9 @@ export function planFloor() {
   scatterGrass(lastSegOfFloor ? [lastSegOfFloor, ...newSegs] : newSegs);
   lastSegOfFloor = newSegs[newSegs.length - 1];
   applyQuality();
+  forestNearAcc = []; forestFarAcc = [];
   G.stations.forEach(st => { buildSegment(st, st.from); buildStation(st); });
+  buildForest(forestNearAcc, forestFarAcc, biome, QUALITY[qTier].extras);
   rebuildFloorFx(newSegs, G.stations);
   setAtmosphere(0, G.floor); /* neues Gebiet beginnt am Morgen */
   renderDots();
@@ -149,6 +152,14 @@ function decorY(x, z) { return hillH(x, z); }
 function placeOK(p, type) {
   const need = type === 'tree' ? 9 : (type === 'bush' ? 5.5 : 4.5);
   return distToClear(p.x, p.z) >= need;
+}
+
+function freezeStatic(obj, shadows) {
+  obj.traverse(o => {
+    if (o.isMesh) o.castShadow = shadows;
+    o.updateMatrix();
+    o.matrixAutoUpdate = false;
+  });
 }
 
 function buildSegment(st, from) {
@@ -188,11 +199,53 @@ function buildSegment(st, from) {
       st.group.add(obj);
     });
   }
+
+  /* TIEFENSTAFFELUNG: hinter der ersten Baumreihe steht WALD,
+     nicht leerer Boden. Als INSTANZEN gesammelt (Draw Calls!):
+     Reihe 2 (15-30m) immer, Reihe 3 (30-48m) ab Qualitaet MITTEL. */
+  const E = new THREE.Euler(), Q = new THREE.Quaternion(), S = new THREE.Vector3(), P = new THREE.Vector3();
+  const place = (arr, pos, rotY, sc, seedK) => {
+    const key = pickTreeKey(seedK, biome);
+    if (!key) return;
+    E.set(0, rotY, 0); Q.setFromEuler(E); S.set(sc, sc, sc); P.set(pos.x, decorY(pos.x, pos.z), pos.z);
+    arr.push({ key, matrix: new THREE.Matrix4().compose(P.clone(), Q.clone(), S.clone()) });
+  };
+  for (let d = 1; d < len - 1; d += 2.0) {
+    [-1, 1].forEach(side => {
+      const r2 = hash3(seed, d * 1.7 + 40, side);
+      if (r2 < .32) return;
+      const off = 15 + hash3(seed, d + 41, side) * 15;
+      const p = from.clone().addScaledVector(dir, d).addScaledVector(lat, side * off);
+      place(forestNearAcc, p, hash3(seed, d, side * 5) * 6.28, .95 + hash3(seed, d, side + 9) * .5, seed + d * 13 + side * 7);
+    });
+    [-1, 1].forEach(side => {
+      const r3 = hash3(seed, d * 2.3 + 80, side);
+      if (r3 < .35) return;
+      const off = 30 + hash3(seed, d + 81, side) * 18;
+      const p = from.clone().addScaledVector(dir, d).addScaledVector(lat, side * off);
+      place(forestFarAcc, p, hash3(seed, d, side * 6) * 6.28, 1.25 + hash3(seed, d, side + 13) * .55, seed + d * 19 + side * 11);
+    });
+  }
 }
 
 function buildStation(st) {
   const lat = lateral(st.dir);
   const seed = Math.floor(st.pos.x * 3 + st.pos.z * 5);
+  if (st.type === 'MOB') {
+    /* Baum-Faecher HINTER der Begegnung: die Szene bekommt einen Raum */
+    for (let i = 0; i < 5; i++) {
+      const a = (-.5 + i / 4) * 1.5;
+      const tp = st.pos.clone()
+        .addScaledVector(st.dir, Math.cos(a) * 12)
+        .addScaledVector(lat, Math.sin(a) * 12);
+      const tr = makeTree(seed + i * 17 + 5, biome);
+      tr.scale.multiplyScalar(1.15 + hash3(seed, i, 2) * .4);
+      tr.position.set(tp.x, decorY(tp.x, tp.z), tp.z);
+      tr.rotation.y = hash3(seed, i, 3) * 6.28;
+      freezeStatic(tr, true);
+      st.group.add(tr);
+    }
+  }
   if (st.type === 'TOR') {
     const water = new THREE.Mesh(new THREE.PlaneGeometry(26, 4.6, 32, 6), makeWaterMat());
     water.rotation.x = -Math.PI / 2;
@@ -302,7 +355,7 @@ export function advance() {
   const targetFocus = st.pos.clone(); targetFocus.y = 2.2;
   const fromRig = rigPos.clone(), fromFocus = rigFocus.clone();
   const dist = fromRig.distanceTo(targetRig);
-  const dur = Math.max(1.6, dist / 7);
+  const dur = Math.max(1.3, dist / 9);
   G.state = 'travel'; G.busy = true;
   document.getElementById('mobBar').classList.remove('on');
   let t = 0, stepT = 0;

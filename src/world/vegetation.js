@@ -73,6 +73,43 @@ function natureClone(key, biome) {
   });
   return grp;
 }
+/* ---------- INSTANZ-WALD (Performance!) ----------
+   Hintergrund-Baumreihen als InstancedMesh pro (Modell-Mesh, Biom):
+   hunderte Baeume = eine Handvoll Draw Calls. */
+let forestNear = [], forestFar = [];
+export function pickTreeKey(seed, biome) {
+  return biome.assets ? pickAsset(biome.assets.trees, seed, 1) : null;
+}
+function clearList(list) { list.forEach(m => scene.remove(m)); list.length = 0; }
+function buildInstanced(placements, biome, out) {
+  const byKey = {};
+  placements.forEach(pl => (byKey[pl.key] = byKey[pl.key] || []).push(pl.matrix));
+  const tmp = new THREE.Matrix4();
+  for (const [key, mats] of Object.entries(byKey)) {
+    const src = NATURE[key];
+    if (!src) continue;
+    src.updateMatrixWorld(true);
+    src.traverse(o => {
+      if (!o.isMesh) return;
+      const im = new THREE.InstancedMesh(o.geometry, natureMaterial(o.material.name || '', biome), mats.length);
+      mats.forEach((m, i) => { tmp.multiplyMatrices(m, o.matrixWorld); im.setMatrixAt(i, tmp); });
+      im.instanceMatrix.needsUpdate = true;
+      im.frustumCulled = false;
+      scene.add(im);
+      out.push(im);
+    });
+  }
+}
+export function buildForest(nearPlacements, farPlacements, biome, farVisible) {
+  clearList(forestNear); clearList(forestFar);
+  buildInstanced(nearPlacements, biome, forestNear);
+  buildInstanced(farPlacements, biome, forestFar);
+  forestFar.forEach(m => m.visible = farVisible);
+}
+export function setForestQuality(extras) {
+  forestFar.forEach(m => m.visible = extras);
+}
+
 function pickAsset(list, seed, salt) {
   return list[Math.floor(hash3(seed, salt, 17) * list.length) % list.length];
 }

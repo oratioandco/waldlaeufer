@@ -183,6 +183,9 @@ function startGame() {
   document.getElementById('startOv').classList.remove('on');
   document.getElementById('hud').classList.add('on');
   initThree();
+  /* Schnell-Test: ?gebiet=3 springt direkt in ein Biom */
+  const wanted = +(new URLSearchParams(location.search).get('gebiet') || 0);
+  if (wanted > 0) G.floor = wanted;
   renderHearts(); renderHUD();
   document.getElementById('floorTag').textContent = 'GEBIET ' + G.floor + ' · ' + biomeFor(G.floor).name;
   rigPos.set(0, 3.7, 14); rigFocus.set(0, 2.2, 0);
