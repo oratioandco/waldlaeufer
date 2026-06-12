@@ -36,10 +36,22 @@ Diese Prinzipien sind das Fundament. Kein Feature darf sie verwässern.
    Fehler verstanden).
 6. **TTS de-DE** koppelt Laut- und Schriftbild; 📯-Button wiederholt jederzeit.
 7. **~10 Wörter pro Gebiet**, Checkpoint = natürliche Pausenstelle.
-8. **Eltern-Panel** mit Live-Report (Wörter geübt, Fehlerfrei-Quote,
-   Mastery-Balken je Stufe). Wortlisten müssen leicht durch Förderwörter
-   der Therapeutin ersetzbar sein → in eigene Datendatei auslagern.
-9. Narrativ gewaltarm: verzauberte Tiere werden **befreit**, nicht getötet.
+8. **Eltern-/Therapeuten-Panel** mit Live-Report (Wörter geübt,
+   Fehlerfrei-Quote, Mastery-Balken je Stufe). Geplanter Ausbau:
+   Session-Historie, Fehlermuster, Export. **Wortschatz-Pakete** nach
+   Lesestufe wählbar (Klasse 1/2 lauttreu … 4/5; Lesestufe ≠
+   Jahrgangsstufe bei LRS!) – jedes Paket intern in der 4-Stufen-
+   Progression. Paketwahl setzt nur den Startpunkt, Mastery-Gating
+   regelt das Tempo. Eigene Förderwörter pro Profil direkt im Panel
+   eintragbar (Format: „Ba-na-ne", Bindestrich = Silbengrenze);
+   neue Wörter sprechen sofort per Web-Speech-Fallback, Studio-Stimme
+   beim nächsten `npm run voices`.
+9. **Audio-First (LRS!):** Kein kindgerichteter Text darf Lese-
+   Voraussetzung sein, um im Spiel weiterzukommen. Jedes Overlay/
+   Banner für das Kind wird vertont oder hat eine Sound-Signatur.
+   Gelesen wird NUR der Therapie-Inhalt (Silben, Wörter, Befehlssätze).
+10. Narrativ gewaltarm: verzauberte Tiere werden **befreit**, nicht
+   getötet; auch die Wächter-Bosse werden erlöst.
 
 ## Bekannte technische Fallstricke (bereits gelöst – nicht erneut einbauen)
 

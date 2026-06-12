@@ -31,7 +31,8 @@ import { loadVoiceManifest } from './audio/tts.js';
 import { playTitleMusic, playLevelMusic } from './audio/music.js';
 import { listProfiles, createProfile, selectProfile, saveActive } from './meta/save.js';
 import { initScenes, playScene } from './story/scenes.js';
-import { INTRO } from './story/content.js';
+import { INTRO, UI_LINES } from './story/content.js';
+import { sayStory } from './audio/tts.js';
 
 let birdT = 4;
 
@@ -112,10 +113,15 @@ function initThree() {
 wireOverlays();
 initScenes();
 loadVoiceManifest();
-/* Titelsong ab der ersten Berührung des Startbildschirms
-   (vorher blockiert der Browser Autoplay) */
-document.addEventListener('pointerdown', () => {
-  if (document.getElementById('startOv').classList.contains('on')) playTitleMusic();
+/* Titelsong + gesprochene Begrüßung ab der ersten Berührung des
+   Startbildschirms (vorher blockiert der Browser Autoplay).
+   Audio-First: niemand muss den Startbildschirm LESEN können. */
+document.addEventListener('pointerdown', e => {
+  if (!document.getElementById('startOv').classList.contains('on')) return;
+  playTitleMusic();
+  /* nicht über die Begrüßung quatschen, wenn der erste Tap schon startet */
+  if (e.target.closest('.profileBtn') || e.target.closest('#startBtn')) return;
+  sayStory('narrator', listProfiles().length ? UI_LINES.welcomeBack : UI_LINES.welcomeNew);
 }, { once: true });
 document.getElementById('hornBtn').addEventListener('click', speakSpell);
 document.getElementById('reviveBtn').addEventListener('click', revive);
@@ -134,7 +140,10 @@ function startGame() {
   planFloor();
   const begin = () => {
     announce('GEBIET ' + G.floor, 1200);
-    if (innerHeight > innerWidth) setTimeout(() => announce('🔄 Quer halten!', 1600), 1600);
+    if (innerHeight > innerWidth) setTimeout(() => {
+      announce('🔄 Quer halten!', 1600);
+      sayStory('narrator', UI_LINES.rotate);
+    }, 1600);
     setTimeout(advance, 2000);
   };
   /* Rahmenhandlung beim allerersten Start dieses Profils (vorgelesen) */

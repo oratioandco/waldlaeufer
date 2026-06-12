@@ -16,8 +16,9 @@ import { announce, flyText, flashRed } from '../ui/feedback.js';
 import { spawnGemReward } from './reward.js';
 import { ovOn } from '../ui/overlays.js';
 import { sndChest, sndBlock, sndHurt, tone } from '../audio/sfx.js';
-import { sayGame } from '../audio/tts.js';
+import { sayGame, sayStory } from '../audio/tts.js';
 import { shieldWas } from '../learning/speech-lines.js';
+import { UI_LINES } from '../story/content.js';
 import { startWordChallenge } from './spell.js';
 import { killMob } from './combat.js';
 import { rigPos } from '../engine/camera.js';
@@ -117,7 +118,9 @@ function blitzFailed() {
       } });
     }
     G.hearts--; renderHearts();
-    if (G.hearts <= 0) { setTimeout(() => ovOn('deadOv'), 700); }
+    if (G.hearts <= 0) {
+      setTimeout(() => { ovOn('deadOv'); sayStory('narrator', UI_LINES.dead); }, 700);
+    }
     else setTimeout(() => startWordChallenge('spell'), 900);
   }
 }

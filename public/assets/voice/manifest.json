@@ -361,5 +361,10 @@
  "companion|Ein Wächter ist zurück! Der Wald atmet auf.": "companion-2d08ba09e0.mp3",
  "companion|Die Schattengeister werden nervös – weiter so!": "companion-7873c66347.mp3",
  "narrator|Gebiet geschafft! Ein Wächter des Waldes ist wieder frei.": "narrator-d1a8aed55e.mp3",
- "word|Kro": "word-5b06916da4.mp3"
+ "word|Kro": "word-5b06916da4.mp3",
+ "word|Achtung! Merk dir das Schildwort.": "word-64ac0fd238.mp3",
+ "narrator|Willkommen zurück, Waldläufer! Tippe auf deinen Namen.": "narrator-fdf9156095.mp3",
+ "narrator|Willkommen im großen Wald! Schreib deinen Namen – dann geht es los.": "narrator-debeed4043.mp3",
+ "narrator|Oh nein, umgehauen! Aber ein Waldläufer gibt niemals auf. Tippe auf den Blitz und steh wieder auf!": "narrator-6c2a504121.mp3",
+ "narrator|Dreh dein Tablet quer – dann siehst du den ganzen Wald!": "narrator-173db31895.mp3"
 }

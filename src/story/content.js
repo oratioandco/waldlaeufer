@@ -60,6 +60,14 @@ export const COMPANION_CHEER = [
   'Deine Wortmagie wird immer stärker!'
 ];
 export const FLOOR_DONE = 'Gebiet geschafft! Ein Wächter des Waldes ist wieder frei.';
+/* Audio-First: kindgerichtete UI-Momente, die sonst Lese-Hürden wären */
+export const UI_LINES = {
+  welcomeBack: 'Willkommen zurück, Waldläufer! Tippe auf deinen Namen.',
+  welcomeNew: 'Willkommen im großen Wald! Schreib deinen Namen – dann geht es los.',
+  dead: 'Oh nein, umgehauen! Aber ein Waldläufer gibt niemals auf. Tippe auf den Blitz und steh wieder auf!',
+  rotate: 'Dreh dein Tablet quer – dann siehst du den ganzen Wald!',
+  shieldAlert: 'Achtung! Merk dir das Schildwort.'
+};
 export const FLOOR_QUOTES = [
   'Ein Wächter ist zurück! Der Wald atmet auf.',
   'Die Schattengeister werden nervös – weiter so!',

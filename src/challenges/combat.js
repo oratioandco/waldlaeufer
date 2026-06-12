@@ -16,7 +16,8 @@ import { startWordChallenge } from './spell.js';
 import { startBlitz } from './blitz.js';
 import { spawnGemReward } from './reward.js';
 import { playScene, showBubble } from '../story/scenes.js';
-import { companionJoinScene, COMPANION_CHEER, BOSS_DEFEAT } from '../story/content.js';
+import { companionJoinScene, COMPANION_CHEER, BOSS_DEFEAT, UI_LINES } from '../story/content.js';
+import { sayGame } from '../audio/tts.js';
 
 export function castSpell() {
   const crit = G.errors === 0;
@@ -90,6 +91,7 @@ export function killMob() {
 export function mobTurn() {
   if (Math.random() < .5) { setTimeout(() => startWordChallenge('spell'), 500); return; }
   sndGrowl();
+  sayGame(UI_LINES.shieldAlert); /* hörbares Angriffs-Signal statt nur Text-Banner */
   {
     let t = 0;
     addAnim({ update(dt) {
