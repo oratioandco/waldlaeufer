@@ -16,6 +16,7 @@ const els = {};       // lazily erzeugte, loopende Audio-Elemente
 let progress = 0;     // 0 Morgen … 1 Dämmerung
 let creekOn = false, auraOn = false;
 let started = false;
+let ducked = false;   // Sprache hat Vorrang – Kulisse weit runter
 
 function el(key) {
   if (!els[key]) {
@@ -28,12 +29,13 @@ function el(key) {
 }
 function apply() {
   if (!started) return;
-  const base = getMusicVol() * .9; /* Kulisse knapp unter Musik-Level */
+  /* Kulisse DEUTLICH unter Musik-Level; bei Sprache fast weg */
+  const base = getMusicVol() * .5 * (ducked ? .2 : 1);
   const want = {
     day:   base * (1 - progress) * .8,
     dusk:  base * progress * .8,
-    creek: creekOn ? base * .9 : 0,
-    aura:  auraOn ? base * .8 : 0
+    creek: creekOn ? base * .7 : 0,
+    aura:  auraOn ? base * .6 : 0
   };
   Object.entries(want).forEach(([k, v]) => {
     const a = el(k);
@@ -48,4 +50,5 @@ export function startAmbience() { started = true; apply(); }
 export function setAmbienceProgress(p) { progress = Math.max(0, Math.min(1, p)); apply(); }
 export function setCreek(on) { creekOn = on; apply(); }
 export function setBossAura(on) { auraOn = on; apply(); }
+export function duckAmbience(on) { ducked = on; apply(); }
 export function refreshAmbience() { apply(); }

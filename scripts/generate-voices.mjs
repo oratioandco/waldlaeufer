@@ -21,7 +21,7 @@ import { COLORS } from '../src/world/colors.js';
    und hier nach Geschmack tauschen. */
 const VOICE_IDS = {
   narrator:  '5KvpaGteYkNayiswuX2h', // vom Nutzer gewählte Erzähler-Stimme
-  boss:      'onwK4e9ZLuTAKqWW03F9', // Daniel – tief, autoritär (Schattenfiguren)
+  boss:      'nPczCjzI2devNBz1zQrb', // Brian – tiefer, voller (Schatten-Wächter)
   companion: 'FGY2WhTYpPnrIDTdsKH5', // Laura – hell, lebhaft (Begleiter-Tier)
   word:      '5KvpaGteYkNayiswuX2h'  // Lehrer-Stimme: Wörter, Silben, Gameplay-Sätze
 };

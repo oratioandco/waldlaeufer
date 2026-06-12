@@ -15,7 +15,7 @@ import { buildSky, updateSky } from './world/sky.js';
 import { updateAtmosphere } from './world/atmosphere.js';
 import { buildGrass, updateGrass } from './world/grass.js';
 import { buildPollen, updatePollen } from './world/vegetation.js';
-import { planFloor, advance, clearWorldGroups } from './world/stations.js';
+import { planFloor, advance, clearWorldGroups, updateWater } from './world/stations.js';
 import { biomeFor } from './world/biomes.js';
 import { loadModels } from './creatures/models.js';
 import { updateMob } from './creatures/mob.js';
@@ -53,6 +53,14 @@ if (import.meta.env.DEV) {
       const from = G.stations[0].from;
       rigPos.set(from.x, 3.7, from.z); camPos.copy(rigPos);
       setTimeout(advance, 400);
+    },
+    /* direkt zu Station i des aktuellen Gebiets (0-basiert) */
+    jumpStation(i) {
+      clearAnims();
+      G.stIdx = i - 1;
+      const from = G.stations[Math.max(0, i - 1)].pos;
+      rigPos.set(from.x, 3.7, from.z); camPos.copy(rigPos);
+      advance();
     }
   };
 }
@@ -75,6 +83,7 @@ function loop(t) {
   autoGovern(dt);
 
   updateGrass(time);
+  updateWater(time);
   updateMob(time, dt);
   updateSky(dt);
   updateAtmosphere(dt, time);

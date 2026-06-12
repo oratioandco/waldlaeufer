@@ -18,6 +18,10 @@
       vor dem nächsten `npm run voices`-Lauf.   */
 import { VOICES } from '../story/content.js';
 import { duckMusic } from './music.js';
+import { duckAmbience } from './ambience.js';
+
+/* Sprache duckt Musik UND Umgebungsgeräusche */
+function duckAll(on) { duckMusic(on); duckAmbience(on); }
 
 export let VOICE_ON = true;
 let VOICE_VOL = 1;
@@ -44,11 +48,11 @@ function hardStop() {
   if (curAudio) { curAudio.onended = curAudio.onerror = null; curAudio.pause(); curAudio = null; }
   try { speechSynthesis.cancel(); } catch (e) {}
   if (current) { clearTimeout(current._t); current = null; }
-  duckMusic(false);
+  duckAll(false);
 }
 function startJob(job) {
   current = job;
-  duckMusic(true);
+  duckAll(true);
   let done = false;
   const finish = () => {
     if (done) return;
@@ -57,7 +61,7 @@ function startJob(job) {
     curAudio = null;
     current = null;
     if (queue.length) startJob(queue.shift());
-    else duckMusic(false);
+    else duckAll(false);
   };
   /* Sicherheitsnetz: falls onended/onend nie feuert (iOS-Eigenheiten),
      gibt der Timer die Queue wieder frei */

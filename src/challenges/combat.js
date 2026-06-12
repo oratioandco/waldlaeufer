@@ -5,7 +5,7 @@ import { screenShake } from '../engine/camera.js';
 import { addAnim } from '../engine/anims.js';
 import { burst, shootSpell } from '../engine/effects.js';
 import { G } from '../state.js';
-import { M, flashModel, tintRage, setMobHp, freeMobVisual } from '../creatures/mob.js';
+import { M, flashModel, tintRage, setMobHp, freeMobVisual, releaseFreedAnimal } from '../creatures/mob.js';
 import { stationDone } from '../world/stations.js';
 import { rigPos } from '../engine/camera.js';
 import { renderHearts } from '../ui/hud.js';
@@ -74,7 +74,9 @@ export function killMob() {
 
   G.kills++; G.mob = null; G.word = null; G.busy = true; G.mode = null;
 
-  let afterReward = () => setTimeout(stationDone, 250);
+  /* Das Tier bleibt dem Spieler zugewandt, bis Belohnung + Dialog
+     fertig sind – erst dann fliegt/galoppiert es davon */
+  let afterReward = () => { releaseFreedAnimal(); setTimeout(stationDone, 250); };
   if (wasBoss) {
     setBossAura(false); /* die Schatten-Aura verklingt mit der Erlösung */
     playLevelMusic(G.floor); /* Boss-Thema endet, Wald-Musik kehrt zurück */
@@ -83,10 +85,13 @@ export function killMob() {
   } else if (!G.companion) {
     /* Das erste befreite Tier wird Begleiter und Erzähler-Stimme */
     G.companion = { key: animal.key, icon: animal.icon, name: animal.name };
-    afterReward = () => playScene(companionJoinScene(G.companion), () => setTimeout(stationDone, 250));
+    afterReward = () => playScene(companionJoinScene(G.companion),
+      () => { releaseFreedAnimal(); setTimeout(stationDone, 250); });
   } else if (Math.random() < .35) {
     setTimeout(() => showBubble(G.companion.icon,
       COMPANION_CHEER[Math.floor(Math.random() * COMPANION_CHEER.length)]), 1600);
+    /* Jubel läuft noch ~3 s nach der Belohnung → Abflug etwas verzögern */
+    afterReward = () => { setTimeout(releaseFreedAnimal, 2800); setTimeout(stationDone, 250); };
   }
   spawnGemReward(drop, g, afterReward);
 }

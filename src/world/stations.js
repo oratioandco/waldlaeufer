@@ -33,6 +33,35 @@ let pathHeading = Math.PI;
 let pathEnd = new THREE.Vector3(0, 0, 6);
 let worldGroups = [];
 let biome = biomeFor(1);
+let waterMats = [];
+
+/* Lebendiges Bach-Wasser: Schimmer-Streifen + Glitzern, fragment-only
+   (billig genug für alte iPads, kein Vertex-Displacement nötig) */
+function makeWaterMat() {
+  const m = new THREE.ShaderMaterial({
+    transparent: true,
+    uniforms: { uTime: { value: 0 } },
+    vertexShader: `varying vec2 vUv;
+      void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+    fragmentShader: `varying vec2 vUv;uniform float uTime;
+      void main(){
+        float w1=sin(vUv.x*42.0+uTime*1.6)*0.5+0.5;
+        float w2=sin(vUv.x*17.0-vUv.y*23.0-uTime*2.3)*0.5+0.5;
+        float w3=sin(vUv.y*30.0+uTime*1.1)*0.5+0.5;
+        float spark=smoothstep(0.82,1.0,w1*w2)+smoothstep(0.9,1.0,w2*w3)*0.6;
+        vec3 deep=vec3(0.15,0.40,0.62);
+        vec3 shal=vec3(0.36,0.66,0.85);
+        vec3 c=mix(deep,shal,0.25+0.5*w2*w3);
+        c+=vec3(0.92,0.98,1.0)*spark*0.45;
+        gl_FragColor=vec4(c,0.92);
+      }`
+  });
+  waterMats.push(m);
+  return m;
+}
+export function updateWater(time) {
+  waterMats.forEach(m => { m.uniforms.uTime.value = time; });
+}
 
 export function lateral(dir) { return new THREE.Vector3(-dir.z, 0, dir.x); }
 
@@ -43,6 +72,7 @@ export function planFloor() {
     if (!worldGroups.includes(st.group)) disposeGroup(st.group);
   });
   biome = biomeFor(G.floor);
+  waterMats = []; /* alte Bach-Materialien werden mit ihren Gruppen entsorgt */
   setGrassColors(biome.grassA, biome.grassB);
   setGroundPalette(biome.ground);
   setParticleStyle(biome.particle);
@@ -138,8 +168,7 @@ function buildStation(st) {
   const lat = lateral(st.dir);
   const seed = Math.floor(st.pos.x * 3 + st.pos.z * 5);
   if (st.type === 'TOR') {
-    const water = new THREE.Mesh(new THREE.PlaneGeometry(26, 4.6),
-      new THREE.MeshLambertMaterial({ color: 0x4aa3e8, transparent: true, opacity: .88 }));
+    const water = new THREE.Mesh(new THREE.PlaneGeometry(26, 4.6), makeWaterMat());
     water.rotation.x = -Math.PI / 2;
     water.position.set(st.pos.x, .05, st.pos.z);
     water.rotation.z = Math.atan2(st.dir.x, st.dir.z);
@@ -241,7 +270,9 @@ export function advance() {
   setAmbienceProgress(progress);
   setCreek(false); setBossAura(false); /* stationsgebundene Klänge enden beim Aufbruch */
 
-  const targetRig = st.pos.clone().addScaledVector(st.dir, -9.2); targetRig.y = 3.7;
+  /* Boss-Arena: mehr Abstand, sonst füllt der große Geist den Schirm */
+  const standoff = st.type === 'BOSS' ? -13.5 : -9.2;
+  const targetRig = st.pos.clone().addScaledVector(st.dir, standoff); targetRig.y = 3.7;
   const targetFocus = st.pos.clone(); targetFocus.y = 2.2;
   const fromRig = rigPos.clone(), fromFocus = rigFocus.clone();
   const dist = fromRig.distanceTo(targetRig);

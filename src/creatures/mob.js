@@ -93,7 +93,8 @@ export function spawnMob(st, isBoss) {
     ctx.shadowColor = '#c084fc'; ctx.shadowBlur = 36;
     ctx.fillStyle = '#f3e8ff'; ctx.fillText(def.sym, 128, 140);
     const sym = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false }));
-    sym.scale.set(2.3, 2.3, 1); sym.position.set(0, 1.4, 0);
+    /* ÜBER dem Geist schweben lassen (Blob-Radius ~2.9) – nicht darin */
+    sym.scale.set(2.3, 2.3, 1); sym.position.set(0, 4.3, 0);
     M.group.add(sym);
   }
   M.shadow = blobShadow(5);
@@ -146,6 +147,13 @@ export function freeMobVisual() {
   if (animal) revealFreedAnimal(animal, grp.position.clone());
 }
 
+let releaseAnimalFn = null;
+/* Vom Kampf-Flow gerufen, wenn Belohnung + Dialog fertig sind:
+   erst DANN dreht sich das Tier um und entkommt */
+export function releaseFreedAnimal() {
+  if (releaseAnimalFn) { releaseAnimalFn(); releaseAnimalFn = null; }
+}
+
 function revealFreedAnimal(animal, pos) {
   const model = MODELS[animal.key];
   if (!model) return; /* Modell (noch) nicht geladen → nur Auflösungs-Effekt */
@@ -161,7 +169,9 @@ function revealFreedAnimal(animal, pos) {
     act.timeScale = animal.key === 'horse' ? .55 : 1;
     act.play();
   }
-  /* Erst dem Spieler zuwenden („Danke"-Moment), dann umdrehen und fliehen */
+  /* Das Tier wendet sich dem Spieler zu und BLEIBT, solange gesprochen
+     wird (Begleiter-Szene, Jubel) – Abflug erst nach releaseFreedAnimal()
+     bzw. spätestens nach 12 s Sicherheitsnetz */
   const dir = pos.clone().sub(rigPos).setY(0).normalize();
   const grounded = animal.grounded;
   pos.y = grounded ? 0 : Math.max(pos.y, animal.y);
@@ -172,21 +182,26 @@ function revealFreedAnimal(animal, pos) {
   g.rotation.y = yawFace;
   g.scale.setScalar(.001);
   scene.add(g);
-  let t = 0;
+  let released = false;
+  releaseAnimalFn = () => { released = true; };
+  let phase = 0, pt = 0, total = 0;
   addAnim({ update(dt) {
-    t += dt;
+    pt += dt; total += dt;
     if (mix) mix.update(dt);
-    if (t < .4) {
-      g.scale.setScalar(easeOut(Math.min(1, t / .4)));
-    } else if (t < 1.0) {
-      if (!grounded) g.position.y = baseY + Math.sin(t * 3) * .15;
-    } else if (t < 1.5) {
-      g.rotation.y = yawFace + easeInOut((t - 1.0) / .5) * Math.PI;
-    } else {
+    if (phase === 0) { /* erscheinen, dem Spieler zugewandt */
+      g.scale.setScalar(easeOut(Math.min(1, pt / .4)));
+      if (pt >= .4) { phase = 1; pt = 0; }
+    } else if (phase === 1) { /* verweilen & anschauen, bis Sprache fertig */
+      if (!grounded) g.position.y = baseY + Math.sin(total * 3) * .15;
+      if (released || pt > 12) { phase = 2; pt = 0; }
+    } else if (phase === 2) { /* umdrehen */
+      g.rotation.y = yawFace + easeInOut(Math.min(1, pt / .5)) * Math.PI;
+      if (pt >= .5) { phase = 3; pt = 0; }
+    } else { /* entkommen */
       g.position.addScaledVector(dir, dt * (grounded ? 7 : 4));
       if (!grounded) g.position.y += dt * 5;
+      if (pt >= 2) { mix && mix.stopAllAction(); g.remove(ms); scene.remove(g); return true; }
     }
-    if (t >= 3.4) { mix && mix.stopAllAction(); g.remove(ms); scene.remove(g); return true; }
     return false;
   } });
 }
