@@ -7,6 +7,7 @@ import { hash3 } from './terrain.js';
 
 export { COLORS } from './colors.js';
 import { COLORS } from './colors.js';
+import { toonMat } from '../engine/materials.js';
 
 /* Dekor, das auf NIEDRIG ausgeblendet wird */
 export const extraDecor = [];
@@ -33,13 +34,13 @@ export function makeTree(seed, biome = DEFAULT_BIOME) {
   const pine = hash3(seed, 1, 1) < biome.pine;
   const trunkH = pine ? 1.7 : 1.5 + hash3(seed, 2, 2) * 1.3;
   const trunk = new THREE.Mesh(new THREE.CylinderGeometry(.17, .3, trunkH, 7),
-    new THREE.MeshLambertMaterial({ color: biome.trunk }));
+    toonMat({ color: biome.trunk }));
   trunk.position.y = trunkH / 2; grp.add(trunk);
   if (biome.birch && !pine) {
     /* Birken: dunkle Querbänder auf hellem Stamm */
     for (let k = 0; k < 3; k++) {
       const band = new THREE.Mesh(new THREE.CylinderGeometry(.185, .185, .09, 7),
-        new THREE.MeshLambertMaterial({ color: 0x3a3a34 }));
+        toonMat({ color: 0x3a3a34 }));
       band.position.y = trunkH * (.25 + k * .27);
       grp.add(band);
     }
@@ -49,7 +50,7 @@ export function makeTree(seed, biome = DEFAULT_BIOME) {
     const c = new THREE.Color().setHSL(L.h + .06, L.s, Math.max(.12, L.l - .11) + hash3(seed, 3, 3) * .08);
     for (let k = 0; k < 3; k++) {
       const cone = new THREE.Mesh(deformGeo(new THREE.ConeGeometry(1.6 - k * .42, 1.6, 9), .14),
-        new THREE.MeshLambertMaterial({ color: c }));
+        toonMat({ color: c }));
       cone.position.y = trunkH + .55 + k * 1.05;
       grp.add(cone);
     }
@@ -58,7 +59,7 @@ export function makeTree(seed, biome = DEFAULT_BIOME) {
     const n = 2 + Math.floor(hash3(seed, 6, 6) * 2);
     for (let k = 0; k < n; k++) {
       const ball = new THREE.Mesh(deformGeo(new THREE.IcosahedronGeometry(1.2 + hash3(seed, k, 7) * .8, 2), .32),
-        new THREE.MeshLambertMaterial({ color: c.clone().offsetHSL(0, 0, (hash3(seed, k, 8) - .5) * .08) }));
+        toonMat({ color: c.clone().offsetHSL(0, 0, (hash3(seed, k, 8) - .5) * .08) }));
       ball.position.set((hash3(seed, k, 9) - .5) * 1.5, trunkH + .9 + hash3(seed, k, 10) * 1.3, (hash3(seed, k, 11) - .5) * 1.5);
       grp.add(ball);
     }
@@ -72,13 +73,13 @@ export function makeBush(seed, biome = DEFAULT_BIOME) {
   const L = biome.leaf;
   const c = new THREE.Color().setHSL(L.h + .02, L.s * .9, Math.max(.14, L.l - .06) + hash3(seed, 1, 2) * .1);
   const b = new THREE.Mesh(deformGeo(new THREE.IcosahedronGeometry(.75, 2), .4),
-    new THREE.MeshLambertMaterial({ color: c }));
+    toonMat({ color: c }));
   b.position.y = .55; b.castShadow = true; grp.add(b);
   return grp;
 }
 export function makeStone(seed) {
   const m = new THREE.Mesh(deformGeo(new THREE.IcosahedronGeometry(.4 + hash3(seed, 1, 1) * .7, 1), .6),
-    new THREE.MeshLambertMaterial({ color: 0x9aa3a8 }));
+    toonMat({ color: 0x9aa3a8 }));
   m.position.y = .25; m.castShadow = true;
   return m;
 }
@@ -87,10 +88,10 @@ export function makeFlowerPatch(seed) {
   for (let k = 0; k < 3; k++) {
     const c = COLORS[Math.floor(hash3(seed, k, 3) * COLORS.length)].hex;
     const head = new THREE.Mesh(new THREE.SphereGeometry(.09, 6, 5),
-      new THREE.MeshLambertMaterial({ color: c }));
+      toonMat({ color: c }));
     head.position.set((hash3(seed, k, 4) - .5) * .7, .34, (hash3(seed, k, 5) - .5) * .7);
     const stem = new THREE.Mesh(new THREE.CylinderGeometry(.02, .02, .3, 4),
-      new THREE.MeshLambertMaterial({ color: 0x3f7d33 }));
+      toonMat({ color: 0x3f7d33 }));
     stem.position.set(head.position.x, .16, head.position.z);
     grp.add(stem); grp.add(head);
   }
@@ -99,15 +100,15 @@ export function makeFlowerPatch(seed) {
 export function makeBigFlower(colorDef, seed) {
   const grp = new THREE.Group();
   const stem = new THREE.Mesh(new THREE.CylinderGeometry(.09, .13, 1.6, 6),
-    new THREE.MeshLambertMaterial({ color: 0x3f7d33 }));
+    toonMat({ color: 0x3f7d33 }));
   stem.position.y = .8; grp.add(stem);
   const center = new THREE.Mesh(new THREE.SphereGeometry(.34, 10, 8),
-    new THREE.MeshLambertMaterial({ color: 0xffe9a3 }));
+    toonMat({ color: 0xffe9a3 }));
   center.position.y = 1.7; grp.add(center);
   for (let k = 0; k < 7; k++) {
     const a = (k / 7) * Math.PI * 2;
     const petal = new THREE.Mesh(new THREE.ConeGeometry(.22, .8, 5),
-      new THREE.MeshLambertMaterial({ color: colorDef.hex }));
+      toonMat({ color: colorDef.hex }));
     petal.position.set(Math.cos(a) * .52, 1.7, Math.sin(a) * .52);
     petal.lookAt(Math.cos(a) * 3, 1.7, Math.sin(a) * 3);
     petal.rotateX(Math.PI / 2);

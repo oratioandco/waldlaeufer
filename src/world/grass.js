@@ -65,12 +65,17 @@ export function buildGrass() {
 export function scatterGrass(segs) {
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), s = new THREE.Vector3();
   let i = 0;
-  outer:
-  for (const seg of segs) {
+  /* round-robin über die Segmente: senkt der AUTO-Governor die
+     Instanzzahl, dünnt das Gras ÜBERALL gleichmäßig aus, statt ganze
+     Bereiche schlagartig zu leeren */
+  const meta = segs.map(seg => {
     const dir = seg.b.clone().sub(seg.a), len = dir.length(); dir.normalize();
-    const lat = new THREE.Vector3(-dir.z, 0, dir.x);
-    const per = Math.ceil(grassMax / segs.length);
-    for (let k = 0; k < per; k++) {
+    return { seg, dir, len, lat: new THREE.Vector3(-dir.z, 0, dir.x) };
+  });
+  const per = Math.ceil(grassMax / segs.length);
+  outer:
+  for (let k = 0; k < per; k++) {
+    for (const { seg, dir, len, lat } of meta) {
       if (i >= grassMax) break outer;
       const d = hash3(i, 1, 2) * len;
       const side = hash3(i, 3, 4) < .5 ? -1 : 1;

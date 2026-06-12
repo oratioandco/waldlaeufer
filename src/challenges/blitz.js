@@ -66,7 +66,7 @@ export function startBlitz(ctx) {
     parryTimer = setInterval(() => {
       const left = Math.max(0, parryDeadline - Date.now());
       document.getElementById('parryRingFill').style.width = (left / total * 100) + '%';
-      if (left <= 0) { clearInterval(parryTimer); blitzFail(); }
+      if (left <= 0) { clearInterval(parryTimer); blitzFail(true); }
     }, 80);
   }, 1300);
 }
@@ -85,7 +85,9 @@ function blitzAnswer(btn, choice) {
     blitzFail();
   }
 }
-function blitzFail() {
+let failWasTimeout = false;
+function blitzFail(timedOut = false) {
+  failWasTimeout = timedOut;
   clearInterval(parryTimer);
   shieldStats[shieldItem.w].fails++;
   document.querySelectorAll('.pbtn').forEach(b => b.style.pointerEvents = 'none');
@@ -110,6 +112,12 @@ function blitzSuccess() {
 function blitzFailed() {
   if (parryCtx === 'chest') {
     openChest(G.stations[G.stIdx], 2);
+  } else if (failWasTimeout) {
+    /* THERAPIE: Zeitablauf kostet NIE ein Herz – Lesetempo ist genau
+       die LRS-Schwäche. Der Schild hält gerade noch; es fehlt nur
+       der Treffer-Bonus. Nur aktiv falsche Antworten kosten ein Herz. */
+    announce('PUH – DER SCHILD HÄLT!', 1000);
+    setTimeout(() => startWordChallenge('spell'), 900);
   } else {
     sndHurt(); flashRed(); screenShake(1.2);
     if (M.group) {

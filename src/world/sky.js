@@ -4,6 +4,7 @@ import { scene } from '../engine/renderer.js';
 import { glowTex } from '../engine/textures.js';
 import { camPos } from '../engine/camera.js';
 import { hash3 } from './terrain.js';
+import { toonMat } from '../engine/materials.js';
 
 let clouds = [];
 export let skyMat = null, sunSprite = null;
@@ -37,7 +38,7 @@ export function buildSky() {
     const n = 2 + Math.floor(hash3(i, 1, 2) * 3);
     for (let k = 0; k < n; k++) {
       const c = new THREE.Mesh(new THREE.IcosahedronGeometry(2.6 + hash3(i, k, 3) * 2.6, 1),
-        new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: .94 }));
+        toonMat({ color: 0xffffff, transparent: true, opacity: .94 }));
       c.scale.y = .4;
       c.position.set(k * 3.4 - (n * 1.7), hash3(i, k, 4) * 1.2, hash3(i, k, 5) * 2);
       grp.add(c);

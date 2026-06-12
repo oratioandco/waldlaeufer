@@ -14,6 +14,7 @@ import { ANIMALS, BOSSES } from '../creatures/data.js';
 import { BOSS_DEFEAT, COMPANION_CHEER } from '../story/content.js';
 import { sayStory } from '../audio/tts.js';
 import { sndTap } from '../audio/sfx.js';
+import { toonMat } from '../engine/materials.js';
 
 let campGrp = null;
 export let campTargets = [];
@@ -40,7 +41,7 @@ export function enterCamp() {
   /* Lagerfeuer: Holz, Glut-Glühen, steigende Funken, warmes Licht */
   for (let i = 0; i < 4; i++) {
     const log = new THREE.Mesh(new THREE.CylinderGeometry(.09, .09, 1.5, 6),
-      new THREE.MeshLambertMaterial({ color: 0x5e4528 }));
+      toonMat({ color: 0x5e4528 }));
     log.rotation.z = Math.PI / 2; log.rotation.y = (i / 4) * Math.PI;
     log.position.copy(center); log.position.y = .15;
     campGrp.add(log);
@@ -90,7 +91,7 @@ export function enterCamp() {
     campGrp.add(sp);
     campTargets.push(sp);
     const podest = new THREE.Mesh(new THREE.CylinderGeometry(.9, 1.1, .5, 8),
-      new THREE.MeshLambertMaterial({ color: 0x8a8a92 }));
+      toonMat({ color: 0x8a8a92 }));
     podest.position.set(p.x, .25, p.z);
     campGrp.add(podest);
   });

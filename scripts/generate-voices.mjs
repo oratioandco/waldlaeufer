@@ -26,6 +26,10 @@ const VOICE_IDS = {
   word:      '5KvpaGteYkNayiswuX2h'  // Lehrer-Stimme: Wörter, Silben, Gameplay-Sätze
 };
 const MODEL = 'eleven_multilingual_v2';
+/* Aussprache-Übersteuerung für Problemsilben: GESPROCHEN wird der
+   rechte Wert, der Manifest-Key (und die Karte) bleibt der linke.
+   Bei weiteren Englisch-Fallen hier ergänzen. */
+const PRONOUNCE = { 'Py': 'Pü' };
 const OUT = 'public/assets/voice';
 
 /* ---------- API-Key aus .env oder Umgebung ---------- */
@@ -100,7 +104,9 @@ let made = 0, skipped = 0;
 for (const { voice, text, ctx } of lines) {
   /* Voice-ID im Hash: Stimme in VOICE_IDS tauschen → Clips regenerieren automatisch.
      Kontext im Hash: geänderte Konditionierung regeneriert die Silbe */
-  const ctxKey = ctx ? '|' + (ctx.prev || '') + '|' + (ctx.next || '') : '';
+  const speak = (voice === 'word' && PRONOUNCE[text]) || text;
+  const ctxKey = (ctx ? '|' + (ctx.prev || '') + '|' + (ctx.next || '') : '') +
+    (speak !== text ? '|p:' + speak : '');
   const id = createHash('md5').update(VOICE_IDS[voice] + '|' + text + ctxKey).digest('hex').slice(0, 10);
   const file = `${voice}-${id}.mp3`;
   const key = voice + '|' + text;
@@ -110,7 +116,7 @@ for (const { voice, text, ctx } of lines) {
     method: 'POST',
     headers: { 'xi-api-key': KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      text, model_id: MODEL,
+      text: speak, model_id: MODEL,
       ...(ctx && ctx.prev ? { previous_text: ctx.prev } : {}),
       ...(ctx && ctx.next ? { next_text: ctx.next } : {}),
       voice_settings: { stability: .5, similarity_boost: .75, style: voice === 'boss' ? .35 : .2 }

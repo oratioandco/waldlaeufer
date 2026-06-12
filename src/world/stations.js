@@ -28,6 +28,7 @@ import { playScene } from '../story/scenes.js';
 import { bossIntroScene } from '../story/content.js';
 import { setAmbienceProgress, setCreek, setBossAura } from '../audio/ambience.js';
 import { playBossMusic } from '../audio/music.js';
+import { toonMat } from '../engine/materials.js';
 
 let pathHeading = Math.PI;
 let pathEnd = new THREE.Vector3(0, 0, 6);
@@ -36,25 +37,38 @@ let biome = biomeFor(1);
 let waterMats = [];
 let lastSegOfFloor = null; /* fürs Gras: Anschluss-Stück des Vorgebiets */
 
-/* Lebendiges Bach-Wasser: Schimmer-Streifen + Glitzern, fragment-only
-   (billig genug für alte iPads, kein Vertex-Displacement nötig) */
+/* Lebendiges Bach-Wasser: FLIESSENDE Wellen (scrollend), sanfte
+   Vertex-Dünung, weißer Uferschaum – weiterhin iPad-billig */
 function makeWaterMat() {
   const m = new THREE.ShaderMaterial({
     transparent: true,
     uniforms: { uTime: { value: 0 } },
-    vertexShader: `varying vec2 vUv;
-      void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+    vertexShader: `varying vec2 vUv;uniform float uTime;
+      void main(){
+        vUv=uv;
+        vec3 p=position;
+        /* sanfte Dünung quer zur Fließrichtung */
+        p.z+=sin(uv.x*22.0-uTime*2.0)*0.06+sin(uv.y*9.0+uTime*1.3)*0.04;
+        gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);
+      }`,
     fragmentShader: `varying vec2 vUv;uniform float uTime;
       void main(){
-        float w1=sin(vUv.x*42.0+uTime*1.6)*0.5+0.5;
-        float w2=sin(vUv.x*17.0-vUv.y*23.0-uTime*2.3)*0.5+0.5;
-        float w3=sin(vUv.y*30.0+uTime*1.1)*0.5+0.5;
-        float spark=smoothstep(0.82,1.0,w1*w2)+smoothstep(0.9,1.0,w2*w3)*0.6;
-        vec3 deep=vec3(0.15,0.40,0.62);
-        vec3 shal=vec3(0.36,0.66,0.85);
-        vec3 c=mix(deep,shal,0.25+0.5*w2*w3);
-        c+=vec3(0.92,0.98,1.0)*spark*0.45;
-        gl_FragColor=vec4(c,0.92);
+        /* Wasser FLIESST: Wellenbänder scrollen entlang des Bachs */
+        float flow=vUv.x*30.0-uTime*1.4;
+        float w1=sin(flow)*0.5+0.5;
+        float w2=sin(flow*0.53+vUv.y*14.0-uTime*0.9)*0.5+0.5;
+        float w3=sin(vUv.x*11.0+uTime*0.7)*0.5+0.5;
+        float spark=smoothstep(0.78,0.98,w1*w2);
+        vec3 deep=vec3(0.13,0.37,0.60);
+        vec3 shal=vec3(0.34,0.64,0.84);
+        vec3 c=mix(deep,shal,0.2+0.55*mix(w2,w3,0.5));
+        c+=vec3(0.92,0.98,1.0)*spark*0.5;
+        /* Uferschaum an beiden Rändern, leicht wabernd */
+        float edge=min(vUv.y,1.0-vUv.y);
+        float foamLine=0.085+0.025*sin(vUv.x*40.0+uTime*1.8);
+        float foam=1.0-smoothstep(0.0,foamLine,edge);
+        c=mix(c,vec3(0.96,0.99,1.0),foam*0.85);
+        gl_FragColor=vec4(c,0.94);
       }`
   });
   waterMats.push(m);
@@ -137,7 +151,7 @@ function buildSegment(st, from) {
   const seed = Math.floor(st.pos.x * 7 + st.pos.z * 13);
 
   const path = new THREE.Mesh(new THREE.PlaneGeometry(2.2, len + 4),
-    new THREE.MeshLambertMaterial({ color: biome.path }));
+    toonMat({ color: biome.path }));
   path.rotation.x = -Math.PI / 2;
   const mid = from.clone().add(st.pos).multiplyScalar(.5);
   path.position.set(mid.x, .03, mid.z);
@@ -173,7 +187,7 @@ function buildStation(st) {
   const lat = lateral(st.dir);
   const seed = Math.floor(st.pos.x * 3 + st.pos.z * 5);
   if (st.type === 'TOR') {
-    const water = new THREE.Mesh(new THREE.PlaneGeometry(26, 4.6), makeWaterMat());
+    const water = new THREE.Mesh(new THREE.PlaneGeometry(26, 4.6, 32, 6), makeWaterMat());
     water.rotation.x = -Math.PI / 2;
     water.position.set(st.pos.x, .05, st.pos.z);
     water.rotation.z = Math.atan2(st.dir.x, st.dir.z);
@@ -190,7 +204,7 @@ function buildStation(st) {
     st.objs.planks = [];
     for (let k = 0; k < 5; k++) {
       const plank = new THREE.Mesh(new THREE.BoxGeometry(2.4, .22, .9),
-        new THREE.MeshLambertMaterial({ color: 0x8a5f33 }));
+        toonMat({ color: 0x8a5f33 }));
       plank.castShadow = true;
       plank.position.copy(st.pos).addScaledVector(st.dir, (k - 2) * 1.0);
       plank.position.y = -.8;
@@ -201,14 +215,14 @@ function buildStation(st) {
   }
   if (st.type === 'TRUHE') {
     const body = new THREE.Mesh(new THREE.BoxGeometry(1.7, 1, 1.1),
-      new THREE.MeshLambertMaterial({ color: 0x7a5328 }));
+      toonMat({ color: 0x7a5328 }));
     body.position.copy(st.pos); body.position.y = .5;
     body.castShadow = true;
     const lid = new THREE.Mesh(new THREE.BoxGeometry(1.7, .45, 1.1),
-      new THREE.MeshLambertMaterial({ color: 0x96672f }));
+      toonMat({ color: 0x96672f }));
     lid.position.set(0, .72, 0); lid.castShadow = true; body.add(lid);
     const lock = new THREE.Mesh(new THREE.BoxGeometry(.3, .3, .12),
-      new THREE.MeshLambertMaterial({ color: 0xffd34a, emissive: 0xb8860b }));
+      toonMat({ color: 0xffd34a, emissive: 0xb8860b }));
     lock.position.set(0, .2, .62); body.add(lock);
     body.lookAt(st.pos.clone().sub(st.dir));
     st.group.add(body);

@@ -76,10 +76,16 @@ export function spawnMob(st, isBoss) {
   body.scale.y = isBoss ? 1.15 : fb.squash;
   M.group.add(body);
   [-1, 1].forEach(sx => {
-    const e = new THREE.Mesh(new THREE.SphereGeometry(isBoss ? .3 : .25, 12, 10),
+    const r = isBoss ? .3 : .25;
+    const e = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10),
       new THREE.MeshBasicMaterial({ color: isBoss ? 0xff2e4d : fb.eye }));
     e.position.set(sx * baseR * .38, baseR * .28, baseR * .86);
     M.group.add(e);
+    /* Kawaii-Glanzpunkt im Auge */
+    const glint = new THREE.Mesh(new THREE.SphereGeometry(r * .35, 8, 6),
+      new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    glint.position.set(sx * baseR * .38 - sx * .08, baseR * .28 + r * .35, baseR * .86 + r * .55);
+    M.group.add(glint);
   });
   const hoverY = 2.5;
 
@@ -223,6 +229,10 @@ export function showKingSilhouette() {
       new THREE.MeshBasicMaterial({ color: 0xff2e4d }));
     e.position.set(sx * .8, .7, 1.75);
     kingGrp.add(e);
+    const glint = new THREE.Mesh(new THREE.SphereGeometry(.09, 8, 6),
+      new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    glint.position.set(sx * .8 - sx * .08, .79, 1.92);
+    kingGrp.add(glint);
   });
   const aura = glowSprite(0x9b59c9, 9); aura.material.opacity = .45;
   kingGrp.add(aura);

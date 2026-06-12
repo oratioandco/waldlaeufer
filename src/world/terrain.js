@@ -5,6 +5,7 @@
    ===================================================================== */
 import * as THREE from 'three';
 import { scene } from '../engine/renderer.js';
+import { toonMat } from '../engine/materials.js';
 
 export function hash3(x, y, z) { let h = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453; return h - Math.floor(h); }
 function vnoise2(x, z) {
@@ -80,7 +81,7 @@ export function buildGround() {
   groundTex = makeGrassTex(DEFAULT_GROUND);
   const geo = new THREE.PlaneGeometry(320, 320, 90, 90);
   geo.rotateX(-Math.PI / 2);
-  ground = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: groundTex }));
+  ground = new THREE.Mesh(geo, toonMat({ map: groundTex }));
   ground.receiveShadow = true;
   scene.add(ground);
 }
