@@ -49,8 +49,8 @@ if (process.argv.includes('--list')) {
 
 /* ---------- Alle festen Story-Zeilen einsammeln ---------- */
 const lines = [];
-const add = (voice, text) => {
-  if (!lines.some(l => l.voice === voice && l.text === text)) lines.push({ voice, text });
+const add = (voice, text, ctx) => {
+  if (!lines.some(l => l.voice === voice && l.text === text)) lines.push({ voice, text, ctx });
 };
 INTRO.forEach(s => add(s.voice, s.text));
 for (let f = 1; f <= 6; f++) bossIntroScene(f).forEach(s => add(s.voice, s.text));
@@ -71,7 +71,13 @@ Object.values(WORDS.tiers).flat().forEach(w => {
   add('word', w.w);                  // das Wort allein (Scaffolding-Stufe 1)
   add('word', zauberePhrase(w.w));   // „Zaubere: …" (Aufgaben-Start)
   add('word', syllableRead(w));      // „O, ma. Oma" (📯-Button)
-  w.s.forEach(s => add('word', s));  // einzelne Silben (Karten-Tap, Stufe 2)
+  /* Silben mit previous_text/next_text aus ihrem Wort konditionieren:
+     „Schlan" + next_text „ge" klingt wie der Anfang von „Schlange" –
+     ohne Kontext rät das Modell die Aussprache von Fragmenten */
+  w.s.forEach((syl, i) => add('word', syl, {
+    prev: w.s.slice(0, i).join(''),
+    next: w.s.slice(i + 1).join('')
+  }));
 });
 WORDS.shields.forEach(s => { add('word', s.w); add('word', shieldWas(s.w)); });
 COLORS.forEach(c => {
@@ -89,9 +95,11 @@ const manifest = existsSync(`${OUT}/manifest.json`)
   ? JSON.parse(readFileSync(`${OUT}/manifest.json`, 'utf8')) : {};
 let made = 0, skipped = 0;
 
-for (const { voice, text } of lines) {
-  /* Voice-ID im Hash: Stimme in VOICE_IDS tauschen → Clips regenerieren automatisch */
-  const id = createHash('md5').update(VOICE_IDS[voice] + '|' + text).digest('hex').slice(0, 10);
+for (const { voice, text, ctx } of lines) {
+  /* Voice-ID im Hash: Stimme in VOICE_IDS tauschen → Clips regenerieren automatisch.
+     Kontext im Hash: geänderte Konditionierung regeneriert die Silbe */
+  const ctxKey = ctx ? '|' + (ctx.prev || '') + '|' + (ctx.next || '') : '';
+  const id = createHash('md5').update(VOICE_IDS[voice] + '|' + text + ctxKey).digest('hex').slice(0, 10);
   const file = `${voice}-${id}.mp3`;
   const key = voice + '|' + text;
   if (manifest[key] === file && existsSync(`${OUT}/${file}`)) { skipped++; continue; }
@@ -101,6 +109,8 @@ for (const { voice, text } of lines) {
     headers: { 'xi-api-key': KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       text, model_id: MODEL,
+      ...(ctx && ctx.prev ? { previous_text: ctx.prev } : {}),
+      ...(ctx && ctx.next ? { next_text: ctx.next } : {}),
       voice_settings: { stability: .5, similarity_boost: .75, style: voice === 'boss' ? .35 : .2 }
     })
   });
