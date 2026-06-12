@@ -40,6 +40,25 @@ export function makeCard(text, correctIndex) {
 export function clearCards() { cards.forEach(r => scene.remove(r)); cards = []; }
 export function removeCard(r) { scene.remove(r); }
 
+/* Übrige Karten (Distraktoren) sanft ausblenden statt instant zu
+   entfernen – schlagartiges Verschwinden wirkt wie ein Glitch */
+export function dismissCards(addAnim) {
+  cards.forEach(r => {
+    if (r.userData.dead) return;
+    r.userData.dead = true;
+    let t = 0;
+    const sy = r.position.y;
+    addAnim({ update(dt) {
+      t += dt * 2.2;
+      r.scale.setScalar(Math.max(.001, 1 - t));
+      r.position.y = sy - t * .8;
+      if (t >= 1) { scene.remove(r); return true; }
+      return false;
+    } });
+  });
+  cards = [];
+}
+
 export function updateCards(dt) {
   cards.forEach(r => {
     if (r.userData.dead) return;

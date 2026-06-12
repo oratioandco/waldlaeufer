@@ -12,7 +12,7 @@ import { burst } from '../engine/effects.js';
 import { G } from '../state.js';
 import { nextWord, reportWord, TIER_WORDS, activeTier } from '../learning/engine.js';
 import { lateral } from '../world/stations.js';
-import { cards, makeCard, clearCards, removeCard } from './cards.js';
+import { cards, makeCard, clearCards, removeCard, dismissCards } from './cards.js';
 import { castSpell } from './combat.js';
 import { openBridge } from './bridge.js';
 import { sndCard, sndFizzle } from '../audio/sfx.js';
@@ -99,6 +99,7 @@ export function tapCard(r) {
       G.busy = true;
       reportWord(G.word.w, G.errors === 0);
       saveActive(); /* Lernstand nach jedem Wort sichern */
+      dismissCards(addAnim); /* übrige Distraktoren sanft ausblenden */
       setTimeout(() => { G.mode === 'gate' ? openBridge() : castSpell(); }, 420);
     }
   } else {

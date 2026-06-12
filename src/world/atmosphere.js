@@ -13,6 +13,7 @@ import { glowTex, glowSprite } from '../engine/textures.js';
 import { skyMat, sunSprite } from './sky.js';
 import { hash3, hillH } from './terrain.js';
 import { biomeFor } from './biomes.js';
+import { setGrassEnv } from './grass.js';
 
 /* Tageszeit-Keyframes: p 0=Morgen … 1=Dämmerung (Boss).
    Intensitäten in r128-Werten; ×π passiert beim Anwenden.
@@ -162,6 +163,9 @@ export function updateAtmosphere(dt, time) {
   scene.fog.color.copy(cur.fog);
   scene.fog.near = cur.fogN; scene.fog.far = cur.fogF;
   scene.background.copy(cur.hor);
+  /* Gras folgt Licht & Nebel (sonst leuchtet es nachts) */
+  setGrassEnv(Math.min(1.1, .25 + (cur.sunI / 1.35) * .75 * (cur.hemiI / .85)),
+    cur.fog, cur.fogN, cur.fogF);
   if (sunSprite) {
     sunSprite.material.color.copy(cur.sprite);
     sunSprite.userData.followCamOffset.y = cur.sprY;

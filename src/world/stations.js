@@ -34,6 +34,7 @@ let pathEnd = new THREE.Vector3(0, 0, 6);
 let worldGroups = [];
 let biome = biomeFor(1);
 let waterMats = [];
+let lastSegOfFloor = null; /* fürs Gras: Anschluss-Stück des Vorgebiets */
 
 /* Lebendiges Bach-Wasser: Schimmer-Streifen + Glitzern, fragment-only
    (billig genug für alte iPads, kein Vertex-Displacement nötig) */
@@ -109,7 +110,11 @@ export function planFloor() {
   G.stations.forEach(s => groundCenter.add(s.pos));
   groundCenter.multiplyScalar(1 / G.stations.length);
   reshapeGround();
-  scatterGrass(newSegs);
+  /* Gras AUCH um das letzte Stück des Vorgebiets streuen – sonst
+     verschwindet es schlagartig um den Spieler, der noch in der
+     alten Boss-Lichtung steht (sichtbarer Glitch) */
+  scatterGrass(lastSegOfFloor ? [lastSegOfFloor, ...newSegs] : newSegs);
+  lastSegOfFloor = newSegs[newSegs.length - 1];
   applyQuality();
   G.stations.forEach(st => { buildSegment(st, st.from); buildStation(st); });
   rebuildFloorFx(newSegs, G.stations);
