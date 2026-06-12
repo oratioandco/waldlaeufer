@@ -18,8 +18,8 @@ import { hash3, hillH } from './terrain.js';
    sunY = Höhe des Richtungslichts (tiefer = längere, wärmere Schatten),
    sprY/sprS = Höhe und Größe des sichtbaren Sonnen-Sprites. */
 const STOPS = [
-  /* Morgen: weiches, pfirsichfarbenes Dunstlicht */
-  { p: 0,   top: 0x7da9ef, hor: 0xffe2c4, sun: 0xffd9a0, sunI: 1.05, hemiSky: 0xe2ecff, hemiGr: 0x7f9a58, hemiI: .78, fog: 0xeadfd2, fogN: 30, fogF: 92,  sprite: 0xffe8c0, sunY: 28, sprY: 56, sprS: 55 },
+  /* Morgen: goldenes Frühlicht statt grauem Dunst */
+  { p: 0,   top: 0x5f97ea, hor: 0xffd9a3, sun: 0xffd28a, sunI: 1.1,  hemiSky: 0xdfe9ff, hemiGr: 0x7f9a58, hemiI: .8,  fog: 0xf2ddba, fogN: 32, fogF: 96,  sprite: 0xffe3a8, sunY: 22, sprY: 48, sprS: 60 },
   /* Tag: helle Referenz (Prototyp-Look) */
   { p: .35, top: 0x549ef0, hor: 0xe6f5ff, sun: 0xfff1cf, sunI: 1.35, hemiSky: 0xcfe6ff, hemiGr: 0x77995a, hemiI: .85, fog: 0xcfe9fb, fogN: 36, fogF: 100, sprite: 0xfff6d8, sunY: 38, sprY: 80, sprS: 55 },
   /* Später Nachmittag: erstes Anwärmen */

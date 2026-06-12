@@ -11,7 +11,7 @@ import { sndWin, setSfxVol, getSfxVol, sndGem } from '../audio/sfx.js';
 import { setMusicVol, getMusicVol, playLevelMusic } from '../audio/music.js';
 import { setQuality, setRES } from '../engine/quality.js';
 import { saveActive } from '../meta/save.js';
-import { FLOOR_QUOTES } from '../story/content.js';
+import { FLOOR_QUOTES, FLOOR_DONE } from '../story/content.js';
 
 export function ovOn(id) { document.getElementById(id).classList.add('on'); }
 export function ovOff(id) { document.getElementById(id).classList.remove('on'); }
@@ -20,7 +20,7 @@ export function openPause() {
   document.getElementById('pauseStats').innerHTML = `
     <div class="stat"><div class="n">${G.gems}</div><div class="l">💎 KRISTALLE</div></div>
     <div class="stat"><div class="n">${G.kills}</div><div class="l">TIERE BEFREIT</div></div>
-    <div class="stat"><div class="n">${G.trophies.length}</div><div class="l">FIGUREN</div></div>`;
+    <div class="stat"><div class="n">${G.trophies.length}</div><div class="l">WÄCHTER</div></div>`;
   ovOn('pauseOv');
 }
 export function openAdult() {
@@ -42,16 +42,17 @@ export function openSettings() { ovOn('setOv'); }
 export function showFloorClear() {
   sndWin();
   const quote = FLOOR_QUOTES[(G.floor - 1) % FLOOR_QUOTES.length];
+  const boss = BOSSES[Math.min(G.floor - 1, BOSSES.length - 1)];
   document.getElementById('floorSub').innerHTML =
-    `Du hast den <b style="color:#e9d5ff">${BOSSES[Math.min(G.floor - 1, BOSSES.length - 1)].name}</b> bezwungen<br>und seine Figur erbeutet:` +
+    `Du hast den Schatten gebrochen –<br><b style="color:#e9d5ff">${boss.freed}</b> ist wieder frei und beschützt den Wald:` +
     (G.companion ? `<br><i style="color:#b8ffd9">${G.companion.icon} „${quote}"</i>` : '');
   document.getElementById('trophyRow').textContent = G.trophies.join(' ');
   document.getElementById('floorStats').innerHTML = `
     <div class="stat"><div class="n">${G.gems}</div><div class="l">💎 GESAMT</div></div>
-    <div class="stat"><div class="n">${G.kills}</div><div class="l">BEFREIT</div></div>
-    <div class="stat"><div class="n">${G.floor}</div><div class="l">GEBIET</div></div>`;
+    <div class="stat"><div class="n">${G.kills}</div><div class="l">TIERE BEFREIT</div></div>
+    <div class="stat"><div class="n">${G.trophies.length}</div><div class="l">WÄCHTER</div></div>`;
   ovOn('floorOv');
-  const seq = [{ voice: 'narrator', text: 'Gebiet geschafft! Du hast die Figur erbeutet.' }];
+  const seq = [{ voice: 'narrator', text: FLOOR_DONE }];
   if (G.companion) seq.push({ voice: 'companion', text: quote });
   sayStorySeq(seq);
 }

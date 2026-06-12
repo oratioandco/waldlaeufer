@@ -22,12 +22,18 @@ export function listProfiles() {
     .map(([id, p]) => ({ id, ...p }))
     .sort((a, b) => b.updated - a.updated);
 }
+/* Schutz: Erst wenn in DIESER Sitzung ein Profil gestartet wurde, darf
+   gespeichert werden. Sonst überschreibt z.B. der pagehide-Handler auf
+   dem Startbildschirm das Profil mit dem Default-Spielzustand. */
+let sessionStarted = false;
+
 export function createProfile(name) {
   const s = readStore();
   const id = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   s.profiles[id] = { name, updated: Date.now(), data: null };
   s.activeId = id;
   writeStore(s);
+  sessionStarted = true;
   return id;
 }
 export function selectProfile(id) {
@@ -36,8 +42,10 @@ export function selectProfile(id) {
   s.activeId = id;
   writeStore(s);
   if (s.profiles[id].data) restoreAll(s.profiles[id].data);
+  sessionStarted = true;
 }
 export function saveActive() {
+  if (!sessionStarted) return;
   const s = readStore();
   const id = s.activeId;
   if (!id || !s.profiles[id]) return;

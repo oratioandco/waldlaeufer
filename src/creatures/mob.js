@@ -117,7 +117,7 @@ export function spawnMob(st, isBoss) {
   setTimeout(() => { if (M.group && M.group.scale.x < .9) M.group.scale.setScalar(1); }, 900);
   sndGrowl();
   document.getElementById('mobName').innerHTML =
-    isBoss ? `<span class="boss">👑 ${G.mob.name}</span>` : 'Verzaubert: ' + G.mob.name;
+    isBoss ? `<span class="boss">${def.sym} ${G.mob.name}</span>` : 'Befreie: ' + G.mob.name;
   setMobHp();
   document.getElementById('mobBar').classList.add('on');
   if (isBoss) announce('BOSS!', 1100);

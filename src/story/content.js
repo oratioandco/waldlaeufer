@@ -1,8 +1,8 @@
 /* =====================================================================
-   STORY-INHALTE – Rahmenhandlung, Boss-Persönlichkeiten, Begleiter
+   STORY-INHALTE – Rahmenhandlung, Wächter-Persönlichkeiten, Begleiter
    Alles wird VORGELESEN (TTS); Text ist optional einblendbar
    (freiwilliges Zusatzlesen, nie Pflicht-Lesehürde). Gewaltarm:
-   Schatten „zerfallen", Tiere werden befreit.
+   Schatten werden gebrochen, Tiere und Wächter werden BEFREIT.
    ===================================================================== */
 import { BOSSES } from '../creatures/data.js';
 
@@ -14,28 +14,30 @@ export const VOICES = {
 
 export const INTRO = [
   { icon: '👑', name: 'DER SCHWARZE KÖNIG', voice: 'boss',
-    text: 'Dieser Wald gehört jetzt mir! Alle Tiere stehen unter meinem Schatten-Zauber.' },
+    text: 'Dieser Wald gehört jetzt mir! Meine Schattengeister halten alle Tiere gefangen.' },
   { icon: '🌲', name: 'ERZÄHLER', voice: 'narrator',
-    text: 'Der Schwarze König hat die Tiere des großen Waldes verzaubert. Nur ein Waldläufer mit Wortmagie kann sie befreien.' },
+    text: 'Nur du kannst sie retten, Waldläufer. Deine Zauberwörter brechen jeden Schatten.' },
   { icon: '🪄', name: 'ERZÄHLER', voice: 'narrator',
-    text: 'Folge dem Pfad, sprich die Zauberwörter – und hol dir alle Schachfiguren zurück!' }
+    text: 'Folge dem Pfad, befreie die Tiere – und erlöse die sechs Wächter des Waldes!' }
 ];
 
+/* Die verdorbenen Wächter stellen sich vor – jeder mit eigenem Charakter */
 const BOSS_INTRO = [
-  'Halt! Ich bin der Schatten-Bauer. Hier kommst du nicht vorbei!',
-  'Hihi! Ich bin der Schatten-Springer. Ich hüpfe schneller, als du zaubern kannst!',
-  'Ich bin der Schatten-Läufer. Deine kleinen Wörter schrecken mich nicht.',
-  'Ich bin der Schatten-Turm! Meine Mauern wackeln nicht.',
-  'Ich bin die Schatten-Dame. Zeig mir deine Magie, kleiner Waldläufer.',
-  'Du bist weit gekommen, Waldläufer. Doch hier endet dein Weg.'
+  'Grrrr… Ich bin der Schatten-Wolf. Dieser Pfad ist mein Revier!',
+  'Wer stört meinen Schlaf? Ich bin die Schatten-Bärin – und ich bin sehr, sehr grimmig!',
+  'Schlau bist du, Waldläufer. Aber ich bin der Schatten-Fuchs – und ich bin schlauer!',
+  'Ich bin der Schatten-Adler. Von hier oben sehe ich jeden deiner Fehler!',
+  'Ich bin der Schatten-Hirsch, Wächter des stillen Waldes. Zeig mir, was deine Wörter können.',
+  'Du bist weit gekommen, Waldläufer. Doch ich bin der Schwarze König – an mir zerbricht deine Magie!'
 ];
+/* Befreiungs-Momente: der Schatten fällt, der wahre Wächter kommt zurück */
 export const BOSS_DEFEAT = [
-  'Ohh… mein Schatten… zerfällt…!',
-  'Nicht fair! Du zauberst zu gut!',
-  'Unmöglich… deine Wörter sind zu stark…',
-  'Meine… Mauern…!',
-  'Welch starke Magie… ich verneige mich.',
-  'Der Wald… gehört wieder… euch…'
+  'Auuuuu! Der Schatten ist fort… Danke, Waldläufer. Lauf weiter – ich bewache den Pfad!',
+  'Brumm… Ich bin wieder ich! Hab Dank, kleiner Held.',
+  'Schlau gespielt! Der Schatten ist fort – und der Fuchs ist frei.',
+  'Meine Augen sehen wieder klar! Flieg weiter, mutiger Waldläufer.',
+  'Der stille Wald dankt dir. Mein Geweih trägt wieder Licht.',
+  'Was… was habe ich getan? Der Schatten hatte auch mich gepackt… Verzeih mir, Waldläufer. Du hast uns alle gerettet!'
 ];
 export function bossIntroScene(floor) {
   const i = Math.min(floor - 1, BOSSES.length - 1);
@@ -57,9 +59,10 @@ export const COMPANION_CHEER = [
   'Weiter so, Waldläufer!',
   'Deine Wortmagie wird immer stärker!'
 ];
+export const FLOOR_DONE = 'Gebiet geschafft! Ein Wächter des Waldes ist wieder frei.';
 export const FLOOR_QUOTES = [
-  'Ein Gebiet ist frei! Der Wald atmet auf.',
-  'Die Schattenfiguren werden nervös – weiter so!',
+  'Ein Wächter ist zurück! Der Wald atmet auf.',
+  'Die Schattengeister werden nervös – weiter so!',
   'Hörst du die Vögel? Sie singen wieder.',
   'Der Schwarze König verliert seine Macht!',
   'Bald ist der ganze Wald wieder frei!',

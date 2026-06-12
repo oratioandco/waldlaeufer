@@ -13,18 +13,19 @@ try { MUSIC_VOL = +(localStorage.getItem('waldlaeufer.volMusic') ?? .35); } catc
 let current = null;       // aktives Audio-Element
 let currentKey = null;
 let ducked = false;
-let fadeTimer = null;
 
 function targetVol() { return MUSIC_VOL * (ducked ? .25 : 1); }
 
+/* Fade-Timer PRO Audio-Element – ein globaler Timer würde parallele
+   Fades (Titel raus + Level rein) gegenseitig abwürgen */
 function fadeTo(audio, vol, ms, onDone) {
-  clearInterval(fadeTimer);
+  clearInterval(audio._fade);
   const from = audio.volume, steps = Math.max(1, Math.round(ms / 50));
   let i = 0;
-  fadeTimer = setInterval(() => {
+  audio._fade = setInterval(() => {
     i++;
     audio.volume = Math.max(0, Math.min(1, from + (vol - from) * (i / steps)));
-    if (i >= steps) { clearInterval(fadeTimer); if (onDone) onDone(); }
+    if (i >= steps) { clearInterval(audio._fade); if (onDone) onDone(); }
   }, 50);
 }
 

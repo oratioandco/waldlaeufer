@@ -140,8 +140,12 @@ Schatzkarte (Anweisungssätze lesen → Weg abgehen). Kurz (60–90 s), optional
 
 **6. Meta-Progression** – Tokens (💎 bereits da) ausgeben können:
 Outfits/Skins für den Zauberstab/Umhang/Begleiter-Tier, kosmetisch,
-nie Pay-to-Win-Logik gegen die Lern-Engine. Schachfiguren-Sammlung als
-Langzeitziel behalten. Speicherstand in localStorage (Lernstand UND Kosmetik),
+nie Pay-to-Win-Logik gegen die Lern-Engine. Wächter-Sammlung als
+Langzeitziel (die Schach-Metapher wurde 2026-06 bewusst ersetzt:
+Bosse sind die sechs vom Schatten verdorbenen WÄCHTER DES WALDES –
+Wolf, Bärin, Fuchs, Adler, Hirsch, zuletzt der Schwarze König selbst.
+Sie werden ERLÖST, nicht besiegt; die befreiten Wächter sind die
+Sammlung). Speicherstand in localStorage (Lernstand UND Kosmetik),
 Export/Import als Datei für Gerätewechsel.
 
 ## Definition of Done je Feature

@@ -35,10 +35,24 @@ import { INTRO } from './story/content.js';
 
 let birdT = 4;
 
+/* Debug-Zugriff für Test-Sessions (nur im Dev-Server) */
+if (import.meta.env.DEV) {
+  window.__dbg = { G, cards: () => cards, camera: () => camera };
+}
+
 /* ---------- Loop ---------- */
 let lastT = 0;
+function frame(t) {
+  requestAnimationFrame(frame);
+  loop(t);
+}
+/* Dev-Server: Wenn rAF pausiert (Fenster verdeckt/Tab im Hintergrund),
+   treibt ein Timer den Loop weiter – wichtig für automatisierte Tests.
+   In Produktion pausiert das Spiel wie gewohnt (Akku!). */
+if (import.meta.env.DEV) {
+  setInterval(() => { if (performance.now() - lastT > 200) loop(performance.now()); }, 100);
+}
 function loop(t) {
-  requestAnimationFrame(loop);
   const dt = Math.min(.05, (t - lastT) / 1000); lastT = t;
   const time = t / 1000;
   autoGovern(dt);
@@ -92,7 +106,7 @@ function initThree() {
   loadModels();
   initCameraInput();
   document.querySelector('canvas').addEventListener('pointerdown', onTap);
-  requestAnimationFrame(loop);
+  requestAnimationFrame(frame);
 }
 
 wireOverlays();

@@ -12,7 +12,7 @@
    ===================================================================== */
 import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync, unlinkSync } from 'fs';
 import { createHash } from 'crypto';
-import { INTRO, BOSS_DEFEAT, COMPANION_CHEER, FLOOR_QUOTES, bossIntroScene, companionJoinScene } from '../src/story/content.js';
+import { INTRO, BOSS_DEFEAT, COMPANION_CHEER, FLOOR_QUOTES, FLOOR_DONE, bossIntroScene, companionJoinScene } from '../src/story/content.js';
 import { BEFEHL_VERBS, zauberePhrase, syllableRead, shieldWas, befehlOne, befehlTwo, befehlHelp, FIXED_GAMEPLAY } from '../src/learning/speech-lines.js';
 import { COLORS } from '../src/world/colors.js';
 
@@ -58,7 +58,7 @@ BOSS_DEFEAT.forEach(t => add('boss', t));
 companionJoinScene({ icon: '', name: '' }).forEach(s => add(s.voice, s.text));
 COMPANION_CHEER.forEach(t => add('companion', t));
 FLOOR_QUOTES.forEach(t => add('companion', t));
-add('narrator', 'Gebiet geschafft! Du hast die Figur erbeutet.');
+add('narrator', FLOOR_DONE);
 
 /* ---------- Gameplay: Wörter, Silben, Schildwörter, Sätze ----------
    Quelle ist words.json → tauscht die Therapeutin Wörter aus, erzeugt

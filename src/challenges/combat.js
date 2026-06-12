@@ -57,7 +57,7 @@ export function killMob() {
   const wasBoss = G.mob.boss, animal = G.mob.animal, bossSym = G.mob.def.sym;
   burst(pos.clone().add(new THREE.Vector3(0, 1, 0)), 34,
     [0xffffff, 0xffe9a3, wasBoss ? 0x9b59c9 : 0x46d68a], true);
-  announce(wasBoss ? 'BESIEGT!' : 'BEFREIT! 🕊', 1000);
+  announce('BEFREIT! 🕊', 1000); /* auch Wächter werden erlöst, nie besiegt */
   /* Tier wird befreit: Verzauberung fällt ab, es fliegt davon */
   freeMobVisual();
   document.getElementById('mobBar').classList.remove('on');

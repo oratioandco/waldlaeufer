@@ -48,7 +48,9 @@ export function startWordChallenge(mode) {
   const st = G.stations[G.stIdx];
   const lat = lateral(st.dir);
   const portrait = innerHeight > innerWidth;
-  const dist = portrait ? 6.4 : 4.4;
+  /* dist erhöht (5.2/7.2): Karten erscheinen kleiner und höher im Bild
+     → keine Überlappung mit Silben-Slots und Vorlesen-Button unten */
+  const dist = portrait ? 7.2 : 5.2;
   const vFov = camera.fov * Math.PI / 180;
   const hHalf = Math.tan(vFov / 2) * (innerWidth / innerHeight) * dist * 0.8;
   const spacing = 2.1;
@@ -60,7 +62,9 @@ export function startWordChallenge(mode) {
     const col = k % perRow;
     const off = inRow === 1 ? 0 : (col - (inRow - 1) / 2) * Math.min(spacing, (hHalf * 2) / (inRow - 1));
     const r = makeCard(o.s, o.i);
-    r.userData.baseY = 1.0 + row * 1.45;
+    /* baseY 1.7: untere Kartenreihe bleibt über dem Silben-HUD
+       und dem Vorlesen-Button am unteren Bildschirmrand */
+    r.userData.baseY = 1.7 + row * 1.45;
     r.position.copy(base).addScaledVector(lat, off);
     r.position.y = r.userData.baseY;
   });
