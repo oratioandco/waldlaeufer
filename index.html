@@ -107,6 +107,16 @@
       <h3>📅 Letzte Sitzungen</h3>
       <div id="histList"></div>
     </div>
+    <h3>📚 Wortschatz-Paket</h3>
+    <p>Fertige Wortlisten nach Lesestufe – ersetzen alle vier Stufen auf einmal.
+    <b>Standard</b> ist die lautgetreue Progression nach Reuter-Liehr.</p>
+    <div id="packRow">
+      <select id="packSelect">
+        <option value="">Standard · lautgetreu (Reuter-Liehr)</option>
+      </select>
+      <button class="play" id="packApply" style="margin-top:8px">PAKET ÜBERNEHMEN</button>
+      <div id="packStatus"></div>
+    </div>
     <h3>🛠 Eigene Förderwörter</h3>
     <p>Ein Wort pro Zeile, Silben mit Bindestrich getrennt (z.&nbsp;B. <b>Ba-na-ne</b>).
     Die Liste ersetzt die gewählte Stufe für dieses Profil – ideal für die
@@ -121,6 +131,16 @@
       <textarea id="cwWords" rows="5" placeholder="Ba-na-ne&#10;To-ma-te&#10;Ra-ke-te"></textarea>
       <button class="play" id="cwSave" style="margin-top:8px">FÖRDERWÖRTER SPEICHERN</button>
       <div id="cwStatus"></div>
+    </div>
+    <h3>💾 Spielstand übertragen</h3>
+    <p>Für den Gerätewechsel: Spielstand (Lernstand <b>und</b> Abenteuer-Fortschritt)
+    als Datei sichern und auf dem neuen Gerät wieder einlesen. Es gibt kein Konto –
+    alle Daten bleiben bei euch.</p>
+    <div id="saveRow">
+      <button class="play" id="saveExport">SPIELSTAND SICHERN</button>
+      <button class="play" id="saveImport">SPIELSTAND EINLESEN</button>
+      <input type="file" id="saveFile" accept=".json,application/json" style="display:none">
+      <div id="saveStatus"></div>
     </div>
     <h3>Strukturierte Wortauswahl statt Zufall</h3>
     <p>Die Wörter folgen einem <b>Spaced-Repetition-System</b> (Leitner-Prinzip): Jedes Wort hat eine Beherrschungsstufe. Fehlerfreie Wörter steigen auf und kommen seltener; Fehlerwörter werden nach 2–3 anderen Wörtern gezielt erneut geübt (verteiltes Wiederholen – wirksamer als sofortige Massierung). Neue Wörter werden erst eingeführt, wenn die aktuelle Stufe zu ~70&nbsp;% beherrscht ist (<b>Mastery-Gating</b>). Die Schwierigkeitsstufen folgen der lautgetreuen Progression (Reuter-Liehr): offene 2-Silber → mehrsilbig → Konsonantenhäufungen → Klasse&nbsp;4/5 mit Vor-/Nachsilben und Komposita aus dem Grundwortschatz.</p>

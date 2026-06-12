@@ -224,3 +224,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;heigh
   #hearts{font-size:19px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Deaktivierte Panel-Buttons (z.B. Wortlisten auf dem Startbildschirm) */
+button:disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.6); }

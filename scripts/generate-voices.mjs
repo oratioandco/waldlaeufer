@@ -73,7 +73,12 @@ add('word', UI_LINES.shieldAlert);
    Quelle ist words.json → tauscht die Therapeutin Wörter aus, erzeugt
    der nächste Lauf automatisch die fehlenden Clips. */
 const WORDS = JSON.parse(readFileSync('src/learning/words.json', 'utf8'));
-Object.values(WORDS.tiers).flat().forEach(w => {
+/* Standard-Stufen + alle Wortschatz-Pakete (Klasse 1/2, 3/4, …) */
+const allTierWords = [
+  ...Object.values(WORDS.tiers).flat(),
+  ...Object.values(WORDS.packs || {}).flatMap(p => Object.values(p.tiers).flat())
+];
+allTierWords.forEach(w => {
   add('word', w.w);                  // das Wort allein (Scaffolding-Stufe 1)
   add('word', zauberePhrase(w.w));   // „Zaubere: …" (Aufgaben-Start)
   add('word', syllableRead(w));      // „O, ma. Oma" (📯-Button)

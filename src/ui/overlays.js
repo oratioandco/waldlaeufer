@@ -2,7 +2,8 @@
    Eltern-Panel mit Live-Lern-Report ---------- */
 import { G } from '../state.js';
 import { SESSION, activeTier, tierMastery, TIER_NAMES, getCustomWords, setCustomWords } from '../learning/engine.js';
-import { getHistory } from '../meta/save.js';
+import { getHistory, exportActiveProfile, importProfile } from '../meta/save.js';
+import WORDS from '../learning/words.json';
 import { BOSSES } from '../creatures/data.js';
 import { planFloor, advance } from '../world/stations.js';
 import { biomeFor } from '../world/biomes.js';
@@ -49,7 +50,69 @@ export function openAdult() {
       }).join('<br>')
     : 'Noch keine abgeschlossenen Sitzungen.';
   loadCustomWordsUI();
+  /* Wortlisten gelten PRO PROFIL: auf dem Startbildschirm (kein Profil
+     aktiv) wäre die Auswahl verloren – Bearbeitung erst im Spiel */
+  const onTitle = document.getElementById('startOv').classList.contains('on');
+  document.getElementById('packApply').disabled = onTitle;
+  document.getElementById('cwSave').disabled = onTitle;
+  const anyCustom = Object.values(getCustomWords()).some(l => l && l.length);
+  document.getElementById('packStatus').textContent = onTitle
+    ? 'Wortlisten gelten pro Profil – bitte zuerst das Abenteuer des Kindes starten.'
+    : (anyCustom ? 'Eigene Wortlisten sind aktiv (siehe Förderwörter-Editor unten).' : '');
   ovOn('adultOv');
+}
+
+/* ---------- Wortschatz-Pakete (fertige Listen nach Lesestufe) ---------- */
+function fillPackSelect() {
+  const sel = document.getElementById('packSelect');
+  Object.entries(WORDS.packs || {}).forEach(([key, p]) => {
+    const o = document.createElement('option');
+    o.value = key; o.textContent = p.name;
+    sel.appendChild(o);
+  });
+}
+function applyPackUI() {
+  const key = document.getElementById('packSelect').value;
+  const status = document.getElementById('packStatus');
+  if (!key) {
+    [1, 2, 3, 4].forEach(t => setCustomWords(t, []));
+    status.textContent = '✓ Standard-Wörter (lautgetreue Progression) sind wieder aktiv.';
+  } else {
+    const pack = WORDS.packs[key];
+    [1, 2, 3, 4].forEach(t => setCustomWords(t, pack.tiers[t] || []));
+    status.textContent = `✓ „${pack.name}" ist jetzt aktiv – für alle vier Stufen.`;
+  }
+  saveActive();
+  loadCustomWordsUI();
+}
+
+/* ---------- Spielstand als Datei sichern / einlesen ---------- */
+function exportSaveUI() {
+  const status = document.getElementById('saveStatus');
+  const obj = exportActiveProfile();
+  if (!obj) { status.textContent = 'Noch kein Profil gespielt – erst ein Abenteuer starten.'; return; }
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'waldlaeufer-' + obj.name.toLowerCase().replace(/[^a-zä-ü0-9]/gi, '') + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  status.textContent = `✓ Spielstand von ${obj.name} als Datei gesichert.`;
+}
+function importSaveUI(file) {
+  const status = document.getElementById('saveStatus');
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const obj = JSON.parse(reader.result);
+      importProfile(obj);
+      status.textContent = `✓ Spielstand von ${obj.name} eingelesen – Spiel startet neu …`;
+      setTimeout(() => location.reload(), 1600);
+    } catch (e) {
+      status.textContent = '✗ ' + (e.message || 'Datei konnte nicht gelesen werden.');
+    }
+  };
+  reader.readAsText(file);
 }
 
 /* ---------- Förderwörter-Editor ---------- */
@@ -156,6 +219,16 @@ export function wireOverlays() {
 
   document.getElementById('cwTier').addEventListener('change', loadCustomWordsUI);
   document.getElementById('cwSave').addEventListener('click', saveCustomWordsUI);
+  /* Wortschatz-Pakete + Spielstand-Datei */
+  fillPackSelect();
+  document.getElementById('packApply').addEventListener('click', applyPackUI);
+  document.getElementById('saveExport').addEventListener('click', exportSaveUI);
+  document.getElementById('saveImport').addEventListener('click', () =>
+    document.getElementById('saveFile').click());
+  document.getElementById('saveFile').addEventListener('change', e => {
+    if (e.target.files[0]) importSaveUI(e.target.files[0]);
+    e.target.value = '';
+  });
 
   /* dezentes Tap-Feedback auf allen statischen Buttons */
   document.querySelectorAll('.play, .ghost, .chip, #settingsBtn, #pauseBtn, #hornBtn').forEach(b =>

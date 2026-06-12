@@ -71,6 +71,29 @@ export function getHistory() {
   return (p && p.data && p.data.history) || [];
 }
 
+/* ---------- Export/Import als Datei (Gerätewechsel, kein Account) ---------- */
+export function exportActiveProfile() {
+  if (sessionStarted) saveActive(); /* aktuellen Stand mitnehmen */
+  const s = readStore();
+  const p = s.profiles[s.activeId];
+  if (!p) return null;
+  return { format: 'waldlaeufer-profile', v: 1, name: p.name, data: p.data };
+}
+export function importProfile(obj) {
+  if (!obj || obj.format !== 'waldlaeufer-profile' || !obj.name) {
+    throw new Error('Das ist kein Waldläufer-Spielstand.');
+  }
+  const s = readStore();
+  const id = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  s.profiles[id] = {
+    name: String(obj.name).toUpperCase().slice(0, 12),
+    updated: Date.now(),
+    data: obj.data || null
+  };
+  writeStore(s);
+  return id;
+}
+
 function collectAll() {
   return {
     floor: G.floor, gems: G.gems, trophies: G.trophies, kills: G.kills,

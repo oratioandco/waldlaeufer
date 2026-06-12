@@ -40,15 +40,18 @@ Diese Prinzipien sind das Fundament. Kein Feature darf sie verwässern.
 6. **TTS de-DE** koppelt Laut- und Schriftbild; 📯-Button wiederholt jederzeit.
 7. **~10 Wörter pro Gebiet**, Checkpoint = natürliche Pausenstelle.
 8. **Eltern-/Therapeuten-Panel** mit Live-Report (Wörter geübt,
-   Fehlerfrei-Quote, Mastery-Balken je Stufe). Geplanter Ausbau:
-   Session-Historie, Fehlermuster, Export. **Wortschatz-Pakete** nach
-   Lesestufe wählbar (Klasse 1/2 lauttreu … 4/5; Lesestufe ≠
-   Jahrgangsstufe bei LRS!) – jedes Paket intern in der 4-Stufen-
-   Progression. Paketwahl setzt nur den Startpunkt, Mastery-Gating
-   regelt das Tempo. Eigene Förderwörter pro Profil direkt im Panel
-   eintragbar (Format: „Ba-na-ne", Bindestrich = Silbengrenze);
-   neue Wörter sprechen sofort per Web-Speech-Fallback, Studio-Stimme
-   beim nächsten `npm run voices`.
+   Fehlerfrei-Quote, Mastery-Balken je Stufe), Session-Historie und
+   Spielstand-Export/-Import als Datei (Gerätewechsel, kein Account).
+   **Wortschatz-Pakete** (umgesetzt: `words.json` → `packs`, GWS
+   Klasse 1/2 + 3/4; Lesestufe ≠ Jahrgangsstufe bei LRS!) – jedes
+   Paket intern in der 4-Stufen-Progression, Auswahl ersetzt alle
+   vier Stufen per `setCustomWords`. Mastery-Gating regelt das Tempo.
+   Eigene Förderwörter pro Profil direkt im Panel eintragbar
+   (Format: „Ba-na-ne", Bindestrich = Silbengrenze); neue Wörter
+   sprechen sofort per Web-Speech-Fallback, Studio-Stimme beim
+   nächsten `npm run voices` (Generator liest auch `packs`).
+   WICHTIG: Wortlisten gelten PRO PROFIL → Bearbeitung nur im Spiel,
+   auf dem Startbildschirm gesperrt (sonst ginge die Wahl verloren).
 9. **Audio-First (LRS!):** Kein kindgerichteter Text darf Lese-
    Voraussetzung sein, um im Spiel weiterzukommen. Jedes Overlay/
    Banner für das Kind wird vertont oder hat eine Sound-Signatur.

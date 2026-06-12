@@ -8,82 +8,1281 @@
   },
   "tiers": {
     "1": [
-      {"w": "Oma", "s": ["O", "ma"]},
-      {"w": "Nase", "s": ["Na", "se"]},
-      {"w": "Hase", "s": ["Ha", "se"]},
-      {"w": "Rose", "s": ["Ro", "se"]},
-      {"w": "Wiese", "s": ["Wie", "se"]},
-      {"w": "Esel", "s": ["E", "sel"]},
-      {"w": "Igel", "s": ["I", "gel"]},
-      {"w": "Rabe", "s": ["Ra", "be"]},
-      {"w": "Feder", "s": ["Fe", "der"]},
-      {"w": "Bogen", "s": ["Bo", "gen"]},
-      {"w": "Nebel", "s": ["Ne", "bel"]},
-      {"w": "Hagel", "s": ["Ha", "gel"]},
-      {"w": "Biene", "s": ["Bie", "ne"]},
-      {"w": "Eule", "s": ["Eu", "le"]}
+      {
+        "w": "Oma",
+        "s": [
+          "O",
+          "ma"
+        ]
+      },
+      {
+        "w": "Nase",
+        "s": [
+          "Na",
+          "se"
+        ]
+      },
+      {
+        "w": "Hase",
+        "s": [
+          "Ha",
+          "se"
+        ]
+      },
+      {
+        "w": "Rose",
+        "s": [
+          "Ro",
+          "se"
+        ]
+      },
+      {
+        "w": "Wiese",
+        "s": [
+          "Wie",
+          "se"
+        ]
+      },
+      {
+        "w": "Esel",
+        "s": [
+          "E",
+          "sel"
+        ]
+      },
+      {
+        "w": "Igel",
+        "s": [
+          "I",
+          "gel"
+        ]
+      },
+      {
+        "w": "Rabe",
+        "s": [
+          "Ra",
+          "be"
+        ]
+      },
+      {
+        "w": "Feder",
+        "s": [
+          "Fe",
+          "der"
+        ]
+      },
+      {
+        "w": "Bogen",
+        "s": [
+          "Bo",
+          "gen"
+        ]
+      },
+      {
+        "w": "Nebel",
+        "s": [
+          "Ne",
+          "bel"
+        ]
+      },
+      {
+        "w": "Hagel",
+        "s": [
+          "Ha",
+          "gel"
+        ]
+      },
+      {
+        "w": "Biene",
+        "s": [
+          "Bie",
+          "ne"
+        ]
+      },
+      {
+        "w": "Eule",
+        "s": [
+          "Eu",
+          "le"
+        ]
+      }
     ],
     "2": [
-      {"w": "Banane", "s": ["Ba", "na", "ne"]},
-      {"w": "Tomate", "s": ["To", "ma", "te"]},
-      {"w": "Rakete", "s": ["Ra", "ke", "te"]},
-      {"w": "Lawine", "s": ["La", "wi", "ne"]},
-      {"w": "Kamera", "s": ["Ka", "me", "ra"]},
-      {"w": "Ananas", "s": ["A", "na", "nas"]},
-      {"w": "Salami", "s": ["Sa", "la", "mi"]},
-      {"w": "Telefon", "s": ["Te", "le", "fon"]},
-      {"w": "Tornado", "s": ["Tor", "na", "do"]},
-      {"w": "Krokodil", "s": ["Kro", "ko", "dil"]},
-      {"w": "Pyramide", "s": ["Py", "ra", "mi", "de"]},
-      {"w": "Marmelade", "s": ["Mar", "me", "la", "de"]}
+      {
+        "w": "Banane",
+        "s": [
+          "Ba",
+          "na",
+          "ne"
+        ]
+      },
+      {
+        "w": "Tomate",
+        "s": [
+          "To",
+          "ma",
+          "te"
+        ]
+      },
+      {
+        "w": "Rakete",
+        "s": [
+          "Ra",
+          "ke",
+          "te"
+        ]
+      },
+      {
+        "w": "Lawine",
+        "s": [
+          "La",
+          "wi",
+          "ne"
+        ]
+      },
+      {
+        "w": "Kamera",
+        "s": [
+          "Ka",
+          "me",
+          "ra"
+        ]
+      },
+      {
+        "w": "Ananas",
+        "s": [
+          "A",
+          "na",
+          "nas"
+        ]
+      },
+      {
+        "w": "Salami",
+        "s": [
+          "Sa",
+          "la",
+          "mi"
+        ]
+      },
+      {
+        "w": "Telefon",
+        "s": [
+          "Te",
+          "le",
+          "fon"
+        ]
+      },
+      {
+        "w": "Tornado",
+        "s": [
+          "Tor",
+          "na",
+          "do"
+        ]
+      },
+      {
+        "w": "Krokodil",
+        "s": [
+          "Kro",
+          "ko",
+          "dil"
+        ]
+      },
+      {
+        "w": "Pyramide",
+        "s": [
+          "Py",
+          "ra",
+          "mi",
+          "de"
+        ]
+      },
+      {
+        "w": "Marmelade",
+        "s": [
+          "Mar",
+          "me",
+          "la",
+          "de"
+        ]
+      }
     ],
     "3": [
-      {"w": "Drache", "s": ["Dra", "che"]},
-      {"w": "Schlange", "s": ["Schlan", "ge"]},
-      {"w": "Donner", "s": ["Don", "ner"]},
-      {"w": "Schatten", "s": ["Schat", "ten"]},
-      {"w": "Monster", "s": ["Mons", "ter"]},
-      {"w": "Springer", "s": ["Sprin", "ger"]},
-      {"w": "Splitter", "s": ["Split", "ter"]},
-      {"w": "Kristall", "s": ["Kris", "tall"]},
-      {"w": "Skelett", "s": ["Ske", "lett"]},
-      {"w": "Diamant", "s": ["Di", "a", "mant"]},
-      {"w": "Sturmwind", "s": ["Sturm", "wind"]},
-      {"w": "Schmetterling", "s": ["Schmet", "ter", "ling"]}
+      {
+        "w": "Drache",
+        "s": [
+          "Dra",
+          "che"
+        ]
+      },
+      {
+        "w": "Schlange",
+        "s": [
+          "Schlan",
+          "ge"
+        ]
+      },
+      {
+        "w": "Donner",
+        "s": [
+          "Don",
+          "ner"
+        ]
+      },
+      {
+        "w": "Schatten",
+        "s": [
+          "Schat",
+          "ten"
+        ]
+      },
+      {
+        "w": "Monster",
+        "s": [
+          "Mons",
+          "ter"
+        ]
+      },
+      {
+        "w": "Springer",
+        "s": [
+          "Sprin",
+          "ger"
+        ]
+      },
+      {
+        "w": "Splitter",
+        "s": [
+          "Split",
+          "ter"
+        ]
+      },
+      {
+        "w": "Kristall",
+        "s": [
+          "Kris",
+          "tall"
+        ]
+      },
+      {
+        "w": "Skelett",
+        "s": [
+          "Ske",
+          "lett"
+        ]
+      },
+      {
+        "w": "Diamant",
+        "s": [
+          "Di",
+          "a",
+          "mant"
+        ]
+      },
+      {
+        "w": "Sturmwind",
+        "s": [
+          "Sturm",
+          "wind"
+        ]
+      },
+      {
+        "w": "Schmetterling",
+        "s": [
+          "Schmet",
+          "ter",
+          "ling"
+        ]
+      }
     ],
     "4": [
-      {"w": "Geheimnis", "s": ["Ge", "heim", "nis"]},
-      {"w": "Abenteuer", "s": ["A", "ben", "teu", "er"]},
-      {"w": "Augenblick", "s": ["Au", "gen", "blick"]},
-      {"w": "Freundschaft", "s": ["Freund", "schaft"]},
-      {"w": "Entdecker", "s": ["Ent", "de", "cker"]},
-      {"w": "Verwandlung", "s": ["Ver", "wand", "lung"]},
-      {"w": "Beschützer", "s": ["Be", "schüt", "zer"]},
-      {"w": "Zauberkraft", "s": ["Zau", "ber", "kraft"]},
-      {"w": "Königreich", "s": ["Kö", "nig", "reich"]},
-      {"w": "Unsichtbar", "s": ["Un", "sicht", "bar"]},
-      {"w": "Verzauberung", "s": ["Ver", "zau", "be", "rung"]},
-      {"w": "Geisterstunde", "s": ["Geis", "ter", "stun", "de"]}
+      {
+        "w": "Geheimnis",
+        "s": [
+          "Ge",
+          "heim",
+          "nis"
+        ]
+      },
+      {
+        "w": "Abenteuer",
+        "s": [
+          "A",
+          "ben",
+          "teu",
+          "er"
+        ]
+      },
+      {
+        "w": "Augenblick",
+        "s": [
+          "Au",
+          "gen",
+          "blick"
+        ]
+      },
+      {
+        "w": "Freundschaft",
+        "s": [
+          "Freund",
+          "schaft"
+        ]
+      },
+      {
+        "w": "Entdecker",
+        "s": [
+          "Ent",
+          "de",
+          "cker"
+        ]
+      },
+      {
+        "w": "Verwandlung",
+        "s": [
+          "Ver",
+          "wand",
+          "lung"
+        ]
+      },
+      {
+        "w": "Beschützer",
+        "s": [
+          "Be",
+          "schüt",
+          "zer"
+        ]
+      },
+      {
+        "w": "Zauberkraft",
+        "s": [
+          "Zau",
+          "ber",
+          "kraft"
+        ]
+      },
+      {
+        "w": "Königreich",
+        "s": [
+          "Kö",
+          "nig",
+          "reich"
+        ]
+      },
+      {
+        "w": "Unsichtbar",
+        "s": [
+          "Un",
+          "sicht",
+          "bar"
+        ]
+      },
+      {
+        "w": "Verzauberung",
+        "s": [
+          "Ver",
+          "zau",
+          "be",
+          "rung"
+        ]
+      },
+      {
+        "w": "Geisterstunde",
+        "s": [
+          "Geis",
+          "ter",
+          "stun",
+          "de"
+        ]
+      }
     ]
   },
   "shields": [
-    {"w": "und", "d": ["uns", "rund"]},
-    {"w": "der", "d": ["den", "dem"]},
-    {"w": "die", "d": ["dir", "sie"]},
-    {"w": "das", "d": ["des", "was"]},
-    {"w": "ist", "d": ["im", "ihr"]},
-    {"w": "mit", "d": ["mir", "mut"]},
-    {"w": "auf", "d": ["aus", "an"]},
-    {"w": "ein", "d": ["kein", "eins"]},
-    {"w": "ich", "d": ["dich", "ach"]},
-    {"w": "sie", "d": ["wie", "sei"]},
-    {"w": "nicht", "d": ["licht", "nichts"]},
-    {"w": "auch", "d": ["aus", "ach"]},
-    {"w": "sind", "d": ["sand", "seid"]},
-    {"w": "wir", "d": ["wer", "wie"]},
-    {"w": "dann", "d": ["denn", "dran"]},
-    {"w": "noch", "d": ["nach", "doch"]},
-    {"w": "sehr", "d": ["mehr", "sieht"]},
-    {"w": "wieder", "d": ["weiter", "wider"]}
-  ]
+    {
+      "w": "und",
+      "d": [
+        "uns",
+        "rund"
+      ]
+    },
+    {
+      "w": "der",
+      "d": [
+        "den",
+        "dem"
+      ]
+    },
+    {
+      "w": "die",
+      "d": [
+        "dir",
+        "sie"
+      ]
+    },
+    {
+      "w": "das",
+      "d": [
+        "des",
+        "was"
+      ]
+    },
+    {
+      "w": "ist",
+      "d": [
+        "im",
+        "ihr"
+      ]
+    },
+    {
+      "w": "mit",
+      "d": [
+        "mir",
+        "mut"
+      ]
+    },
+    {
+      "w": "auf",
+      "d": [
+        "aus",
+        "an"
+      ]
+    },
+    {
+      "w": "ein",
+      "d": [
+        "kein",
+        "eins"
+      ]
+    },
+    {
+      "w": "ich",
+      "d": [
+        "dich",
+        "ach"
+      ]
+    },
+    {
+      "w": "sie",
+      "d": [
+        "wie",
+        "sei"
+      ]
+    },
+    {
+      "w": "nicht",
+      "d": [
+        "licht",
+        "nichts"
+      ]
+    },
+    {
+      "w": "auch",
+      "d": [
+        "aus",
+        "ach"
+      ]
+    },
+    {
+      "w": "sind",
+      "d": [
+        "sand",
+        "seid"
+      ]
+    },
+    {
+      "w": "wir",
+      "d": [
+        "wer",
+        "wie"
+      ]
+    },
+    {
+      "w": "dann",
+      "d": [
+        "denn",
+        "dran"
+      ]
+    },
+    {
+      "w": "noch",
+      "d": [
+        "nach",
+        "doch"
+      ]
+    },
+    {
+      "w": "sehr",
+      "d": [
+        "mehr",
+        "sieht"
+      ]
+    },
+    {
+      "w": "wieder",
+      "d": [
+        "weiter",
+        "wider"
+      ]
+    }
+  ],
+  "packs": {
+    "gws12": {
+      "name": "Grundwortschatz Klasse 1/2",
+      "hinweis": "Häufige, überwiegend lautgetreue Wörter aus dem Grundwortschatz der Klassen 1/2 – gleiche 4-Stufen-Progression.",
+      "tiers": {
+        "1": [
+          {
+            "w": "Hose",
+            "s": [
+              "Ho",
+              "se"
+            ]
+          },
+          {
+            "w": "Dose",
+            "s": [
+              "Do",
+              "se"
+            ]
+          },
+          {
+            "w": "Tafel",
+            "s": [
+              "Ta",
+              "fel"
+            ]
+          },
+          {
+            "w": "Gabel",
+            "s": [
+              "Ga",
+              "bel"
+            ]
+          },
+          {
+            "w": "Vogel",
+            "s": [
+              "Vo",
+              "gel"
+            ]
+          },
+          {
+            "w": "Kino",
+            "s": [
+              "Ki",
+              "no"
+            ]
+          },
+          {
+            "w": "Sofa",
+            "s": [
+              "So",
+              "fa"
+            ]
+          },
+          {
+            "w": "Hafen",
+            "s": [
+              "Ha",
+              "fen"
+            ]
+          },
+          {
+            "w": "Regen",
+            "s": [
+              "Re",
+              "gen"
+            ]
+          },
+          {
+            "w": "Boden",
+            "s": [
+              "Bo",
+              "den"
+            ]
+          },
+          {
+            "w": "Käfer",
+            "s": [
+              "Kä",
+              "fer"
+            ]
+          },
+          {
+            "w": "Schule",
+            "s": [
+              "Schu",
+              "le"
+            ]
+          }
+        ],
+        "2": [
+          {
+            "w": "Melone",
+            "s": [
+              "Me",
+              "lo",
+              "ne"
+            ]
+          },
+          {
+            "w": "Rosine",
+            "s": [
+              "Ro",
+              "si",
+              "ne"
+            ]
+          },
+          {
+            "w": "Papagei",
+            "s": [
+              "Pa",
+              "pa",
+              "gei"
+            ]
+          },
+          {
+            "w": "Pelikan",
+            "s": [
+              "Pe",
+              "li",
+              "kan"
+            ]
+          },
+          {
+            "w": "Kakadu",
+            "s": [
+              "Ka",
+              "ka",
+              "du"
+            ]
+          },
+          {
+            "w": "Domino",
+            "s": [
+              "Do",
+              "mi",
+              "no"
+            ]
+          },
+          {
+            "w": "Sirene",
+            "s": [
+              "Si",
+              "re",
+              "ne"
+            ]
+          },
+          {
+            "w": "Pirat",
+            "s": [
+              "Pi",
+              "rat"
+            ]
+          },
+          {
+            "w": "Salat",
+            "s": [
+              "Sa",
+              "lat"
+            ]
+          },
+          {
+            "w": "Schokolade",
+            "s": [
+              "Scho",
+              "ko",
+              "la",
+              "de"
+            ]
+          },
+          {
+            "w": "Limonade",
+            "s": [
+              "Li",
+              "mo",
+              "na",
+              "de"
+            ]
+          },
+          {
+            "w": "Lokomotive",
+            "s": [
+              "Lo",
+              "ko",
+              "mo",
+              "ti",
+              "ve"
+            ]
+          }
+        ],
+        "3": [
+          {
+            "w": "Blume",
+            "s": [
+              "Blu",
+              "me"
+            ]
+          },
+          {
+            "w": "Brille",
+            "s": [
+              "Bril",
+              "le"
+            ]
+          },
+          {
+            "w": "Kleber",
+            "s": [
+              "Kle",
+              "ber"
+            ]
+          },
+          {
+            "w": "Schwester",
+            "s": [
+              "Schwes",
+              "ter"
+            ]
+          },
+          {
+            "w": "Pflaume",
+            "s": [
+              "Pflau",
+              "me"
+            ]
+          },
+          {
+            "w": "Traktor",
+            "s": [
+              "Trak",
+              "tor"
+            ]
+          },
+          {
+            "w": "Flasche",
+            "s": [
+              "Fla",
+              "sche"
+            ]
+          },
+          {
+            "w": "Glocke",
+            "s": [
+              "Glo",
+              "cke"
+            ]
+          },
+          {
+            "w": "Schwalbe",
+            "s": [
+              "Schwal",
+              "be"
+            ]
+          },
+          {
+            "w": "Spinne",
+            "s": [
+              "Spin",
+              "ne"
+            ]
+          },
+          {
+            "w": "Kralle",
+            "s": [
+              "Kral",
+              "le"
+            ]
+          },
+          {
+            "w": "Schnecke",
+            "s": [
+              "Schne",
+              "cke"
+            ]
+          }
+        ],
+        "4": [
+          {
+            "w": "Schulhof",
+            "s": [
+              "Schul",
+              "hof"
+            ]
+          },
+          {
+            "w": "Ausflug",
+            "s": [
+              "Aus",
+              "flug"
+            ]
+          },
+          {
+            "w": "Spielplatz",
+            "s": [
+              "Spiel",
+              "platz"
+            ]
+          },
+          {
+            "w": "Fußball",
+            "s": [
+              "Fuß",
+              "ball"
+            ]
+          },
+          {
+            "w": "Vorlesen",
+            "s": [
+              "Vor",
+              "le",
+              "sen"
+            ]
+          },
+          {
+            "w": "Verstecken",
+            "s": [
+              "Ver",
+              "ste",
+              "cken"
+            ]
+          },
+          {
+            "w": "Geburtstag",
+            "s": [
+              "Ge",
+              "burts",
+              "tag"
+            ]
+          },
+          {
+            "w": "Apfelbaum",
+            "s": [
+              "Ap",
+              "fel",
+              "baum"
+            ]
+          },
+          {
+            "w": "Regenbogen",
+            "s": [
+              "Re",
+              "gen",
+              "bo",
+              "gen"
+            ]
+          },
+          {
+            "w": "Sonnenblume",
+            "s": [
+              "Son",
+              "nen",
+              "blu",
+              "me"
+            ]
+          },
+          {
+            "w": "Hausaufgabe",
+            "s": [
+              "Haus",
+              "auf",
+              "ga",
+              "be"
+            ]
+          },
+          {
+            "w": "Schattenspiel",
+            "s": [
+              "Schat",
+              "ten",
+              "spiel"
+            ]
+          }
+        ]
+      }
+    },
+    "gws34": {
+      "name": "Grundwortschatz Klasse 3/4",
+      "hinweis": "Wörter aus dem Grundwortschatz der Klassen 3/4 inkl. orthografischer Besonderheiten (Dehnungs-h, Doppelkonsonant).",
+      "tiers": {
+        "1": [
+          {
+            "w": "Lehrer",
+            "s": [
+              "Leh",
+              "rer"
+            ]
+          },
+          {
+            "w": "Woche",
+            "s": [
+              "Wo",
+              "che"
+            ]
+          },
+          {
+            "w": "Fieber",
+            "s": [
+              "Fie",
+              "ber"
+            ]
+          },
+          {
+            "w": "Honig",
+            "s": [
+              "Ho",
+              "nig"
+            ]
+          },
+          {
+            "w": "Mauer",
+            "s": [
+              "Mau",
+              "er"
+            ]
+          },
+          {
+            "w": "Feuer",
+            "s": [
+              "Feu",
+              "er"
+            ]
+          },
+          {
+            "w": "Eimer",
+            "s": [
+              "Ei",
+              "mer"
+            ]
+          },
+          {
+            "w": "Leiter",
+            "s": [
+              "Lei",
+              "ter"
+            ]
+          },
+          {
+            "w": "Fahne",
+            "s": [
+              "Fah",
+              "ne"
+            ]
+          },
+          {
+            "w": "Höhle",
+            "s": [
+              "Höh",
+              "le"
+            ]
+          },
+          {
+            "w": "Mühle",
+            "s": [
+              "Müh",
+              "le"
+            ]
+          },
+          {
+            "w": "Wetter",
+            "s": [
+              "Wet",
+              "ter"
+            ]
+          }
+        ],
+        "2": [
+          {
+            "w": "Ameise",
+            "s": [
+              "A",
+              "mei",
+              "se"
+            ]
+          },
+          {
+            "w": "Pinguin",
+            "s": [
+              "Pin",
+              "gu",
+              "in"
+            ]
+          },
+          {
+            "w": "Medizin",
+            "s": [
+              "Me",
+              "di",
+              "zin"
+            ]
+          },
+          {
+            "w": "Kalender",
+            "s": [
+              "Ka",
+              "len",
+              "der"
+            ]
+          },
+          {
+            "w": "Karneval",
+            "s": [
+              "Kar",
+              "ne",
+              "val"
+            ]
+          },
+          {
+            "w": "Paradies",
+            "s": [
+              "Pa",
+              "ra",
+              "dies"
+            ]
+          },
+          {
+            "w": "Marathon",
+            "s": [
+              "Ma",
+              "ra",
+              "thon"
+            ]
+          },
+          {
+            "w": "Musikant",
+            "s": [
+              "Mu",
+              "si",
+              "kant"
+            ]
+          },
+          {
+            "w": "Laterne",
+            "s": [
+              "La",
+              "ter",
+              "ne"
+            ]
+          },
+          {
+            "w": "Vitamine",
+            "s": [
+              "Vi",
+              "ta",
+              "mi",
+              "ne"
+            ]
+          },
+          {
+            "w": "Erdbeere",
+            "s": [
+              "Erd",
+              "bee",
+              "re"
+            ]
+          },
+          {
+            "w": "Regenwurm",
+            "s": [
+              "Re",
+              "gen",
+              "wurm"
+            ]
+          }
+        ],
+        "3": [
+          {
+            "w": "Hubschrauber",
+            "s": [
+              "Hub",
+              "schrau",
+              "ber"
+            ]
+          },
+          {
+            "w": "Frühstück",
+            "s": [
+              "Früh",
+              "stück"
+            ]
+          },
+          {
+            "w": "Geschwister",
+            "s": [
+              "Ge",
+              "schwis",
+              "ter"
+            ]
+          },
+          {
+            "w": "Strecke",
+            "s": [
+              "Stre",
+              "cke"
+            ]
+          },
+          {
+            "w": "Schraube",
+            "s": [
+              "Schrau",
+              "be"
+            ]
+          },
+          {
+            "w": "Pflanze",
+            "s": [
+              "Pflan",
+              "ze"
+            ]
+          },
+          {
+            "w": "Zwiebel",
+            "s": [
+              "Zwie",
+              "bel"
+            ]
+          },
+          {
+            "w": "Quelle",
+            "s": [
+              "Quel",
+              "le"
+            ]
+          },
+          {
+            "w": "Knöchel",
+            "s": [
+              "Knö",
+              "chel"
+            ]
+          },
+          {
+            "w": "Gespenst",
+            "s": [
+              "Ge",
+              "spenst"
+            ]
+          },
+          {
+            "w": "Strudel",
+            "s": [
+              "Stru",
+              "del"
+            ]
+          },
+          {
+            "w": "Schachtel",
+            "s": [
+              "Schach",
+              "tel"
+            ]
+          }
+        ],
+        "4": [
+          {
+            "w": "Entschuldigung",
+            "s": [
+              "Ent",
+              "schul",
+              "di",
+              "gung"
+            ]
+          },
+          {
+            "w": "Verantwortung",
+            "s": [
+              "Ver",
+              "ant",
+              "wor",
+              "tung"
+            ]
+          },
+          {
+            "w": "Überraschung",
+            "s": [
+              "Ü",
+              "ber",
+              "ra",
+              "schung"
+            ]
+          },
+          {
+            "w": "Geschwindigkeit",
+            "s": [
+              "Ge",
+              "schwin",
+              "dig",
+              "keit"
+            ]
+          },
+          {
+            "w": "Wissenschaft",
+            "s": [
+              "Wis",
+              "sen",
+              "schaft"
+            ]
+          },
+          {
+            "w": "Naturforscher",
+            "s": [
+              "Na",
+              "tur",
+              "for",
+              "scher"
+            ]
+          },
+          {
+            "w": "Wasserfall",
+            "s": [
+              "Was",
+              "ser",
+              "fall"
+            ]
+          },
+          {
+            "w": "Taschenlampe",
+            "s": [
+              "Ta",
+              "schen",
+              "lam",
+              "pe"
+            ]
+          },
+          {
+            "w": "Erfindung",
+            "s": [
+              "Er",
+              "fin",
+              "dung"
+            ]
+          },
+          {
+            "w": "Unterricht",
+            "s": [
+              "Un",
+              "ter",
+              "richt"
+            ]
+          },
+          {
+            "w": "Beobachtung",
+            "s": [
+              "Be",
+              "ob",
+              "ach",
+              "tung"
+            ]
+          },
+          {
+            "w": "Heldenmut",
+            "s": [
+              "Hel",
+              "den",
+              "mut"
+            ]
+          }
+        ]
+      }
+    }
+  }
 }
