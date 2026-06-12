@@ -24,15 +24,29 @@ function deformGeo(geo, roughAmt) {
 }
 function castAll(grp) { grp.traverse(o => { if (o.isMesh) o.castShadow = true; }); }
 
-export function makeTree(seed) {
+/* Standard-Biom (Wächterlichtung) als Default, damit Aufrufer ohne
+   Biom-Wissen (z.B. Boss-Baumring vor Biome-Einführung) weiter laufen */
+const DEFAULT_BIOME = { leaf: { h: .30, hVar: .08, s: .55, l: .38 }, pine: .4, trunk: 0x6e4b2a };
+
+export function makeTree(seed, biome = DEFAULT_BIOME) {
   const grp = new THREE.Group();
-  const pine = hash3(seed, 1, 1) < .4;
+  const pine = hash3(seed, 1, 1) < biome.pine;
   const trunkH = pine ? 1.7 : 1.5 + hash3(seed, 2, 2) * 1.3;
   const trunk = new THREE.Mesh(new THREE.CylinderGeometry(.17, .3, trunkH, 7),
-    new THREE.MeshLambertMaterial({ color: 0x6e4b2a }));
+    new THREE.MeshLambertMaterial({ color: biome.trunk }));
   trunk.position.y = trunkH / 2; grp.add(trunk);
+  if (biome.birch && !pine) {
+    /* Birken: dunkle Querbänder auf hellem Stamm */
+    for (let k = 0; k < 3; k++) {
+      const band = new THREE.Mesh(new THREE.CylinderGeometry(.185, .185, .09, 7),
+        new THREE.MeshLambertMaterial({ color: 0x3a3a34 }));
+      band.position.y = trunkH * (.25 + k * .27);
+      grp.add(band);
+    }
+  }
+  const L = biome.leaf;
   if (pine) {
-    const c = new THREE.Color().setHSL(.36, .5, .27 + hash3(seed, 3, 3) * .08);
+    const c = new THREE.Color().setHSL(L.h + .06, L.s, Math.max(.12, L.l - .11) + hash3(seed, 3, 3) * .08);
     for (let k = 0; k < 3; k++) {
       const cone = new THREE.Mesh(deformGeo(new THREE.ConeGeometry(1.6 - k * .42, 1.6, 9), .14),
         new THREE.MeshLambertMaterial({ color: c }));
@@ -40,7 +54,7 @@ export function makeTree(seed) {
       grp.add(cone);
     }
   } else {
-    const c = new THREE.Color().setHSL(.3 + hash3(seed, 4, 4) * .08, .55, .38 + hash3(seed, 5, 5) * .1);
+    const c = new THREE.Color().setHSL(L.h + hash3(seed, 4, 4) * L.hVar, L.s, L.l + hash3(seed, 5, 5) * .1);
     const n = 2 + Math.floor(hash3(seed, 6, 6) * 2);
     for (let k = 0; k < n; k++) {
       const ball = new THREE.Mesh(deformGeo(new THREE.IcosahedronGeometry(1.2 + hash3(seed, k, 7) * .8, 2), .32),
@@ -53,9 +67,10 @@ export function makeTree(seed) {
   grp.scale.setScalar(.85 + hash3(seed, 12, 12) * .75);
   return grp;
 }
-export function makeBush(seed) {
+export function makeBush(seed, biome = DEFAULT_BIOME) {
   const grp = new THREE.Group();
-  const c = new THREE.Color().setHSL(.32, .5, .32 + hash3(seed, 1, 2) * .1);
+  const L = biome.leaf;
+  const c = new THREE.Color().setHSL(L.h + .02, L.s * .9, Math.max(.14, L.l - .06) + hash3(seed, 1, 2) * .1);
   const b = new THREE.Mesh(deformGeo(new THREE.IcosahedronGeometry(.75, 2), .4),
     new THREE.MeshLambertMaterial({ color: c }));
   b.position.y = .55; b.castShadow = true; grp.add(b);
@@ -125,16 +140,28 @@ export function buildPollen() {
   pollenPts.userData.seed = seed;
   pollenGrp.add(pollenPts);
 }
+/* Partikel-Stimmung je Biom: Pollen, fallende Blätter, Irrlichter */
+let irrlichtMode = false;
+export function setParticleStyle(p) {
+  if (!pollenPts) return;
+  pollenPts.material.color.setHex(p.color);
+  pollenPts.material.size = p.size;
+  pollenPts.material.opacity = p.irrlicht ? .9 : .75;
+  irrlichtMode = !!p.irrlicht;
+}
 export function updatePollen(time, dt) {
   if (pollenGrp) { pollenGrp.position.x = camPos.x; pollenGrp.position.z = camPos.z; }
   if (pollenPts && pollenPts.visible) {
     const arr = pollenPts.geometry.attributes.position.array;
     const sd = pollenPts.userData.seed;
+    /* Irrlichter schweben tief und träge, Pollen tanzen höher */
+    const sx = irrlichtMode ? .25 : .6, sy = irrlichtMode ? .2 : .4;
+    const maxH = irrlichtMode ? 3.2 : 7.5;
     for (let i = 0; i < sd.length; i++) {
-      arr[i * 3] += Math.sin(time * .6 + sd[i]) * dt * .5;
-      arr[i * 3 + 1] += Math.cos(time * .4 + sd[i]) * dt * .3;
-      if (arr[i * 3 + 1] < .3) arr[i * 3 + 1] = 6;
-      if (arr[i * 3 + 1] > 7.5) arr[i * 3 + 1] = .5;
+      arr[i * 3] += Math.sin(time * sx + sd[i]) * dt * .5;
+      arr[i * 3 + 1] += Math.cos(time * sy + sd[i]) * dt * .3;
+      if (arr[i * 3 + 1] < .3) arr[i * 3 + 1] = maxH * .8;
+      if (arr[i * 3 + 1] > maxH) arr[i * 3 + 1] = .5;
     }
     pollenPts.geometry.attributes.position.needsUpdate = true;
   }

@@ -12,6 +12,7 @@ import { QUALITY, qTier } from '../engine/quality.js';
 import { glowTex, glowSprite } from '../engine/textures.js';
 import { skyMat, sunSprite } from './sky.js';
 import { hash3, hillH } from './terrain.js';
+import { biomeFor } from './biomes.js';
 
 /* Tageszeit-Keyframes: p 0=Morgen … 1=Dämmerung (Boss).
    Intensitäten in r128-Werten; ×π passiert beim Anwenden.
@@ -29,8 +30,6 @@ const STOPS = [
   /* Dämmerung (Boss): dunkel, tiefes Blauviolett */
   { p: 1,   top: 0x191a45, hor: 0x6e4070, sun: 0x9f7be0, sunI: .55,  hemiSky: 0x55477e, hemiGr: 0x2c2c40, hemiI: .50, fog: 0x3d3552, fogN: 22, fogF: 70,  sprite: 0xc9a0ff, sunY: 10, sprY: 26, sprS: 60 }
 ];
-/* dezente Farbstimmung je Gebiet (Hue-Shift auf Himmel + Nebel) */
-const FLOOR_HUE = [0, .025, -.035, .045, -.02, .06];
 
 const cur = {
   top: new THREE.Color(0x549ef0), hor: new THREE.Color(0xe6f5ff),
@@ -60,13 +59,30 @@ function lerpStop(p) {
   };
 }
 
-/* progress 0..1 innerhalb des Gebiets; floor für die Farbstimmung */
+/* progress 0..1 innerhalb des Gebiets; floor bestimmt das Biom */
 export function setAtmosphere(progress, floor, snap = false) {
-  tgt = lerpStop(Math.min(1, Math.max(0, progress)));
-  const hue = FLOOR_HUE[(floor - 1) % FLOOR_HUE.length];
-  tgt.top.offsetHSL(hue, 0, 0);
-  tgt.hor.offsetHSL(hue, 0, 0);
-  tgt.fog.offsetHSL(hue, 0, 0);
+  const biome = biomeFor(floor);
+  const m = biome.mood;
+  let p = Math.min(1, Math.max(0, progress));
+  /* z.B. Schattenreich: dort ist es NIE heller Morgen */
+  if (m && m.minProgress) p = Math.max(p, m.minProgress);
+  tgt = lerpStop(p);
+  tgt.top.offsetHSL(biome.hue, 0, 0);
+  tgt.hor.offsetHSL(biome.hue, 0, 0);
+  tgt.fog.offsetHSL(biome.hue, 0, 0);
+  /* Nebeldichte je Biom (Nebelmoor!) */
+  tgt.fogN /= biome.fogMul; tgt.fogF /= biome.fogMul;
+  /* Biom-Stimmung: Nebel-Färbung + Licht-Dämpfung */
+  if (m) {
+    if (m.fogTint) {
+      const c = new THREE.Color(m.fogTint);
+      tgt.fog.lerp(c, m.k);
+      tgt.hor.lerp(c, m.k * .6);
+      tgt.top.lerp(c, m.k * .3);
+    }
+    if (m.sunMul) tgt.sunI *= m.sunMul;
+    if (m.hemiMul) tgt.hemiI *= m.hemiMul;
+  }
   if (snap) {
     cur.top.copy(tgt.top); cur.hor.copy(tgt.hor); cur.sun.copy(tgt.sun);
     cur.hemiSky.copy(tgt.hemiSky); cur.hemiGr.copy(tgt.hemiGr);

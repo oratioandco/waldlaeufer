@@ -4,6 +4,7 @@ import { G } from '../state.js';
 import { SESSION, activeTier, tierMastery, TIER_NAMES } from '../learning/engine.js';
 import { BOSSES } from '../creatures/data.js';
 import { planFloor, advance } from '../world/stations.js';
+import { biomeFor } from '../world/biomes.js';
 import { renderHearts } from './hud.js';
 import { announce } from './feedback.js';
 import { setVoiceOn, setVoiceVol, getVoiceVol, sayStorySeq } from '../audio/tts.js';
@@ -62,7 +63,8 @@ function nextFloor() {
   G.floor++; G.hearts = Math.min(5, G.hearts + 2); renderHearts();
   playLevelMusic(G.floor); /* Track-Wechsel je Gebiet (hell/düster) */
   saveActive(); /* Checkpoint: neues Gebiet ist der Wiedereinstiegspunkt */
-  document.getElementById('floorTag').textContent = 'GEBIET ' + G.floor;
+  /* Biom-Name als freiwilliges Zusatzlesen (schöne Komposita!) */
+  document.getElementById('floorTag').textContent = 'GEBIET ' + G.floor + ' · ' + biomeFor(G.floor).name;
   announce('GEBIET ' + G.floor, 1200);
   planFloor();
   setTimeout(advance, 700);

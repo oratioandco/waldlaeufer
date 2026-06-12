@@ -9,9 +9,10 @@ import { addAnim, easeInOut } from '../engine/anims.js';
 import { QUALITY, qTier, applyQuality } from '../engine/quality.js';
 import { glowSprite } from '../engine/textures.js';
 import { G } from '../state.js';
-import { hash3, hillH, distToClear, setClearArea, groundCenter, reshapeGround } from './terrain.js';
-import { scatterGrass } from './grass.js';
-import { makeTree, makeBush, makeStone, makeFlowerPatch, makeBigFlower, extraDecor, COLORS } from './vegetation.js';
+import { hash3, hillH, distToClear, setClearArea, groundCenter, reshapeGround, setGroundPalette } from './terrain.js';
+import { scatterGrass, setGrassColors } from './grass.js';
+import { makeTree, makeBush, makeStone, makeFlowerPatch, makeBigFlower, extraDecor, COLORS, setParticleStyle } from './vegetation.js';
+import { biomeFor } from './biomes.js';
 import { spawnMob } from '../creatures/mob.js';
 import { BOSSES } from '../creatures/data.js';
 import { startWordChallenge } from '../challenges/spell.js';
@@ -31,10 +32,15 @@ import { playBossMusic } from '../audio/music.js';
 let pathHeading = Math.PI;
 let pathEnd = new THREE.Vector3(0, 0, 6);
 let worldGroups = [];
+let biome = biomeFor(1);
 
 export function lateral(dir) { return new THREE.Vector3(-dir.z, 0, dir.x); }
 
 export function planFloor() {
+  biome = biomeFor(G.floor);
+  setGrassColors(biome.grassA, biome.grassB);
+  setGroundPalette(biome.ground);
+  setParticleStyle(biome.particle);
   const plan = ['MOB', Math.random() < .5 ? 'TOR' : 'TRUHE', 'MOB', 'BEFEHL',
                 'MOB', Math.random() < .5 ? 'TRUHE' : 'TOR', 'BOSS'];
   G.stations = []; G.stIdx = -1;
@@ -91,7 +97,7 @@ function buildSegment(st, from) {
   const seed = Math.floor(st.pos.x * 7 + st.pos.z * 13);
 
   const path = new THREE.Mesh(new THREE.PlaneGeometry(2.2, len + 4),
-    new THREE.MeshLambertMaterial({ color: 0xc9b481 }));
+    new THREE.MeshLambertMaterial({ color: biome.path }));
   path.rotation.x = -Math.PI / 2;
   const mid = from.clone().add(st.pos).multiplyScalar(.5);
   path.position.set(mid.x, .03, mid.z);
@@ -106,9 +112,12 @@ function buildSegment(st, from) {
       const off = 5 + hash3(seed, d + 1, side) * 12;
       const p = from.clone().addScaledVector(dir, d).addScaledVector(lat, side * off);
       let obj, type;
-      if (r1 < .6) { obj = makeTree(seed + d * 3 + side); type = 'tree'; }
-      else if (r1 < .77) { obj = makeBush(seed + d * 5 + side); type = 'bush'; }
-      else if (r1 < .9) { obj = makeStone(seed + d * 7 + side); type = 'stone'; }
+      /* Biom-Dichten verschieben die Auswahl-Schwellen */
+      const treeT = .15 + (.6 - .15) * biome.treeDensity;
+      const bushT = treeT + .17 * biome.bushDensity;
+      if (r1 < treeT) { obj = makeTree(seed + d * 3 + side, biome); type = 'tree'; }
+      else if (r1 < bushT) { obj = makeBush(seed + d * 5 + side, biome); type = 'bush'; }
+      else if (r1 < bushT + .13) { obj = makeStone(seed + d * 7 + side); type = 'stone'; }
       else { obj = makeFlowerPatch(seed + d * 9 + side); type = 'flower'; }
       if (!placeOK(p, type)) return; /* SICHTKORRIDOR */
       const isExtra = hash3(seed, d + 4, side) < .4;
@@ -186,7 +195,7 @@ function buildStation(st) {
       const a = (i / 8) * Math.PI * 2;
       const tp = new THREE.Vector3(st.pos.x + Math.cos(a) * 14, 0, st.pos.z + Math.sin(a) * 14);
       if (distToClear(tp.x, tp.z) < 9) continue;
-      const tr = makeTree(seed + i * 11);
+      const tr = makeTree(seed + i * 11, biome);
       tr.scale.setScalar(1.35 + hash3(seed, i, 1) * .5);
       tr.position.set(tp.x, decorY(tp.x, tp.z), tp.z);
       st.group.add(tr);

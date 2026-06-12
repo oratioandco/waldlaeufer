@@ -15,7 +15,11 @@ export function buildGrass() {
   blade.translate(0, .475, 0);
   grassMat = new THREE.ShaderMaterial({
     side: THREE.DoubleSide, fog: false,
-    uniforms: { uTime: { value: 0 } },
+    uniforms: {
+      uTime: { value: 0 },
+      uColA: { value: new THREE.Vector3(.18, .40, .14) },
+      uColB: { value: new THREE.Vector3(.49, .76, .30) }
+    },
     vertexShader: `
       uniform float uTime;
       varying float vH;varying float vJ;
@@ -30,10 +34,9 @@ export function buildGrass() {
       }`,
     fragmentShader: `
       varying float vH;varying float vJ;
+      uniform vec3 uColA;uniform vec3 uColB;
       void main(){
-        vec3 a=vec3(0.18,0.40,0.14);
-        vec3 b=vec3(0.49,0.76,0.30);
-        vec3 c=mix(a,b,clamp(vH*1.15,0.0,1.0));
+        vec3 c=mix(uColA,uColB,clamp(vH*1.15,0.0,1.0));
         c*=0.88+vJ*0.24;
         gl_FragColor=vec4(c,1.0);
       }`
@@ -73,4 +76,9 @@ export function scatterGrass(segs) {
 }
 export function updateGrass(time) {
   if (grassMat) grassMat.uniforms.uTime.value = time;
+}
+export function setGrassColors(a, b) {
+  if (!grassMat) return;
+  grassMat.uniforms.uColA.value.set(a[0], a[1], a[2]);
+  grassMat.uniforms.uColB.value.set(b[0], b[1], b[2]);
 }

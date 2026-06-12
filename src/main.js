@@ -16,6 +16,7 @@ import { updateAtmosphere } from './world/atmosphere.js';
 import { buildGrass, updateGrass } from './world/grass.js';
 import { buildPollen, updatePollen } from './world/vegetation.js';
 import { planFloor, advance } from './world/stations.js';
+import { biomeFor } from './world/biomes.js';
 import { loadModels } from './creatures/models.js';
 import { updateMob } from './creatures/mob.js';
 import { cards, updateCards } from './challenges/cards.js';
@@ -39,7 +40,16 @@ let birdT = 4;
 
 /* Debug-Zugriff für Test-Sessions (nur im Dev-Server) */
 if (import.meta.env.DEV) {
-  window.__dbg = { G, cards: () => cards, camera: () => camera };
+  window.__dbg = {
+    G, cards: () => cards, camera: () => camera,
+    /* Biome-Sichtung: direkt in ein Gebiet springen */
+    jumpFloor(n) {
+      G.floor = n;
+      document.getElementById('floorTag').textContent = 'GEBIET ' + n + ' · ' + biomeFor(n).name;
+      planFloor();
+      setTimeout(advance, 400);
+    }
+  };
 }
 
 /* ---------- Loop ---------- */
@@ -137,7 +147,7 @@ function startGame() {
   document.getElementById('hud').classList.add('on');
   initThree();
   renderHearts(); renderHUD();
-  document.getElementById('floorTag').textContent = 'GEBIET ' + G.floor;
+  document.getElementById('floorTag').textContent = 'GEBIET ' + G.floor + ' · ' + biomeFor(G.floor).name;
   rigPos.set(0, 3.7, 14); rigFocus.set(0, 2.2, 0);
   camPos.copy(rigPos); camFocus.copy(rigFocus);
   planFloor();

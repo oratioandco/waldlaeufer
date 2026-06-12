@@ -59,14 +59,14 @@ export function hillH(x, z) {
   return (fbm2(x * .045, z * .045) - .45) * 4.0 * mask;
 }
 
-function makeGrassTex() {
+/* Boden-Textur aus Biom-Palette (palette[0] = Grundton, Rest = Tupfer) */
+function makeGrassTex(palette) {
   const cv = document.createElement('canvas'); cv.width = cv.height = 512;
   const ctx = cv.getContext('2d');
-  ctx.fillStyle = '#5c9c44'; ctx.fillRect(0, 0, 512, 512);
+  ctx.fillStyle = palette[0]; ctx.fillRect(0, 0, 512, 512);
   for (let i = 0; i < 14000; i++) {
     const x = Math.random() * 512, y = Math.random() * 512;
-    const t = Math.random();
-    ctx.fillStyle = t < .45 ? '#549441' : (t < .8 ? '#6cae50' : (t < .94 ? '#7fbe5d' : '#8d9a4c'));
+    ctx.fillStyle = palette[1 + Math.floor(Math.random() * (palette.length - 1))];
     ctx.globalAlpha = .25 + Math.random() * .5;
     ctx.fillRect(x, y, 1.5 + Math.random() * 2.5, 1.5 + Math.random() * 2.5);
   }
@@ -75,13 +75,22 @@ function makeGrassTex() {
   tx.wrapS = tx.wrapT = THREE.RepeatWrapping;
   return tx;
 }
+const DEFAULT_GROUND = ['#5c9c44', '#549441', '#6cae50', '#7fbe5d', '#8d9a4c'];
 export function buildGround() {
-  groundTex = makeGrassTex();
+  groundTex = makeGrassTex(DEFAULT_GROUND);
   const geo = new THREE.PlaneGeometry(320, 320, 90, 90);
   geo.rotateX(-Math.PI / 2);
   ground = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: groundTex }));
   ground.receiveShadow = true;
   scene.add(ground);
+}
+export function setGroundPalette(palette) {
+  if (!ground) return;
+  const old = groundTex;
+  groundTex = makeGrassTex(palette);
+  ground.material.map = groundTex;
+  ground.material.needsUpdate = true;
+  if (old) old.dispose();
 }
 export function reshapeGround() {
   const geo = ground.geometry;
