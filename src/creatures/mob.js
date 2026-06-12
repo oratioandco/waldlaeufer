@@ -206,6 +206,54 @@ function revealFreedAnimal(animal, pos) {
   } });
 }
 
+/* ---------- Intro-Inszenierung: der Schwarze König auf dem Pfad ---------- */
+let kingGrp = null;
+export function showKingSilhouette() {
+  kingGrp = new THREE.Group();
+  const mat = blobMaterial(0x1c1430, .7);
+  const body = new THREE.Mesh(new THREE.SphereGeometry(2.1, 40, 30), mat);
+  body.scale.y = 1.3;
+  kingGrp.add(body);
+  [-1, 1].forEach(sx => {
+    const e = new THREE.Mesh(new THREE.SphereGeometry(.26, 12, 10),
+      new THREE.MeshBasicMaterial({ color: 0xff2e4d }));
+    e.position.set(sx * .8, .7, 1.75);
+    kingGrp.add(e);
+  });
+  const aura = glowSprite(0x9b59c9, 9); aura.material.opacity = .45;
+  kingGrp.add(aura);
+  const cv = document.createElement('canvas'); cv.width = cv.height = 256;
+  const ctx = cv.getContext('2d');
+  ctx.font = '190px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.shadowColor = '#c084fc'; ctx.shadowBlur = 36;
+  ctx.fillText('👑', 128, 140);
+  const sym = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false }));
+  sym.scale.set(2.4, 2.4, 1); sym.position.set(0, 4.1, 0);
+  kingGrp.add(sym);
+  kingGrp.position.set(0, 2.4, -2); /* Spieler-Start blickt genau hierher */
+  scene.add(kingGrp);
+  let t = 0;
+  addAnim({ update(dt) {
+    if (!kingGrp) return true;
+    t += dt;
+    kingGrp.position.y = 2.4 + Math.sin(t * 1.4) * .18;
+    mat.uniforms.uTime.value = t;
+    return false;
+  } });
+}
+export function removeKingSilhouette() {
+  const g = kingGrp; kingGrp = null;
+  if (!g) return;
+  let t = 0;
+  addAnim({ update(dt) {
+    t += dt * 2.2;
+    g.scale.setScalar(Math.max(.001, 1 - t));
+    g.rotation.y += dt * 6;
+    if (t >= 1) { scene.remove(g); return true; }
+    return false;
+  } });
+}
+
 export function updateMob(time) {
   if (M.mat) M.mat.uniforms.uTime.value = time;
   if (M.group && G.mob) {

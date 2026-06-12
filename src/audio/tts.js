@@ -149,6 +149,11 @@ function clipFor(voiceKey, text) {
 }
 
 /* ---------- Öffentliche API ---------- */
+/* Sofort verstummen + Warteschlange leeren (Szene überspringen) */
+export function stopSpeech() {
+  queue = [];
+  hardStop();
+}
 export function say(text, rate = .95, pitch = .9, interrupt = false) {
   requestJob(speechJob(text, rate, pitch), interrupt);
 }

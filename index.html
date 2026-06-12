@@ -118,12 +118,17 @@
 </div>
 
 <div class="ov" id="sceneOv">
-  <div class="card" id="sceneCard">
+  <div id="sceneCard">
     <div id="sceneIcon">🌲</div>
-    <div id="sceneSpeaker">ERZÄHLER</div>
-    <p id="sceneText" class="sub hidden"></p>
-    <button class="play" id="sceneNextBtn">▶ &nbsp;WEITER</button>
-    <button class="ghost" id="sceneTextBtn">💬 Text zeigen</button>
+    <div id="sceneBody">
+      <div id="sceneSpeaker">ERZÄHLER</div>
+      <p id="sceneText" class="hidden"></p>
+      <div id="sceneSub">
+        <button class="ghost" id="sceneTextBtn">💬 Text zeigen</button>
+        <button class="ghost hidden" id="sceneSkipBtn">⏭ Überspringen</button>
+      </div>
+    </div>
+    <button id="sceneNextBtn">▶</button>
   </div>
 </div>
 

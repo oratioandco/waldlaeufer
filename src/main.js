@@ -18,7 +18,7 @@ import { buildPollen, updatePollen } from './world/vegetation.js';
 import { planFloor, advance, clearWorldGroups, updateWater } from './world/stations.js';
 import { biomeFor } from './world/biomes.js';
 import { loadModels } from './creatures/models.js';
-import { updateMob } from './creatures/mob.js';
+import { updateMob, showKingSilhouette, removeKingSilhouette } from './creatures/mob.js';
 import { cards, updateCards } from './challenges/cards.js';
 import { tapCard, speakSpell } from './challenges/spell.js';
 import { tapBefehl, befehlTargets } from './challenges/befehl.js';
@@ -173,9 +173,15 @@ function startGame() {
     }, 1600);
     setTimeout(advance, 2000);
   };
-  /* Rahmenhandlung beim allerersten Start dieses Profils (vorgelesen) */
+  /* Rahmenhandlung beim allerersten Start dieses Profils (vorgelesen):
+     der Schwarze König steht als Schatten auf dem Pfad – die 3D-Welt
+     ist die Bühne, kein Vollbild-Textkarten-Overlay mehr */
   if (!G.seenIntro) {
-    playScene(INTRO, () => { G.seenIntro = true; saveActive(); begin(); });
+    showKingSilhouette();
+    playScene(INTRO, () => {
+      removeKingSilhouette();
+      G.seenIntro = true; saveActive(); begin();
+    });
   } else begin();
 }
 
