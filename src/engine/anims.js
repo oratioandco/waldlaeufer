@@ -5,6 +5,8 @@
 let anims = [];
 
 export function addAnim(a) { anims.push(a); }
+/* Alle laufenden Animationen verwerfen (Dev-Gebietssprung) */
+export function clearAnims() { anims = []; }
 
 export function updateAnims(dt) {
   const cur = anims; anims = [];

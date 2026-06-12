@@ -37,6 +37,11 @@ let biome = biomeFor(1);
 export function lateral(dir) { return new THREE.Vector3(-dir.z, 0, dir.x); }
 
 export function planFloor() {
+  /* Unbesuchte Stationen des Vorgebiets entsorgen – sie sind nie in
+     worldGroups gelandet und blieben sonst als Geister-Dekor stehen */
+  G.stations.forEach(st => {
+    if (!worldGroups.includes(st.group)) disposeGroup(st.group);
+  });
   biome = biomeFor(G.floor);
   setGrassColors(biome.grassA, biome.grassB);
   setGroundPalette(biome.ground);
@@ -203,6 +208,11 @@ function buildStation(st) {
   }
 }
 
+/* Komplette Alt-Welt räumen (Dev-Gebietssprung) */
+export function clearWorldGroups() {
+  worldGroups.forEach(disposeGroup);
+  worldGroups = [];
+}
 function disposeGroup(g) {
   g.traverse(o => {
     if (o.geometry) o.geometry.dispose();

@@ -7,7 +7,7 @@ import './ui/style.css';
 import { initRenderer, renderFrame, raycaster, pointer, camera } from './engine/renderer.js';
 import { autoGovern } from './engine/quality.js';
 import { initTextures } from './engine/textures.js';
-import { updateAnims } from './engine/anims.js';
+import { updateAnims, clearAnims } from './engine/anims.js';
 import { initCameraInput, updateCamera, rigPos, rigFocus, camPos, camFocus } from './engine/camera.js';
 import { updateShards } from './engine/effects.js';
 import { buildGround } from './world/terrain.js';
@@ -15,7 +15,7 @@ import { buildSky, updateSky } from './world/sky.js';
 import { updateAtmosphere } from './world/atmosphere.js';
 import { buildGrass, updateGrass } from './world/grass.js';
 import { buildPollen, updatePollen } from './world/vegetation.js';
-import { planFloor, advance } from './world/stations.js';
+import { planFloor, advance, clearWorldGroups } from './world/stations.js';
 import { biomeFor } from './world/biomes.js';
 import { loadModels } from './creatures/models.js';
 import { updateMob } from './creatures/mob.js';
@@ -46,7 +46,12 @@ if (import.meta.env.DEV) {
     jumpFloor(n) {
       G.floor = n;
       document.getElementById('floorTag').textContent = 'GEBIET ' + n + ' · ' + biomeFor(n).name;
+      clearAnims(); /* laufende Reise-Anims würden sonst die Kamera kapern */
+      clearWorldGroups(); /* Alt-Biom-Dekor restlos entfernen */
       planFloor();
+      /* Kamera an den Gebietsanfang teleportieren (kurze Anreise) */
+      const from = G.stations[0].from;
+      rigPos.set(from.x, 3.7, from.z); camPos.copy(rigPos);
       setTimeout(advance, 400);
     }
   };

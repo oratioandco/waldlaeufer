@@ -66,7 +66,8 @@ export const BIOMES = [
     leaf: { h: .76, hVar: .05, s: .30, l: .22 }, pine: .6, trunk: 0x2e2438,
     treeDensity: .9, bushDensity: .5,
     hue: .0, fogMul: 1.35,
-    mood: { fogTint: 0x3c2f52, k: .6, sunMul: .6, hemiMul: .7, minProgress: .65 },
+    /* minProgress 1: im Schattenreich ist IMMER Geisterstunde */
+    mood: { fogTint: 0x3c2f52, k: .6, sunMul: .6, hemiMul: .7, minProgress: 1 },
     particle: { color: 0xc9a0ff, size: .2, irrlicht: true }
   }
 ];
