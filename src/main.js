@@ -19,6 +19,7 @@ import { planFloor, advance, clearWorldGroups, updateWater } from './world/stati
 import { biomeFor } from './world/biomes.js';
 import { loadModels } from './creatures/models.js';
 import { updateMob, showKingSilhouette, removeKingSilhouette } from './creatures/mob.js';
+import { updateCompanion } from './creatures/companion.js';
 import { cards, updateCards } from './challenges/cards.js';
 import { tapCard, speakSpell } from './challenges/spell.js';
 import { tapBefehl, befehlTargets } from './challenges/befehl.js';
@@ -38,6 +39,7 @@ import { INTRO, UI_LINES } from './story/content.js';
 import { sayStory } from './audio/tts.js';
 
 let birdT = 4;
+let gameStarted = false;
 
 /* Debug-Zugriff für Test-Sessions (nur im Dev-Server) */
 if (import.meta.env.DEV) {
@@ -83,9 +85,16 @@ function loop(t) {
   const time = t / 1000;
   autoGovern(dt);
 
+  /* Startbildschirm: die Welt treibt sanft hinter der Startkarte */
+  if (!gameStarted) {
+    rigPos.set(Math.sin(time * .07) * 2.5, 3.6 + Math.sin(time * .11) * .15, 13 + Math.sin(time * .045) * 1.5);
+    rigFocus.set(0, 2.2, 0);
+  }
+
   updateGrass(time);
   updateWater(time);
   updateMob(time, dt);
+  if (gameStarted) updateCompanion(dt, time);
   updateSky(dt);
   updateAtmosphere(dt, time);
   updateCards(dt);
@@ -128,7 +137,10 @@ function onTap(e) {
 }
 
 /* ---------- Start ---------- */
+let threeReady = false;
 function initThree() {
+  if (threeReady) return;
+  threeReady = true;
   initRenderer();
   initTextures();
   buildSky();
@@ -145,6 +157,9 @@ wireOverlays();
 initScenes();
 loadVoiceManifest();
 loadSfx();
+/* Lebendiger Startbildschirm: Welt sofort aufbauen, Kamera treibt */
+initThree();
+planFloor();
 /* Titelsong + gesprochene Begrüßung ab der ersten Berührung des
    Startbildschirms (vorher blockiert der Browser Autoplay).
    Audio-First: niemand muss den Startbildschirm LESEN können. */
@@ -161,6 +176,7 @@ addEventListener('pagehide', saveActive);
 
 function startGame() {
   ac();
+  gameStarted = true;
   playLevelMusic(G.floor);
   startAmbience();
   document.getElementById('startOv').classList.remove('on');

@@ -138,6 +138,8 @@ button{font-family:inherit;cursor:pointer}
 
 .ov{position:fixed;inset:0;background:rgba(8,16,11,.82);backdrop-filter:blur(6px);
   display:none;align-items:center;justify-content:center;z-index:40;padding:16px}
+/* Startbildschirm: die lebendige Welt bleibt sichtbar */
+#startOv{background:rgba(8,16,11,.28);backdrop-filter:blur(2px)}
 .ov.on{display:flex}
 .card{background:linear-gradient(180deg,#15301f,#0d2014);border:1px solid rgba(255,255,255,.16);border-radius:22px;
   width:min(540px,94vw);padding:30px 26px;text-align:center;max-height:92vh;overflow-y:auto;
