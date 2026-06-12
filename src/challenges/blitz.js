@@ -56,9 +56,11 @@ export function startBlitz(ctx) {
       b.addEventListener('pointerdown', () => { sndTap(); blitzAnswer(b, o); });
       c.appendChild(b);
     });
-    /* Blitz-Timer wird in höheren Runden schneller (Mechanik-Tempo) */
+    /* Blitz-Timer wird in höheren Runden schneller (Mechanik-Tempo);
+       in Boss-Phase 2 nochmal um 20% */
     const round = Math.floor((G.floor - 1) / 6);
-    const T = Math.max(3500, 6000 - round * 700);
+    let T = Math.max(3500, 6000 - round * 700);
+    if (G.mob && G.mob.boss && G.mob.phase2) T = Math.round(T * .8);
     parryDeadline = Date.now() + T;
     const total = T;
     parryTimer = setInterval(() => {

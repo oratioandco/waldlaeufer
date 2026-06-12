@@ -18,7 +18,8 @@ import { startWordChallenge } from './spell.js';
 import { startBlitz } from './blitz.js';
 import { spawnGemReward } from './reward.js';
 import { playScene, showBubble } from '../story/scenes.js';
-import { companionJoinScene, COMPANION_CHEER, BOSS_DEFEAT, UI_LINES } from '../story/content.js';
+import { companionJoinScene, COMPANION_CHEER, BOSS_DEFEAT, BOSS_RAGE, UI_LINES } from '../story/content.js';
+import { setBattleRage } from '../world/atmosphere.js';
 import { sayGame } from '../audio/tts.js';
 
 export function castSpell() {
@@ -46,6 +47,17 @@ export function castSpell() {
       const c = document.getElementById('comboTag');
       c.textContent = `🔥 COMBO x${G.combo}`; c.classList.add('on');
     } else document.getElementById('comboTag').classList.remove('on');
+
+    /* BOSS-PHASE 2 ab halber Kraft: der Schatten tobt – Arena
+       verdunkelt sich, strikter Wort↔Schildwort-Wechsel, mehr Tempo */
+    if (G.mob && G.mob.boss && !G.mob.phase2 && G.mob.hp > 0 && G.mob.hp <= G.mob.max / 2) {
+      G.mob.phase2 = true;
+      setBattleRage(true);
+      sndGrowl();
+      announce('DER SCHATTEN TOBT!', 1400);
+      const bi = Math.min(G.floor - 1, BOSS_RAGE.length - 1);
+      setTimeout(() => showBubble(G.mob && G.mob.def.sym || '👑', BOSS_RAGE[bi], 'boss'), 500);
+    }
 
     setTimeout(() => {
       document.getElementById('spellWord').innerHTML = '';
@@ -79,6 +91,7 @@ export function killMob() {
      fertig sind – erst dann fliegt/galoppiert es davon */
   let afterReward = () => { releaseFreedAnimal(); setTimeout(stationDone, 250); };
   if (wasBoss) {
+    setBattleRage(false); /* das Licht kehrt mit der Erlösung zurück */
     setBossAura(false); /* die Schatten-Aura verklingt mit der Erlösung */
     playLevelMusic(G.floor); /* Boss-Thema endet, Wald-Musik kehrt zurück */
     /* Boss-Abgangszeile (gewaltarm: der Schatten zerfällt) */
@@ -99,9 +112,11 @@ export function killMob() {
 
 /* ---------- Gegnerzug ---------- */
 export function mobTurn() {
+  /* Boss-Phase 2: STRIKTER Wechsel – nach jedem Wort ein Schildwort */
+  const phase2 = G.mob && G.mob.boss && G.mob.phase2;
   /* höhere Runden: Geister greifen öfter an (mehr Blitzlesen-Druck) */
   const round = Math.floor((G.floor - 1) / 6);
-  if (Math.random() < Math.max(.3, .5 - round * .08)) { setTimeout(() => startWordChallenge('spell'), 500); return; }
+  if (!phase2 && Math.random() < Math.max(.3, .5 - round * .08)) { setTimeout(() => startWordChallenge('spell'), 500); return; }
   sndGrowl();
   /* hörbares Angriffs-Signal – optional: entfällt, wenn gerade gesprochen wird */
   sayGame(UI_LINES.shieldAlert, false, true);

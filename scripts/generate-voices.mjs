@@ -12,7 +12,7 @@
    ===================================================================== */
 import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync, unlinkSync } from 'fs';
 import { createHash } from 'crypto';
-import { INTRO, BOSS_DEFEAT, COMPANION_CHEER, FLOOR_QUOTES, FLOOR_DONE, FLOOR_DONE_ALL, UI_LINES, bossIntroScene, companionJoinScene } from '../src/story/content.js';
+import { INTRO, BOSS_DEFEAT, BOSS_RAGE, COMPANION_CHEER, FLOOR_QUOTES, FLOOR_DONE, FLOOR_DONE_ALL, UI_LINES, bossIntroScene, companionJoinScene } from '../src/story/content.js';
 import { BEFEHL_VERBS, zauberePhrase, syllableRead, shieldWas, befehlOne, befehlTwo, befehlHelp, FIXED_GAMEPLAY } from '../src/learning/speech-lines.js';
 import { COLORS } from '../src/world/colors.js';
 
@@ -55,6 +55,7 @@ const add = (voice, text, ctx) => {
 INTRO.forEach(s => add(s.voice, s.text));
 for (let f = 1; f <= 6; f++) bossIntroScene(f).forEach(s => add(s.voice, s.text));
 BOSS_DEFEAT.forEach(t => add('boss', t));
+BOSS_RAGE.forEach(t => add('boss', t));
 companionJoinScene({ icon: '', name: '' }).forEach(s => add(s.voice, s.text));
 COMPANION_CHEER.forEach(t => add('companion', t));
 FLOOR_QUOTES.forEach(t => add('companion', t));

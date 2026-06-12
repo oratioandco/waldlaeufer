@@ -140,9 +140,14 @@ export function rebuildFloorFx(segs, stations) {
   });
 }
 
+/* Boss-Phase 2: die Arena verdunkelt sich spürbar */
+let rage = 1, rageTgt = 1;
+export function setBattleRage(on) { rageTgt = on ? .45 : 1; }
+
 export function updateAtmosphere(dt, time) {
   if (!tgt || !skyMat) return;
   const k = Math.min(1, dt * 1.1); /* weicher Übergang über ~2–3 s */
+  rage += (rageTgt - rage) * Math.min(1, dt * 2);
   cur.top.lerp(tgt.top, k); cur.hor.lerp(tgt.hor, k);
   cur.sun.lerp(tgt.sun, k); cur.hemiSky.lerp(tgt.hemiSky, k);
   cur.hemiGr.lerp(tgt.hemiGr, k); cur.fog.lerp(tgt.fog, k);
@@ -157,14 +162,14 @@ export function updateAtmosphere(dt, time) {
 
   skyMat.uniforms.uTop.value.copy(cur.top);
   skyMat.uniforms.uHor.value.copy(cur.hor);
-  sun.color.copy(cur.sun); sun.intensity = cur.sunI * Math.PI;
+  sun.color.copy(cur.sun); sun.intensity = cur.sunI * Math.PI * rage;
   hemi.color.copy(cur.hemiSky); hemi.groundColor.copy(cur.hemiGr);
-  hemi.intensity = cur.hemiI * Math.PI;
+  hemi.intensity = cur.hemiI * Math.PI * (rage * .6 + .4);
   scene.fog.color.copy(cur.fog);
   scene.fog.near = cur.fogN; scene.fog.far = cur.fogF;
   scene.background.copy(cur.hor);
   /* Gras folgt Licht & Nebel (sonst leuchtet es nachts) */
-  setGrassEnv(Math.min(1.1, .25 + (cur.sunI / 1.35) * .75 * (cur.hemiI / .85)),
+  setGrassEnv(Math.min(1.1, .25 + (cur.sunI / 1.35) * .75 * (cur.hemiI / .85)) * (rage * .7 + .3),
     cur.fog, cur.fogN, cur.fogF);
   if (sunSprite) {
     sunSprite.material.color.copy(cur.sprite);

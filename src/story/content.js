@@ -30,6 +30,15 @@ const BOSS_INTRO = [
   'Ich bin der Schatten-Hirsch, Wächter des stillen Waldes. Zeig mir, was deine Wörter können.',
   'Du bist weit gekommen, Waldläufer. Doch ich bin der Schwarze König – an mir zerbricht deine Magie!'
 ];
+/* Phase 2 (ab halber Kraft): der Schatten bäumt sich auf */
+export const BOSS_RAGE = [
+  'Grrrrr! Jetzt zeige ich dir meine Zähne!',
+  'Du weckst meinen ganzen Zorn, kleiner Läufer!',
+  'Genug gespielt! Jetzt wird der Fuchs ernst!',
+  'Spürst du den Sturm? Meine Schwingen tragen Schatten!',
+  'Der stille Wald wird dunkel, Waldläufer!',
+  'Du zwingst mich, meine ganze Macht zu entfesseln!'
+];
 /* Befreiungs-Momente: der Schatten fällt, der wahre Wächter kommt zurück */
 export const BOSS_DEFEAT = [
   'Auuuuu! Der Schatten ist fort… Danke, Waldläufer. Lauf weiter – ich bewache den Pfad!',
