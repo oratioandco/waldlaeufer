@@ -22,6 +22,7 @@ import { updateMob, showKingSilhouette, removeKingSilhouette } from './creatures
 import { cards, updateCards } from './challenges/cards.js';
 import { tapCard, speakSpell } from './challenges/spell.js';
 import { tapBefehl, befehlTargets } from './challenges/befehl.js';
+import { campTargets, tapCamp } from './world/camp.js';
 import { revive } from './challenges/combat.js';
 import { G } from './state.js';
 import { renderHearts, renderHUD } from './ui/hud.js';
@@ -107,6 +108,11 @@ function onTap(e) {
   pointer.x = (e.clientX / innerWidth) * 2 - 1;
   pointer.y = -(e.clientY / innerHeight) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
+  if (G.mode === 'camp') {
+    const hits = raycaster.intersectObjects(campTargets, true);
+    if (hits.length) tapCamp(hits[0].object);
+    return;
+  }
   if (G.mode === 'befehl') {
     const hits = raycaster.intersectObjects(befehlTargets, true);
     if (hits.length) {

@@ -5,5 +5,6 @@ export const G = {
   mob: null, recentErr: [],
   stations: [], stIdx: -1, state: 'idle',
   befehlSeq: [], befehlPos: 0, befehlSentence: '',
-  companion: null, seenIntro: false
+  companion: null, seenIntro: false,
+  freedSpecies: {} /* Tierart → Anzahl befreit (fürs Lager) */
 };

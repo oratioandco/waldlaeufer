@@ -73,6 +73,7 @@ export function killMob() {
   drop.y = .5;
 
   G.kills++; G.mob = null; G.word = null; G.busy = true; G.mode = null;
+  if (!wasBoss) G.freedSpecies[animal.key] = (G.freedSpecies[animal.key] || 0) + 1;
 
   /* Das Tier bleibt dem Spieler zugewandt, bis Belohnung + Dialog
      fertig sind – erst dann fliegt/galoppiert es davon */

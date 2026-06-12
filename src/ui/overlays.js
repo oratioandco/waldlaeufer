@@ -5,6 +5,7 @@ import { SESSION, activeTier, tierMastery, TIER_NAMES } from '../learning/engine
 import { BOSSES } from '../creatures/data.js';
 import { planFloor, advance } from '../world/stations.js';
 import { biomeFor } from '../world/biomes.js';
+import { enterCamp, leaveCamp } from '../world/camp.js';
 import { renderHearts } from './hud.js';
 import { announce } from './feedback.js';
 import { setVoiceOn, setVoiceVol, getVoiceVol, sayStorySeq } from '../audio/tts.js';
@@ -79,6 +80,14 @@ export function wireOverlays() {
   document.getElementById('resumeBtn').addEventListener('click', () => ovOff('pauseOv'));
   document.getElementById('restartBtn').addEventListener('click', () => location.reload());
   document.getElementById('nextFloorBtn').addEventListener('click', nextFloor);
+  /* Lagerfeuer: sichtbarer Fortschritt nach jedem Gebiets-Sieg */
+  document.getElementById('campBtn').addEventListener('click', () => {
+    ovOff('floorOv');
+    enterCamp();
+  });
+  document.getElementById('campLeaveBtn').addEventListener('click', () => {
+    leaveCamp(nextFloor);
+  });
   document.getElementById('setDoneBtn').addEventListener('click', () => ovOff('setOv'));
   document.getElementById('settingsBtn').addEventListener('click', openSettings);
   document.getElementById('pauseBtn').addEventListener('click', openPause);
