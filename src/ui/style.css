@@ -273,3 +273,43 @@ button:disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.6); }
   background: rgba(255,255,255,.12);
 }
 #fishHorn:active, #fishQuit:active { transform: scale(.92); }
+
+/* ---------- 🏹 Wort-Bogenschießen ---------- */
+#archBar {
+  position: fixed; left: 50%; top: max(64px, env(safe-area-inset-top));
+  transform: translateX(-50%); z-index: 7; display: none;
+  align-items: center; gap: 12px; padding: 8px 14px; border-radius: 18px;
+  background: rgba(20,30,40,.62); backdrop-filter: blur(6px);
+  box-shadow: 0 4px 18px rgba(0,0,0,.4);
+}
+#archBar.on { display: flex; }
+#archWord { font: 700 26px Verdana, sans-serif; letter-spacing: .04em; color: #fff;
+  padding: 2px 10px; border-radius: 9px; background: #ffd34a22; }
+#archHorn, #archQuit { border: none; cursor: pointer; font-size: 20px; line-height: 1;
+  width: 40px; height: 40px; border-radius: 12px; color: #fff; background: rgba(255,255,255,.12); }
+#archReticle {
+  position: fixed; width: 54px; height: 54px; z-index: 7; display: none;
+  margin: -27px 0 0 -27px; pointer-events: none;
+  border: 3px solid rgba(255,255,255,.85); border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(0,0,0,.35), 0 0 12px rgba(0,0,0,.4);
+}
+#archReticle::before, #archReticle::after {
+  content: ''; position: absolute; background: rgba(255,255,255,.9); }
+#archReticle::before { left: 50%; top: 8px; bottom: 8px; width: 2px; margin-left: -1px; }
+#archReticle::after { top: 50%; left: 8px; right: 8px; height: 2px; margin-top: -1px; }
+#archReticle.charged { border-color: #ffd34a; box-shadow: 0 0 0 2px rgba(0,0,0,.35), 0 0 18px #ffd34a; }
+#archPower {
+  position: fixed; left: max(16px, env(safe-area-inset-left)); bottom: 80px;
+  width: 16px; height: 180px; z-index: 7; display: none;
+  border-radius: 9px; background: rgba(0,0,0,.4); overflow: hidden;
+  box-shadow: 0 0 0 2px rgba(255,255,255,.25);
+}
+#archPower.on { display: block; }
+#archPowerFill { position: absolute; left: 0; right: 0; bottom: 0; height: 0%;
+  background: linear-gradient(0deg, #66d36e, #ffd34a, #ff7a3c); transition: height .05s linear; }
+#archHint {
+  position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 7;
+  display: none; padding: 7px 16px; border-radius: 14px; color: #fff; font-size: 14px;
+  background: rgba(20,30,40,.55); backdrop-filter: blur(4px);
+}
+#archHint.on { display: block; }

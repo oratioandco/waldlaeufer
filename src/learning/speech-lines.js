@@ -29,6 +29,18 @@ export const FIXED_GAMEPLAY = [
 /* ---------- Lager: Begleiter-Tausch (Begleiter-Stimme) ---------- */
 export const CAMP_SWAP = 'Juhu, ich komme mit dir!';
 
+/* ---------- Wort-Bogenschießen (Erzähler-Zeilen) ---------- */
+export const ARCHERY_LINES = [
+  'Bogenschießen! Halt den Finger zum Spannen, ziel und lass los.',
+  'Triff das Wort:',
+  'Spann den Bogen weiter!',
+  'Daneben – probier es nochmal!',
+  'Das war ein anderes Wort. Triff:',
+  'Bullseye!',
+  'Getroffen!',
+  'Scharf geschossen! Toll gezielt.'
+];
+
 /* ---------- Silben-Angeln (Erzähler-Zeilen; Wort/Silben kommen aus dem Pool) ---------- */
 export const FISHING_LINES = [
   'Silben-Angeln! Tipp die Silben in der richtigen Reihenfolge an.',

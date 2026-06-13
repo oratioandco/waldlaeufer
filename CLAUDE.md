@@ -151,10 +151,28 @@ SFX-Set. Quellen: Kenney.nl / OpenGameArt (CC0) lokal ins Repo, oder
 weiter WebAudio-Synth für SFX. Lautstärkeregler getrennt für
 Musik/SFX/Stimme (Stimme muss immer verständlich bleiben!).
 
-**5. Minigames (nach Gebieten, als Belohnung)** – Ideen, alle mit
-Lese-Kern aber neuem Gefühl: Silben-Angeln (richtige Silbe schwimmt vorbei),
-Wort-Bogenschießen (Zielscheiben mit Wörtern, Erzähler nennt das Ziel),
-Schatzkarte (Anweisungssätze lesen → Weg abgehen). Kurz (60–90 s), optional.
+**5. Minigames (nach Gebieten, als Belohnung)** – ZWEI Kategorien:
+
+  **5a. Lese-Minispiele** (Lese-Kern, aber neues Gefühl) – andere
+  Gameplay-Mechaniken fürs gleiche Lerntherapie-Ziel:
+  - Silben-Angeln (umgesetzt: `src/challenges/fishing.js`, 🎣 im Lager):
+    Zielwort-Silben treiben über einen Teich, in Lesereihenfolge antippen.
+  - Wort-Bogenschießen (in Arbeit: `src/challenges/archery.js`, 🏹 im
+    Lager): Zielscheiben mit Wörtern, Erzähler nennt das Ziel. WICHTIG –
+    echte Bogen-Mechanik: Nutzer SPANNT den Bogen (halten = Kraft lädt),
+    ZIELT (Finger bewegt das Fadenkreuz), löst aus; **Extra-Kristalle je
+    nach Treffer-Nähe zum Bullseye** (Ring-Wertung). Fehlschuss/falsches
+    Wort kostet nichts (Therapie-Invariante 4).
+  - Schatzkarte (geplant): Anweisungssätze lesen → Weg abgehen.
+
+  **5b. REINE Belohnungs-Minispiele OHNE Wortbezug** (Wunsch 2026-06):
+  echte Spiel-Pausen als Belohnung, die NICHTS mit Lesen/Wörtern zu tun
+  haben – reiner Spaß/Geschicklichkeit (z.B. Geschicklichkeit, Sammeln,
+  Timing). Bewusst getrennt von 5a, damit das Kind auch mal „nur spielen"
+  darf. Kurz (60–90 s), optional, nach Gebiets-Sieg im Lager.
+
+  Alle Minispiele: kurz (60–90 s), optional, Audio-First, kein
+  Pflicht-Lesen zum Weiterkommen.
 
 **6. Meta-Progression** – Tokens (💎 bereits da) ausgeben können:
 Outfits/Skins für den Zauberstab/Umhang/Begleiter-Tier, kosmetisch,

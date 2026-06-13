@@ -137,6 +137,7 @@ function loop(t) {
 /* ---------- Tap-Routing ---------- */
 function onTap(e) {
   ac();
+  if (G.mode === 'archery') return; /* Bogenschießen hat eigene Pointer-Logik */
   if (G.busy) return;
   pointer.x = (e.clientX / innerWidth) * 2 - 1;
   pointer.y = -(e.clientY / innerHeight) * 2 + 1;
