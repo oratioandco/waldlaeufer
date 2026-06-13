@@ -329,3 +329,19 @@ button:disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.6); }
 #ffTime { color: #cfe6ff; min-width: 52px; text-align: right; }
 #ffQuit { border: none; cursor: pointer; font-size: 18px; width: 36px; height: 36px;
   border-radius: 11px; color: #fff; background: rgba(255,255,255,.12); }
+
+/* ---------- 🍄 Pilz-Hüpfer ---------- */
+#hopBar {
+  position: fixed; left: 50%; top: max(64px, env(safe-area-inset-top));
+  transform: translateX(-50%); z-index: 7; display: none;
+  align-items: center; gap: 16px; padding: 8px 16px; border-radius: 18px;
+  background: rgba(20,30,40,.62); backdrop-filter: blur(6px); color: #fff;
+  font: 700 22px Verdana, sans-serif; box-shadow: 0 4px 18px rgba(0,0,0,.4);
+}
+#hopBar.on { display: flex; }
+#hopScore { color: #ffd9b0; min-width: 72px; }
+#hopChain { color: #ffd34a; min-width: 42px; text-align: center; transition: transform .1s; }
+#hopChain.hot { color: #ff7a3c; transform: scale(1.25); text-shadow: 0 0 12px #ff7a3c; }
+#hopTime { color: #cfe6ff; min-width: 52px; text-align: right; }
+#hopQuit { border: none; cursor: pointer; font-size: 18px; width: 36px; height: 36px;
+  border-radius: 11px; color: #fff; background: rgba(255,255,255,.12); }

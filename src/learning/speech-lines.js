@@ -36,6 +36,13 @@ export const FIREFLY_LINES = [
   'Toll gefangen!'
 ];
 
+/* ---------- Pilz-Hüpfer (reines Belohnungsspiel, Erzähler) ---------- */
+export const HOPPER_LINES = [
+  'Pilz-Hüpfer! Tipp im richtigen Moment, wenn ein Pilz in der Mitte ist – je genauer, desto mehr Punkte!',
+  'Was für eine Hüpf-Kette!',
+  'Toll gehüpft!'
+];
+
 /* ---------- Wort-Bogenschießen (Erzähler-Zeilen) ---------- */
 export const ARCHERY_LINES = [
   'Bogenschießen! Halt den Finger zum Spannen, ziel und lass los.',
