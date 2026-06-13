@@ -29,6 +29,13 @@ export const FIXED_GAMEPLAY = [
 /* ---------- Lager: Begleiter-Tausch (Begleiter-Stimme) ---------- */
 export const CAMP_SWAP = 'Juhu, ich komme mit dir!';
 
+/* ---------- Glühwürmchen-Jagd (reines Belohnungsspiel, Erzähler) ---------- */
+export const FIREFLY_LINES = [
+  'Glühwürmchen-Jagd! Tipp so viele wie du kannst, schnell hintereinander für mehr Punkte!',
+  'Wahnsinn, was für eine Jagd!',
+  'Toll gefangen!'
+];
+
 /* ---------- Wort-Bogenschießen (Erzähler-Zeilen) ---------- */
 export const ARCHERY_LINES = [
   'Bogenschießen! Halt den Finger zum Spannen, ziel und lass los.',

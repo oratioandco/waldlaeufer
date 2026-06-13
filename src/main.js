@@ -25,6 +25,7 @@ import { tapCard, speakSpell } from './challenges/spell.js';
 import { tapBefehl, befehlTargets } from './challenges/befehl.js';
 import { campTargets, tapCamp } from './world/camp.js';
 import { fishTargets, tapFish } from './challenges/fishing.js';
+import { fireflyTargets, tapFirefly } from './challenges/fireflies.js';
 import { revive } from './challenges/combat.js';
 import { G } from './state.js';
 import { renderHearts, renderHUD } from './ui/hud.js';
@@ -149,6 +150,11 @@ function onTap(e) {
       while (o && !o.userData.syl) o = o.parent;
       if (o) tapFish(o);
     }
+    return;
+  }
+  if (G.mode === 'fireflies') {
+    const hits = raycaster.intersectObjects(fireflyTargets, false);
+    if (hits.length) tapFirefly(hits[0].object);
     return;
   }
   if (G.mode === 'camp') {
