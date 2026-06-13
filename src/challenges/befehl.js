@@ -18,6 +18,7 @@ import { spawnGemReward } from './reward.js';
 export let befehlTargets = [];
 
 export function startBefehl(st) {
+  if (G.sandbox) return; /* Dev-Sandbox: keine Flüsterblumen */
   announce('FLÜSTERBLUMEN', 900);
   G.mode = 'befehl'; G.errors = 0; G.busy = false;
   befehlTargets = st.objs.flowers;

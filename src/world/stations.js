@@ -424,6 +424,7 @@ function disposeGroup(g) {
 
 /* ---------- Reise ---------- */
 export function advance() {
+  if (G.sandbox) return; /* Dev-Sandbox: keine Reise/Encounter */
   G.stIdx++;
   renderDots();
   if (G.stIdx >= G.stations.length) return;

@@ -26,6 +26,7 @@ import { rigPos } from '../engine/camera.js';
 let shieldItem = null, parryTimer = null, parryDeadline = null, parryCtx = 'fight';
 
 export function startChest() {
+  if (G.sandbox) return; /* Dev-Sandbox: keine Truhe */
   announce('SCHATZTRUHE', 900);
   sayGame('Eine Truhe! Merk dir das Schlüsselwort.');
   setTimeout(() => startBlitz('chest'), 900);

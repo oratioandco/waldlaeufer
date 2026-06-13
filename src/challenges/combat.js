@@ -113,6 +113,7 @@ export function killMob() {
 
 /* ---------- Gegnerzug ---------- */
 export function mobTurn() {
+  if (G.sandbox) return; /* Dev-Sandbox: kein Gegnerzug */
   /* Boss-Phase 2: STRIKTER Wechsel – nach jedem Wort ein Schildwort */
   const phase2 = G.mob && G.mob.boss && G.mob.phase2;
   /* höhere Runden: Geister greifen öfter an (mehr Blitzlesen-Druck) */

@@ -26,8 +26,17 @@ import { sndCard, sndTap, sndWin, sndCast, sndBlock } from '../audio/sfx.js';
 import { announce } from '../ui/feedback.js';
 
 let targets = [], master = null, canvas = null;
-/* Dev-Hook für automatisierte Sichttests (kein Produktions-Pfad) */
-export const _dbg = { targets: () => targets, target: () => target };
+/* Dev-Hooks für automatisierte Tests (kein Produktions-Pfad).
+   _dbg.shoot(sx,sy,power) zielt auf einen Bildschirmpunkt und löst den
+   vollen Schuss-Flow aus – ohne synthetische Pointer-Events (die im
+   Headless-Browser unzuverlässig sind). */
+let _lastShot = null;
+export const _dbg = {
+  targets: () => targets,
+  target: () => target,
+  shoot(sx, sy, pw = 1) { aimX = sx; aimY = sy; shoot(pw); return _lastShot; },
+  last: () => _lastShot
+};
 let words = [], wIdx = 0, target = null, busyShot = false;
 let base = new THREE.Vector3(), fwd = new THREE.Vector3(), lat = new THREE.Vector3();
 let savedRigPos = new THREE.Vector3(), savedRigFocus = new THREE.Vector3();
@@ -185,7 +194,7 @@ function onUp(e) {
 }
 
 function shoot(pw) {
-  if (busyShot) return;
+  if (busyShot) { if (import.meta.env.DEV) _lastShot = { blocked: true, hits: 0, uv: null }; return; }
   busyShot = true;
   sndCast();
   /* Ziel-Punkt: Kamerastrahl durch das Fadenkreuz auf die Zielebene */
@@ -198,8 +207,13 @@ function shoot(pw) {
      Matrizen frisch ziehen: die Scheiben schaukeln pro Frame, der
      Raycast braucht ihre AKTUELLE Weltposition (nicht die vom letzten
      Render-Frame) – sonst geht der Treffer bei langsamen Frames daneben. */
-  targets.forEach(t => t.disc.updateMatrixWorld(true));
+  /* GRUPPEN-Matrix frisch ziehen (die Scheibe sitzt im Gruppen-Ursprung;
+     die Gruppe schaukelt pro Frame) → der Raycast nutzt die AKTUELLE
+     Weltposition, auch wenn seit dem letzten Render-Frame Zeit verging. */
+  targets.forEach(t => t.grp.updateMatrixWorld(true));
   const hits = ray.intersectObjects(targets.map(t => t.disc), false);
+  if (import.meta.env.DEV) _lastShot = { hits: hits.length,
+    uv: hits[0] && hits[0].uv ? [+hits[0].uv.x.toFixed(2), +hits[0].uv.y.toFixed(2)] : null };
   let result = null; /* {t, r} */
   if (hits.length) {
     const h = hits[0];

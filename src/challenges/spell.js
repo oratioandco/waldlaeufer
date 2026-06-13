@@ -21,6 +21,7 @@ import { zauberePhrase, syllableRead } from '../learning/speech-lines.js';
 import { saveActive } from '../meta/save.js';
 
 export function startWordChallenge(mode) {
+  if (G.sandbox) return; /* Dev-Sandbox: keine Wort-Challenge */
   G.mode = mode;
   G.word = nextWord();
   G.idx = 0; G.errors = 0; G.busy = false;

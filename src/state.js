@@ -6,5 +6,8 @@ export const G = {
   stations: [], stIdx: -1, state: 'idle',
   befehlSeq: [], befehlPos: 0, befehlSentence: '',
   companion: null, seenIntro: false,
-  freedSpecies: {} /* Tierart → Anzahl befreit (fürs Lager) */
+  freedSpecies: {}, /* Tierart → Anzahl befreit (fürs Lager) */
+  /* Dev-Sandbox: legt die Encounter-Statemaschine still, damit Lager &
+     Minispiele isoliert getestet werden können (nie in Produktion gesetzt) */
+  sandbox: false
 };

@@ -82,11 +82,44 @@ if (import.meta.env.DEV) {
       revealFreedAnimal(a, rigFocus.clone());
       return 'ok';
     },
-    /* Lager-Sichtung mit allen Wächtern */
+    /* ---------- SANDBOX: ruhige Lichtung zum Testen von Lager &
+       Minispielen, OHNE dass die Encounter-Statemaschine dazwischenfunkt.
+       (Guards in advance/startWordChallenge/mobTurn/startChest/startBefehl
+       greifen auf G.sandbox.) ---------- */
+    async _sandbox(pos = [0, 3.7, 12], focus = [0, 2.2, -2]) {
+      const [{ clearAnims }, mob, cards, tts] = await Promise.all([
+        import('./engine/anims.js'), import('./creatures/mob.js'),
+        import('./challenges/cards.js'), import('./audio/tts.js')
+      ]);
+      G.sandbox = true;
+      tts.stopSpeech(); clearAnims();
+      if (mob.M.group) mob.despawnMobVisual();
+      cards.clearCards();
+      G.mob = null; G.word = null; G.mode = null; G.busy = false; G.state = 'idle';
+      G.stations = []; G.stIdx = 0;
+      ['mobBar', 'parry', 'fishBar', 'archBar', 'ffBar', 'campBar'].forEach(id =>
+        document.getElementById(id)?.classList.remove('on'));
+      document.getElementById('spellWord').innerHTML = '';
+      document.getElementById('archReticle').style.display = 'none';
+      rigPos.set(pos[0], pos[1], pos[2]); rigFocus.set(focus[0], focus[1], focus[2]);
+      camPos.copy(rigPos); camFocus.copy(rigFocus);
+      return 'sandbox bereit';
+    },
+    /* Normalbetrieb wiederherstellen (Sandbox verlassen) */
+    unsandbox() { G.sandbox = false; return 'sandbox aus'; },
+    /* Minispiele isoliert starten (Modul wird unter __dbg.mod abgelegt,
+       damit Tests dieselbe Instanz wie der Start ansprechen) */
+    async fish() { await this._sandbox(); const m = await import('./challenges/fishing.js'); this.mod = m; m.startFishing(); return 'fish'; },
+    async arch() { await this._sandbox(); const m = await import('./challenges/archery.js'); this.mod = m; m.startArchery(); return 'arch'; },
+    async fireflies() { await this._sandbox(); const m = await import('./challenges/fireflies.js'); this.mod = m; m.startFireflies(); return 'fireflies'; },
+    /* Lager-Sichtung mit allen Wächtern (ruhige Sandbox-Lichtung) */
     async camp() {
-      const { enterCamp } = await import('./world/camp.js');
+      await this._sandbox([0, 3.7, 12], [0, 1.4, 0]);
+      const dummy = rigPos.clone(); dummy.set(0, 0, 0);
+      G.stations = [{ pos: dummy }]; /* Dummy-Boss-Lichtung als Lager-Zentrum */
       G.trophies = ['🐺', '🐻', '🦊', '🦅', '🦌', '👑'];
       G.freedSpecies = { parrot: 1, flamingo: 1, stork: 1, horse: 1 };
+      const { enterCamp } = await import('./world/camp.js');
       enterCamp();
       return 'ok';
     }

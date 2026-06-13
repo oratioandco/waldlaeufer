@@ -113,6 +113,28 @@ Dev-Server mit `--host` starten → Live-Test auf dem iPad im selben WLAN.
   beim Gebietswechsel; Wiedereinstieg am Anfang des aktuellen Gebiets.
   Neue Spielzustände (z.B. Kosmetik) gehören in collectAll/restoreAll.
 
+## Self-Test (Dev-Server, Chrome)
+
+Der laufende Gebiets-Run (Reise → Encounter) überschreibt sonst Kamera,
+`G.mode` und blendet den Gegner wieder ein – das macht isolierte Tests von
+Lager & Minispielen unmöglich. Dafür gibt es eine **Sandbox**:
+
+- `G.sandbox` (state.js) legt die Encounter-Statemaschine still. Guards in
+  `advance` / `startWordChallenge` / `mobTurn` / `startChest` / `startBefehl`
+  prüfen das Flag (in Produktion nie gesetzt → kein Effekt).
+- Dev-Hooks (nur DEV) auf `window.__dbg`:
+  - `__dbg._sandbox(pos?, focus?)` – ruhige, gegnerfreie Lichtung + stabile Kamera.
+  - `__dbg.fish()` / `__dbg.arch()` / `__dbg.fireflies()` / `__dbg.camp()` –
+    Sandbox + Minispiel/Lager starten; das Modul liegt danach unter `__dbg.mod`.
+  - `__dbg.unsandbox()` – Normalbetrieb zurück.
+- Test-Hooks der Minispiele: `fishing.tapFish` / `fireflies.tapFirefly` direkt
+  aufrufbar; `archery._dbg.shoot(sx,sy,power)` löst den vollen Schuss-Flow ohne
+  synthetische Pointer-Events aus und gibt `{hits,uv}` zurück (Bullseye = uv 0.5,0.5).
+- Falle im Headless-Browser: synthetische `PointerEvent`s in einer Microtask-Kette
+  werden unzuverlässig zugestellt → die direkten Hooks nutzen. Belohnungs-Ketten
+  (Pfeilflug + Juwel-Tick) laufen bei gedrosseltem rAF langsamer als real → zwischen
+  zwei Schüssen lange warten (sonst blockt `busyShot`).
+
 ## Deployment
 
 - **Live:** https://waldlaeufer.oratio.co (HTTPS via Traefik/Let's Encrypt)
