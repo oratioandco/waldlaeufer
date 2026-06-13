@@ -13,7 +13,7 @@
 import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync, unlinkSync } from 'fs';
 import { createHash } from 'crypto';
 import { INTRO, BOSS_DEFEAT, BOSS_RAGE, COMPANION_CHEER, FLOOR_QUOTES, FLOOR_DONE, FLOOR_DONE_ALL, UI_LINES, bossIntroScene, companionJoinScene } from '../src/story/content.js';
-import { BEFEHL_VERBS, zauberePhrase, syllableRead, shieldWas, befehlOne, befehlTwo, befehlHelp, FIXED_GAMEPLAY, shopItemLine, SHOP_FIXED, FISHING_LINES } from '../src/learning/speech-lines.js';
+import { BEFEHL_VERBS, zauberePhrase, syllableRead, shieldWas, befehlOne, befehlTwo, befehlHelp, FIXED_GAMEPLAY, shopItemLine, SHOP_FIXED, FISHING_LINES, CAMP_SWAP } from '../src/learning/speech-lines.js';
 import { SHOP_ITEMS } from '../src/meta/cosmetics.js';
 import { COLORS } from '../src/world/colors.js';
 
@@ -105,6 +105,8 @@ SHOP_ITEMS.forEach(it => add('narrator', shopItemLine(it.name, it.price)));
 SHOP_FIXED.forEach(t => add('narrator', t));
 /* Silben-Angeln: feste Erzähler-Zeilen */
 FISHING_LINES.forEach(t => add('narrator', t));
+/* Lager: Begleiter-Tausch (Begleiter-Stimme) */
+add('companion', CAMP_SWAP);
 
 /* ---------- Generieren (inkrementell: vorhandene Clips bleiben) ---------- */
 mkdirSync(OUT, { recursive: true });

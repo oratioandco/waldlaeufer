@@ -26,6 +26,9 @@ export const FIXED_GAMEPLAY = [
   'Richtig! Die Blumen stärken deine Wortmagie.'
 ];
 
+/* ---------- Lager: Begleiter-Tausch (Begleiter-Stimme) ---------- */
+export const CAMP_SWAP = 'Juhu, ich komme mit dir!';
+
 /* ---------- Silben-Angeln (Erzähler-Zeilen; Wort/Silben kommen aus dem Pool) ---------- */
 export const FISHING_LINES = [
   'Silben-Angeln! Tipp die Silben in der richtigen Reihenfolge an.',

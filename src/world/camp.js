@@ -13,12 +13,15 @@ import { G } from '../state.js';
 import { ANIMALS, BOSSES } from '../creatures/data.js';
 import { loadModelOnce, pickClip } from '../creatures/models.js';
 import { BOSS_DEFEAT, COMPANION_CHEER } from '../story/content.js';
+import { CAMP_SWAP } from '../learning/speech-lines.js';
 import { sayStory } from '../audio/tts.js';
 import { sndTap } from '../audio/sfx.js';
 import { toonMat } from '../engine/materials.js';
+import { saveActive } from '../meta/save.js';
 
 let campGrp = null;
 export let campTargets = [];
+let companionMark = null; /* Markierung unter dem aktuellen Begleiter */
 
 function emojiSprite(emoji, size = 2) {
   const cv = document.createElement('canvas'); cv.width = cv.height = 256;
@@ -37,6 +40,7 @@ export function enterCamp() {
   const center = st.pos.clone();
   campGrp = new THREE.Group();
   campTargets = [];
+  companionMark = null;
   G.state = 'camp'; G.mode = 'camp'; G.busy = false;
 
   /* Lagerfeuer: Holz, Glut-Glühen, steigende Funken, warmes Licht */
@@ -130,7 +134,8 @@ export function enterCamp() {
     return false;
   } });
 
-  /* Befreite Tierarten näher am Feuer */
+  /* Befreite Tierarten näher am Feuer – antippen macht sie zum BEGLEITER
+     (kosmetisch, Audio-First). Eine Markierung zeigt den aktuellen. */
   const species = ANIMALS.filter(a => (G.freedSpecies[a.key] || 0) > 0);
   species.forEach((an, i) => {
     const a = Math.PI * (1.15 + .7 * (i / Math.max(1, species.length - 1 || 1)));
@@ -139,9 +144,11 @@ export function enterCamp() {
     sp.position.set(p.x, 1.1, p.z);
     sp.userData.campSay = { voice: 'companion',
       text: COMPANION_CHEER[i % COMPANION_CHEER.length] };
+    sp.userData.swap = { key: an.key, name: an.name, icon: an.icon };
     sp.userData.bob = Math.random() * 6;
     campGrp.add(sp);
     campTargets.push(sp);
+    if (G.companion && G.companion.key === an.key) markCompanion(sp);
   });
   /* sanftes Schweben der Figuren */
   addAnim({ t: 0, update(dt) {
@@ -162,13 +169,32 @@ export function enterCamp() {
   document.getElementById('campBar').classList.add('on');
 }
 
+/* Leuchtring unter dem aktuellen Begleiter (wandert beim Tausch mit) */
+function markCompanion(sp) {
+  if (!campGrp) return;
+  if (companionMark) campGrp.remove(companionMark);
+  companionMark = glowSprite(0x9fe8ff, 1.8);
+  companionMark.material.opacity = .7;
+  companionMark.position.set(sp.position.x, .35, sp.position.z);
+  campGrp.add(companionMark);
+}
+
 export function tapCamp(obj) {
   let o = obj;
-  while (o && !o.userData.campSay) o = o.parent;
+  while (o && !o.userData.campSay && !o.userData.swap) o = o.parent;
   if (!o) return;
   sndTap();
-  const s = o.userData.campSay;
-  sayStory(s.voice, s.text);
+  /* befreites Tier antippen, das noch nicht Begleiter ist → Tausch */
+  const sw = o.userData.swap;
+  if (sw && (!G.companion || G.companion.key !== sw.key)) {
+    G.companion = { key: sw.key, icon: sw.icon, name: sw.name };
+    markCompanion(o);
+    sayStory('companion', CAMP_SWAP);
+    saveActive();
+  } else if (o.userData.campSay) {
+    const s = o.userData.campSay;
+    sayStory(s.voice, s.text);
+  }
   /* kleiner Freuden-Hüpfer */
   let t = 0; const base = o.position.y;
   addAnim({ update(dt) {
