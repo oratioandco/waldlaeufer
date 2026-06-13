@@ -26,6 +26,14 @@ export const FIXED_GAMEPLAY = [
   'Richtig! Die Blumen stärken deine Wortmagie.'
 ];
 
+/* ---------- Silben-Angeln (Erzähler-Zeilen; Wort/Silben kommen aus dem Pool) ---------- */
+export const FISHING_LINES = [
+  'Silben-Angeln! Tipp die Silben in der richtigen Reihenfolge an.',
+  'Angle das Wort:',
+  'Volltreffer!',
+  'Toll geangelt! Deine Silben sitzen.'
+];
+
 /* ---------- Tauschplatz (Audio-First: jedes Stück wird vorgelesen) ---------- */
 export const shopItemLine = (name, price) => `${name}. Kostet ${price} Kristalle.`;
 export const SHOP_FIXED = [
