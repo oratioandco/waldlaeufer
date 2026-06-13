@@ -15,6 +15,7 @@ import { startFishing } from '../challenges/fishing.js';
 import { startArchery } from '../challenges/archery.js';
 import { startFireflies } from '../challenges/fireflies.js';
 import { startHopper } from '../challenges/hopper.js';
+import { startTreasure } from '../challenges/treasure.js';
 import { renderHearts } from './hud.js';
 import { announce } from './feedback.js';
 import { setVoiceOn, setVoiceVol, getVoiceVol, sayStorySeq } from '../audio/tts.js';
@@ -255,6 +256,7 @@ export function wireOverlays() {
   document.getElementById('archBtn').addEventListener('click', () => startArchery());
   document.getElementById('ffBtn').addEventListener('click', () => startFireflies());
   document.getElementById('hopBtn').addEventListener('click', () => startHopper());
+  document.getElementById('treaBtn').addEventListener('click', () => startTreasure());
   document.getElementById('setDoneBtn').addEventListener('click', () => ovOff('setOv'));
   document.getElementById('settingsBtn').addEventListener('click', openSettings);
   document.getElementById('pauseBtn').addEventListener('click', openPause);

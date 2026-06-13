@@ -13,7 +13,7 @@
 import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync, unlinkSync } from 'fs';
 import { createHash } from 'crypto';
 import { INTRO, BOSS_DEFEAT, BOSS_RAGE, COMPANION_CHEER, FLOOR_QUOTES, FLOOR_DONE, FLOOR_DONE_ALL, UI_LINES, bossIntroScene, companionJoinScene } from '../src/story/content.js';
-import { BEFEHL_VERBS, zauberePhrase, syllableRead, shieldWas, befehlOne, befehlTwo, befehlHelp, FIXED_GAMEPLAY, shopItemLine, SHOP_FIXED, FISHING_LINES, CAMP_SWAP, ARCHERY_LINES, FIREFLY_LINES, HOPPER_LINES } from '../src/learning/speech-lines.js';
+import { BEFEHL_VERBS, zauberePhrase, syllableRead, shieldWas, befehlOne, befehlTwo, befehlHelp, FIXED_GAMEPLAY, shopItemLine, SHOP_FIXED, FISHING_LINES, CAMP_SWAP, ARCHERY_LINES, FIREFLY_LINES, HOPPER_LINES, TREASURE_INTRO, TREASURE_WIN, TREASURE_CLUES } from '../src/learning/speech-lines.js';
 import { SHOP_ITEMS } from '../src/meta/cosmetics.js';
 import { COLORS } from '../src/world/colors.js';
 
@@ -113,6 +113,9 @@ ARCHERY_LINES.forEach(t => add('narrator', t));
 FIREFLY_LINES.forEach(t => add('narrator', t));
 /* Pilz-Hüpfer: feste Erzähler-Zeilen */
 HOPPER_LINES.forEach(t => add('narrator', t));
+/* Schatzkarte: Intro/Win (Erzähler) + Hinweissätze (Lehrer-/word-Stimme) */
+add('narrator', TREASURE_INTRO); add('narrator', TREASURE_WIN);
+TREASURE_CLUES.forEach(t => add('word', t));
 
 /* ---------- Generieren (inkrementell: vorhandene Clips bleiben) ---------- */
 mkdirSync(OUT, { recursive: true });

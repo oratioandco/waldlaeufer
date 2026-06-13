@@ -27,6 +27,7 @@ import { campTargets, tapCamp } from './world/camp.js';
 import { fishTargets, tapFish } from './challenges/fishing.js';
 import { fireflyTargets, tapFirefly } from './challenges/fireflies.js';
 import { tapHop } from './challenges/hopper.js';
+import { treasureTargets, tapLandmark } from './challenges/treasure.js';
 import { revive } from './challenges/combat.js';
 import { G } from './state.js';
 import { renderHearts, renderHUD } from './ui/hud.js';
@@ -98,7 +99,7 @@ if (import.meta.env.DEV) {
       cards.clearCards();
       G.mob = null; G.word = null; G.mode = null; G.busy = false; G.state = 'idle';
       G.stations = []; G.stIdx = 0;
-      ['mobBar', 'parry', 'fishBar', 'archBar', 'ffBar', 'hopBar', 'campBar'].forEach(id =>
+      ['mobBar', 'parry', 'fishBar', 'archBar', 'ffBar', 'hopBar', 'treaBar', 'campBar'].forEach(id =>
         document.getElementById(id)?.classList.remove('on'));
       document.getElementById('spellWord').innerHTML = '';
       document.getElementById('archReticle').style.display = 'none';
@@ -114,6 +115,7 @@ if (import.meta.env.DEV) {
     async arch() { await this._sandbox(); const m = await import('./challenges/archery.js'); this.mod = m; m.startArchery(); return 'arch'; },
     async fireflies() { await this._sandbox(); const m = await import('./challenges/fireflies.js'); this.mod = m; m.startFireflies(); return 'fireflies'; },
     async hopper() { await this._sandbox(); const m = await import('./challenges/hopper.js'); this.mod = m; m.startHopper(); return 'hopper'; },
+    async treasure() { await this._sandbox(); const m = await import('./challenges/treasure.js'); this.mod = m; m.startTreasure(); return 'treasure'; },
     /* Lager-Sichtung mit allen Wächtern (ruhige Sandbox-Lichtung) */
     async camp() {
       await this._sandbox([0, 3.7, 12], [0, 1.4, 0]);
@@ -193,6 +195,11 @@ function onTap(e) {
     return;
   }
   if (G.mode === 'hopper') { tapHop(); return; } /* ein Tipp = Sprung */
+  if (G.mode === 'treasure') {
+    const hits = raycaster.intersectObjects(treasureTargets, false);
+    if (hits.length) tapLandmark(hits[0].object);
+    return;
+  }
   if (G.mode === 'camp') {
     const hits = raycaster.intersectObjects(campTargets, true);
     if (hits.length) tapCamp(hits[0].object);

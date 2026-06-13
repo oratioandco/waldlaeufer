@@ -185,7 +185,10 @@ Musik/SFX/Stimme (Stimme muss immer verständlich bleiben!).
     ZIELT (Finger bewegt das Fadenkreuz), löst aus; **Extra-Kristalle je
     nach Treffer-Nähe zum Bullseye** (Ring-Wertung). Fehlschuss/falsches
     Wort kostet nichts (Therapie-Invariante 4).
-  - Schatzkarte (geplant): Anweisungssätze lesen → Weg abgehen.
+  - Schatzkarte (umgesetzt: `src/challenges/treasure.js`, 🗺 im Lager):
+    Anweisungssatz LESEN → richtigen Ort antippen → Weg zum Schatz abgehen.
+    Sinnentnahme wie Flüsterblumen: KEIN Vorsprechen vor dem 1. Fehler
+    (📯 freiwillige Hilfe); 1. Fehler → Hinweis vorgelesen, 2. → Ort pulsiert.
 
   **5b. REINE Belohnungs-Minispiele OHNE Wortbezug** (Wunsch 2026-06):
   echte Spiel-Pausen als Belohnung, die NICHTS mit Lesen/Wörtern zu tun

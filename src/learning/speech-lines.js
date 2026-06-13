@@ -36,6 +36,18 @@ export const FIREFLY_LINES = [
   'Toll gefangen!'
 ];
 
+/* ---------- Schatzkarte (Lese-Minispiel: Sinnentnahme) ---------- */
+export const TREASURE_INTRO = 'Schatzkarte! Lies, wohin du gehen sollst, und tippe den richtigen Ort an.';
+export const TREASURE_WIN = 'Der Schatz! Toll gelesen und den Weg gefunden!';
+export const TREASURE_CLUES = [
+  'Geh zum roten Pilz.',
+  'Geh zur gelben Blume.',
+  'Geh zur grünen Tanne.',
+  'Geh zum grauen Stein.',
+  'Geh zum blauen Kristall.',
+  'Geh zum braunen Stamm.'
+];
+
 /* ---------- Pilz-Hüpfer (reines Belohnungsspiel, Erzähler) ---------- */
 export const HOPPER_LINES = [
   'Pilz-Hüpfer! Tipp im richtigen Moment, wenn ein Pilz in der Mitte ist – je genauer, desto mehr Punkte!',

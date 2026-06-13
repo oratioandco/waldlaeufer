@@ -848,5 +848,13 @@
  "narrator|Toll gefangen!": "narrator-9ae0893a89.mp3",
  "narrator|Pilz-Hüpfer! Tipp im richtigen Moment, wenn ein Pilz in der Mitte ist – je genauer, desto mehr Punkte!": "narrator-9a1490ebdc.mp3",
  "narrator|Was für eine Hüpf-Kette!": "narrator-7354bc0182.mp3",
- "narrator|Toll gehüpft!": "narrator-8c48edfd46.mp3"
+ "narrator|Toll gehüpft!": "narrator-8c48edfd46.mp3",
+ "narrator|Schatzkarte! Lies, wohin du gehen sollst, und tippe den richtigen Ort an.": "narrator-02cf36672c.mp3",
+ "narrator|Der Schatz! Toll gelesen und den Weg gefunden!": "narrator-e760a44cb7.mp3",
+ "word|Geh zum roten Pilz.": "word-0e61ec0fb4.mp3",
+ "word|Geh zur gelben Blume.": "word-f718bde7ea.mp3",
+ "word|Geh zur grünen Tanne.": "word-5557e7ea99.mp3",
+ "word|Geh zum grauen Stein.": "word-ee9897fe0c.mp3",
+ "word|Geh zum blauen Kristall.": "word-2d6f9b4d65.mp3",
+ "word|Geh zum braunen Stamm.": "word-b86cf01aa3.mp3"
 }
