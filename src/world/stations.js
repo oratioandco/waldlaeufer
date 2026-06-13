@@ -79,6 +79,80 @@ export function updateWater(time) {
   waterMats.forEach(m => { m.uniforms.uTime.value = time; });
 }
 
+/* ---------- Weg-Optik: getretene Erde statt platter Rechtecke ----------
+   Eine geteilte RGBA-Textur (Erd-Sprenkel + Kiesel), zu den Längs-
+   rändern weich UND wellig ausgefranst → der Weg verschmilzt mit dem
+   Gras statt als harte Kante zu enden. Material-Farbe tönt sie aufs
+   Biom. iPad-billig: ein Canvas, eine Textur, geteilt. */
+let pathTex = null;
+function pathTexture() {
+  if (pathTex) return pathTex;
+  const W = 64, H = 128;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#efe6d0'; ctx.fillRect(0, 0, W, H); /* helle Basis → Tönung schlägt durch */
+  /* getretene Erd-Flecken */
+  for (let i = 0; i < 150; i++) {
+    const x = Math.random() * W, y = Math.random() * H, r = 1 + Math.random() * 3.2;
+    ctx.fillStyle = `rgba(${90 + Math.random() * 45 | 0},${68 + Math.random() * 32 | 0},${44 + Math.random() * 28 | 0},${.08 + Math.random() * .16})`;
+    ctx.beginPath(); ctx.ellipse(x, y, r, r * .7, Math.random() * 3, 0, 7); ctx.fill();
+  }
+  /* ein paar Kiesel */
+  for (let i = 0; i < 11; i++) {
+    const x = 10 + Math.random() * (W - 20), y = Math.random() * H, r = 1.3 + Math.random() * 1.7;
+    ctx.fillStyle = 'rgba(150,152,150,.45)';
+    ctx.beginPath(); ctx.ellipse(x, y, r, r * .8, 0, 0, 7); ctx.fill();
+  }
+  /* Alpha zu den Längsrändern weich + wellig ausblenden */
+  const img = ctx.getImageData(0, 0, W, H), a = img.data;
+  for (let y = 0; y < H; y++) {
+    const wob = .80 + .20 * Math.sin(y * .23) + .10 * Math.sin(y * .77 + 1.3); /* wellige Kante */
+    for (let x = 0; x < W; x++) {
+      const d = Math.min(x, W - 1 - x) / 11; /* 0 am Rand … 1 ab 11px innen */
+      const al = Math.max(0, Math.min(1, Math.min(1, d) * wob));
+      a[(y * W + x) * 4 + 3] = Math.round(al * 255);
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  pathTex = new THREE.CanvasTexture(cv);
+  pathTex.wrapS = THREE.ClampToEdgeWrapping; /* Ränder bleiben gefedert */
+  pathTex.wrapT = THREE.RepeatWrapping;       /* Länge kachelt */
+  pathTex.anisotropy = 4;
+  return pathTex;
+}
+/* Radial gefederte Erd-Scheibe für Kreuzungen (kaschiert spitze Nähte) */
+let discTex = null;
+function discTexture() {
+  if (discTex) return discTex;
+  const S = 96, cv = document.createElement('canvas'); cv.width = cv.height = S;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#efe6d0'; ctx.fillRect(0, 0, S, S);
+  for (let i = 0; i < 120; i++) {
+    const x = Math.random() * S, y = Math.random() * S, r = 1 + Math.random() * 3;
+    ctx.fillStyle = `rgba(${90 + Math.random() * 45 | 0},${68 + Math.random() * 32 | 0},${44 + Math.random() * 28 | 0},${.08 + Math.random() * .15})`;
+    ctx.beginPath(); ctx.ellipse(x, y, r, r * .7, 0, 0, 7); ctx.fill();
+  }
+  const img = ctx.getImageData(0, 0, S, S), a = img.data, c = S / 2;
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+    const dx = x - c, dy = y - c, dist = Math.sqrt(dx * dx + dy * dy) / c;
+    const wob = 1 + .12 * Math.sin(Math.atan2(dy, dx) * 5);
+    const al = 1 - Math.min(1, Math.max(0, (dist * wob - .45) / .55));
+    a[(y * S + x) * 4 + 3] = Math.round(Math.max(0, Math.min(1, al)) * 255);
+  }
+  ctx.putImageData(img, 0, 0);
+  discTex = new THREE.CanvasTexture(cv);
+  return discTex;
+}
+function junctionPatch(pos) {
+  const m = toonMat({ color: biome.path, map: discTexture(), transparent: true });
+  m.depthWrite = false;
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(3.6, 22), m);
+  disc.rotation.x = -Math.PI / 2;
+  disc.position.set(pos.x, .026, pos.z); /* knapp unter dem Weg → Weg-Spuren liegen oben */
+  disc.receiveShadow = true;
+  return disc;
+}
+
 export function lateral(dir) { return new THREE.Vector3(-dir.z, 0, dir.x); }
 
 /* Spielstart: Route beginnt wieder direkt vor der Kamera (die
@@ -124,7 +198,7 @@ export function planFloor() {
   /* ALTES Dekor in Korridornähe entfernen (kann den Blick verstellen) */
   worldGroups.forEach(g => {
     [...g.children].forEach(ch => {
-      if (ch.position && distToClear(ch.position.x, ch.position.z) < 8) g.remove(ch);
+      if (ch.position && distToClear(ch.position.x, ch.position.z) < 11) g.remove(ch);
     });
   });
 
@@ -148,9 +222,10 @@ export function planFloor() {
 
 function decorY(x, z) { return hillH(x, z); }
 
-/* Mindestabstände je Objekttyp – Bäume haben breite Kronen */
+/* Mindestabstände je Objekttyp – Bäume haben breite Kronen.
+   Großzügiger als zuvor: NICHTS soll den Weg oder die Sicht verdecken. */
 function placeOK(p, type) {
-  const need = type === 'tree' ? 9 : (type === 'bush' ? 5.5 : 4.5);
+  const need = type === 'tree' ? 10.5 : (type === 'bush' ? 7 : 5.5);
   return distToClear(p.x, p.z) >= need;
 }
 
@@ -168,14 +243,24 @@ function buildSegment(st, from) {
   const len = st.pos.distanceTo(from);
   const seed = Math.floor(st.pos.x * 7 + st.pos.z * 13);
 
-  const path = new THREE.Mesh(new THREE.PlaneGeometry(2.2, len + 4),
-    toonMat({ color: biome.path }));
+  /* getretener Erdweg mit gefederten, welligen Rändern (kein Rechteck) */
+  const pathGeo = new THREE.PlaneGeometry(3.4, len + 4);
+  const uv = pathGeo.attributes.uv;
+  const tiles = (len + 4) / 4.2; /* ~4 m pro Kachel → Textur wiederholt sich der Länge nach */
+  for (let i = 0; i < uv.count; i++) uv.setY(i, uv.getY(i) * tiles);
+  const pathMat = toonMat({ color: biome.path, map: pathTexture(), transparent: true });
+  pathMat.alphaTest = .02;
+  const path = new THREE.Mesh(pathGeo, pathMat);
   path.rotation.x = -Math.PI / 2;
   const mid = from.clone().add(st.pos).multiplyScalar(.5);
   path.position.set(mid.x, .03, mid.z);
   path.rotation.z = Math.atan2(dir.x, dir.z);
   path.receiveShadow = true;
   st.group.add(path);
+  /* Kreuzungs-Flicken am Ziel der Strecke: kaschiert die spitze Naht,
+     wo das nächste Segment in einem Winkel anschließt */
+  st.group.add(junctionPatch(st.pos));
+  if (st.type !== 'BOSS') st.group.add(junctionPatch(from)); /* Anschluss rückwärts */
 
   for (let d = 2; d < len - 2; d += 2.6) {
     [-1, 1].forEach(side => {
@@ -232,12 +317,15 @@ function buildStation(st) {
   const lat = lateral(st.dir);
   const seed = Math.floor(st.pos.x * 3 + st.pos.z * 5);
   if (st.type === 'MOB') {
-    /* Baum-Faecher HINTER der Begegnung: die Szene bekommt einen Raum */
+    /* Baum-Faecher HINTER der Begegnung: die Szene bekommt einen Raum.
+       Weiter draußen (14 m) + Korridor-Check, damit kein Baum auf einer
+       benachbarten Strecke landet und die Sicht verstellt. */
     for (let i = 0; i < 5; i++) {
       const a = (-.5 + i / 4) * 1.5;
       const tp = st.pos.clone()
-        .addScaledVector(st.dir, Math.cos(a) * 12)
-        .addScaledVector(lat, Math.sin(a) * 12);
+        .addScaledVector(st.dir, Math.cos(a) * 14)
+        .addScaledVector(lat, Math.sin(a) * 14);
+      if (distToClear(tp.x, tp.z) < 9) continue;
       const tr = makeTree(seed + i * 17 + 5, biome);
       tr.scale.multiplyScalar(1.15 + hash3(seed, i, 2) * .4);
       tr.position.set(tp.x, decorY(tp.x, tp.z), tp.z);
@@ -349,8 +437,9 @@ export function advance() {
   setAmbienceProgress(progress);
   setCreek(false); setBossAura(false); /* stationsgebundene Klänge enden beim Aufbruch */
 
-  /* Boss-Arena: mehr Abstand, sonst füllt der große Geist den Schirm */
-  const standoff = st.type === 'BOSS' ? -13.5 : -9.2;
+  /* Mehr Abstand: der Geist soll die Silbenkarten nie verdecken
+     (Boss noch weiter, sonst füllt der große Geist den Schirm) */
+  const standoff = st.type === 'BOSS' ? -14 : -10.4;
   const targetRig = st.pos.clone().addScaledVector(st.dir, standoff); targetRig.y = 3.7;
   const targetFocus = st.pos.clone(); targetFocus.y = 2.2;
   const fromRig = rigPos.clone(), fromFocus = rigFocus.clone();
