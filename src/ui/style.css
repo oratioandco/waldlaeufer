@@ -249,3 +249,27 @@ button:disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.6); }
 .shopItem.equipped { border-color: #9fe86f; background: #9fe86f1d; }
 .shopItem.locked { opacity: .55; }
 #campBar #shopBtn { margin-right: 8px; }
+
+/* ---------- 🎣 Silben-Angeln ---------- */
+#fishBar {
+  position: fixed; left: 50%; top: max(64px, env(safe-area-inset-top));
+  transform: translateX(-50%); z-index: 7; display: none;
+  align-items: center; gap: 12px;
+  padding: 8px 14px; border-radius: 18px;
+  background: rgba(20,30,40,.62); backdrop-filter: blur(6px);
+  box-shadow: 0 4px 18px rgba(0,0,0,.4);
+}
+#fishBar.on { display: flex; }
+#fishWord { display: flex; align-items: center; gap: 2px;
+  font: 700 26px Verdana, sans-serif; letter-spacing: .04em; color: #fff; }
+#fishWord span { padding: 2px 8px; border-radius: 9px; transition: all .2s;
+  background: rgba(255,255,255,.10); }
+#fishWord span.next { background: #ffd34a33; box-shadow: 0 0 0 2px #ffd34a88 inset; }
+#fishWord span.caught { background: #9fe86f; color: #1c2a16; }
+#fishWord i { color: #ffffff66; font-style: normal; margin: 0 1px; }
+#fishHorn, #fishQuit {
+  border: none; cursor: pointer; font-size: 20px; line-height: 1;
+  width: 40px; height: 40px; border-radius: 12px; color: #fff;
+  background: rgba(255,255,255,.12);
+}
+#fishHorn:active, #fishQuit:active { transform: scale(.92); }

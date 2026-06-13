@@ -11,6 +11,7 @@ import { BOSSES } from '../creatures/data.js';
 import { planFloor, advance } from '../world/stations.js';
 import { biomeFor } from '../world/biomes.js';
 import { enterCamp, leaveCamp } from '../world/camp.js';
+import { startFishing } from '../challenges/fishing.js';
 import { renderHearts } from './hud.js';
 import { announce } from './feedback.js';
 import { setVoiceOn, setVoiceVol, getVoiceVol, sayStorySeq } from '../audio/tts.js';
@@ -247,6 +248,7 @@ export function wireOverlays() {
   });
   document.getElementById('shopBtn').addEventListener('click', openShop);
   document.getElementById('shopCloseBtn').addEventListener('click', () => ovOff('shopOv'));
+  document.getElementById('fishBtn').addEventListener('click', () => startFishing());
   document.getElementById('setDoneBtn').addEventListener('click', () => ovOff('setOv'));
   document.getElementById('settingsBtn').addEventListener('click', openSettings);
   document.getElementById('pauseBtn').addEventListener('click', openPause);

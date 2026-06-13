@@ -53,6 +53,15 @@ export function makeCard(text, correctIndex) {
   m.userData = { syl: text, correctIndex, baseY: 0, phase: Math.random() * 6.28, dead: false };
   scene.add(m); cards.push(m); return m;
 }
+/* Freistehende Karte (z.B. Silben-Angeln): NICHT im globalen cards-Pool,
+   der Aufrufer verwaltet Position, Animation und Entsorgung selbst. */
+export function makeFloatingCard(text) {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 1.42),
+    new THREE.MeshBasicMaterial({ map: cardTexture(text), transparent: true, side: THREE.DoubleSide, depthTest: false }));
+  m.renderOrder = 10;
+  m.userData = { syl: text };
+  return m;
+}
 export function clearCards() { cards.forEach(r => scene.remove(r)); cards = []; }
 export function removeCard(r) { scene.remove(r); }
 
