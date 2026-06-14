@@ -81,6 +81,18 @@ Diese Prinzipien sind das Fundament. Kein Feature darf sie verwässern.
 - **Qualitätsstufen + AUTO-FPS-Governor** (runter <40 fps, hoch >56 fps)
   beibehalten: Pixel-Ratio, Schatten-Map, Bloom an/aus, Grasdichte,
   Dekordichte. Ältere iPads sind Zielgeräte.
+- **Boss-Silhouette frontal lesbar:** Die Kamera blickt FRONTAL auf den
+  Gegner (`lookAt`) → eine in der Tiefe (z) gestreckte Tierform wird zur
+  runden Kugel foreshortened. Merkmale müssen in der BILD-Ebene auftragen:
+  Kopf klar OBEN über schmalerem Körper, Ohren/Geweih/Flügel/Krone seitlich
+  breit. Boss = mehrere Schatten-Massen (`buildBossBody`), die sich M.mat
+  teilen → erstarren gemeinsam.
+- **Manga-Einschlag (Schatten-Hieb):** vierphasig (Ausholen → Zuschlagen →
+  Einfrieren → Zurück). `solidify()` blendet das Noise-Wabern aus (Geist
+  erstarrt zur harten Silhouette), `G.timeScale` bremst NUR die Umgebungs-dt
+  (updateMob/Partikel/Atmosphäre), während `updateAnims` in Echtzeit läuft →
+  der eingefrorene Geist + Speedline-Overlay (#mangaImpact) ist die Zeitlupe.
+  Sicherheitsnetz: `G.timeScale=1` bei Auflösung nie hängen lassen.
 
 ## Architektur-Vorschlag
 

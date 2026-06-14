@@ -9,13 +9,13 @@ import { addAnim, easeOut } from '../engine/anims.js';
 import { burst } from '../engine/effects.js';
 import { G } from '../state.js';
 import { nextShield, shieldStats } from '../learning/engine.js';
-import { M, setMobHp, flashModel } from '../creatures/mob.js';
+import { M, setMobHp, flashModel, tintRage, solidify } from '../creatures/mob.js';
 import { stationDone } from '../world/stations.js';
 import { renderHearts } from '../ui/hud.js';
 import { announce, flyText, flashRed } from '../ui/feedback.js';
 import { spawnGemReward } from './reward.js';
 import { ovOn } from '../ui/overlays.js';
-import { sndChest, sndBlock, sndHurt, sndHeart, sndTap, tone } from '../audio/sfx.js';
+import { sndChest, sndBlock, sndHurt, sndHeart, sndTap, sndGrowl, sndBoom, tone } from '../audio/sfx.js';
 import { sayGame, sayStory } from '../audio/tts.js';
 import { shieldWas, BOSS_HIT } from '../learning/speech-lines.js';
 import { UI_LINES } from '../story/content.js';
@@ -121,32 +121,86 @@ function blitzFailed() {
     setTimeout(() => startWordChallenge('spell'), 900);
   } else {
     /* SCHATTEN-HIEB: der Gegner ATTACKIERT (externalisiert – nie „du hast
-       falsch gelesen"). Dramatisch: Schatten-Klauen über den Schirm,
-       starker Ruck, der Geist stürzt vor und blitzt dunkel auf. */
-    sndHurt(); flashRed(); screenShake(2.2);
-    const ss = document.getElementById('shadowSlash');
+       falsch gelesen"). Inszeniert als Manga-Einschlag in vier Phasen:
+       AUSHOLEN (Geist bäumt sich zurück) → ZUSCHLAGEN (schneller Satz nach
+       vorn, der diffuse Schatten ERSTARRT zur harten Silhouette) →
+       EINFRIEREN (Zeitlupe: Speedlines, eingefrorene Pose) → ZURÜCK. */
+    shadowStrike();
+  }
+}
+
+/* Manga-Einschlag-Choreografie. updateAnims läuft in Echtzeit (raw dt),
+   während G.timeScale die UMGEBUNG in Zeitlupe versetzt → der erstarrte
+   Geist wirkt eingefroren, die Welt kriecht. */
+const WIND = .40, STRIKE = .12, FREEZE = .62, RECOVER = .42;
+export function shadowStrike() {
+  const grp = M.group;
+  const ss = document.getElementById('shadowSlash');
+  const mi = document.getElementById('mangaImpact');
+  let hit = false;
+  sndGrowl(); /* tiefes Knurren beim Ausholen */
+
+  const impact = () => {
+    flashRed(); screenShake(3.0); sndBoom(); sndHurt();
     if (ss) { ss.classList.remove('hit'); void ss.offsetWidth; ss.classList.add('hit'); }
+    if (mi) { mi.classList.remove('on'); void mi.offsetWidth; mi.classList.add('on'); }
     announce('🌑 SCHATTEN-HIEB!', 1100);
     if (G.mob && G.mob.boss) sayStory('boss', BOSS_HIT, true); /* nur der Boss höhnt */
-    flashModel(.85); setTimeout(() => flashModel(0), 220);
-    if (M.group) {
-      const grp = M.group;
-      const oz = grp.position.clone();
-      const lunge = oz.clone().lerp(rigPos, .6); /* tieferer, bedrohlicher Stoß */
-      addAnim({ t: 0, update(dt) {
-        this.t += dt * 6.5;
-        const k = Math.sin(Math.min(Math.PI, this.t));
-        grp.position.lerpVectors(oz, lunge, k);
-        grp.scale.setScalar(1 + k * .18); /* schwillt beim Zuschlagen an */
-        if (this.t >= Math.PI) { grp.position.copy(oz); grp.scale.setScalar(1); return true; } return false;
-      } });
-    }
+    G.timeScale = .16; /* Welt in Zeitlupe */
     G.hearts--; renderHearts(); sndHeart();
-    if (G.hearts <= 0) {
-      setTimeout(() => { ovOn('deadOv'); sayStory('narrator', UI_LINES.dead); }, 700);
-    }
-    else setTimeout(() => startWordChallenge('spell'), 1000);
+  };
+
+  if (grp) {
+    const oz = grp.position.clone();
+    const toward = new THREE.Vector3().subVectors(rigPos, oz); toward.y = 0;
+    if (toward.lengthSq() < 1e-4) toward.set(0, 0, 1); toward.normalize();
+    const back = oz.clone().addScaledVector(toward, -1.0); back.y = oz.y + .9;   /* aufgebäumt */
+    const lunge = oz.clone().lerp(rigPos, .6); lunge.y = oz.y - .5;              /* Satz nach vorn-unten */
+    addAnim({ t: 0, update(dt) {
+      this.t += dt; const t = this.t;
+      if (t < WIND) {                                   /* AUSHOLEN */
+        const k = easeOut(t / WIND);
+        grp.position.lerpVectors(oz, back, k);
+        grp.scale.setScalar(1 + k * .12);
+        tintRage(k * .7);
+      } else if (t < WIND + STRIKE) {                   /* ZUSCHLAGEN */
+        const e = ((t - WIND) / STRIKE) ** 2;           /* ease-in: schnellt los */
+        grp.position.lerpVectors(back, lunge, e);
+        grp.scale.setScalar(1.12 + e * .28);
+        solidify(e); tintRage(.7 + e * .3); flashModel(e * .8);
+      } else if (t < WIND + STRIKE + FREEZE) {          /* EINFRIEREN (Zeitlupe) */
+        if (!hit) { hit = true; impact(); }
+        const f = (t - WIND - STRIKE) / FREEZE;
+        grp.position.copy(lunge); grp.position.x += Math.sin(t * 42) * .015; /* feines Zittern */
+        grp.scale.setScalar(1.4);
+        solidify(1); tintRage(1);
+        flashModel(.12 + (1 - f) * .6);                 /* heller Anschlag → dunkle solide Silhouette */
+      } else if (t < WIND + STRIKE + FREEZE + RECOVER) { /* ZURÜCK */
+        if (G.timeScale !== 1) { G.timeScale = 1; if (mi) mi.classList.remove('on'); }
+        const k = easeOut((t - WIND - STRIKE - FREEZE) / RECOVER);
+        grp.position.lerpVectors(lunge, oz, k);
+        grp.scale.setScalar(1.4 - k * .4);
+        solidify(1 - k); tintRage(1 - k); flashModel((1 - k) * .12);
+      } else {
+        grp.position.copy(oz); grp.scale.setScalar(1);
+        solidify(0); tintRage(0); flashModel(0);
+        G.timeScale = 1; if (mi) mi.classList.remove('on');
+        return true;
+      }
+      return false;
+    } });
+  } else {
+    impact(); setTimeout(() => { G.timeScale = 1; if (mi) mi.classList.remove('on'); }, 600);
   }
+
+  /* Auflösung nach der vollen Sequenz (Echtzeit – G.timeScale betrifft nur
+     die Umgebungs-Animation, nicht setTimeout) */
+  const total = WIND + STRIKE + FREEZE + RECOVER;
+  setTimeout(() => {
+    G.timeScale = 1; /* Sicherheitsnetz: Zeitlupe nie hängen lassen */
+    if (G.hearts <= 0) { ovOn('deadOv'); sayStory('narrator', UI_LINES.dead); }
+    else startWordChallenge('spell');
+  }, total * 1000 + 140);
 }
 function openChest(st, g) {
   sndChest();

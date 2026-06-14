@@ -9,6 +9,7 @@ export const G = {
   freedSpecies: {}, /* Tierart → Anzahl befreit (fürs Lager) */
   rankSeen: 0, /* zuletzt gefeierter Lese-Rang (für Aufstiegs-Feier) */
   campReturn: null, /* Lager-Verlassen-Aktion (Hub vom Startbildschirm) */
+  timeScale: 1, /* Zeitlupe für den Manga-Einschlag (Umgebungs-dt) */
   /* Dev-Sandbox: legt die Encounter-Statemaschine still, damit Lager &
      Minispiele isoliert getestet werden können (nie in Produktion gesetzt) */
   sandbox: false

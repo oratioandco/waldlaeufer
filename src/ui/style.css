@@ -413,6 +413,40 @@ button:disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.6); }
   100% { opacity: 0; transform: scale(1) translateX(-5%); }
 }
 
+/* ---------- 💥 Manga-Einschlag: Speedlines + eingefrorener Treffer-Rahmen ---------- */
+#mangaImpact {
+  position: fixed; inset: 0; z-index: 9; pointer-events: none; opacity: 0;
+  /* radiale Fokus-/Speedlines aus der Mitte (Manga-Impact-Frame) */
+  background:
+    repeating-conic-gradient(from 0deg at 50% 48%,
+      rgba(6,2,12,0) 0deg, rgba(6,2,12,0) 1.1deg,
+      rgba(6,2,12,.62) 1.1deg, rgba(6,2,12,.62) 2.3deg);
+  /* Mitte frei, Linien nur außen → klassischer Speedline-Trichter */
+  -webkit-mask-image: radial-gradient(circle at 50% 48%, transparent 12%, rgba(0,0,0,.4) 30%, #000 62%);
+  mask-image: radial-gradient(circle at 50% 48%, transparent 12%, rgba(0,0,0,.4) 30%, #000 62%);
+}
+/* zusätzliche Tinten-Vignette + Weiß-Anschlag über demselben Element */
+#mangaImpact::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 50% 48%, transparent 30%, rgba(8,3,16,.5) 78%, rgba(4,1,10,.82) 100%),
+    linear-gradient(122deg, transparent 40%, rgba(255,255,255,.16) 47%, transparent 52%);
+}
+/* fette diagonale Schatten-Klaue, eingefroren quer durchs Bild */
+#mangaImpact > i {
+  position: absolute; left: -12%; right: -12%; top: 44%; height: 10%;
+  background: linear-gradient(180deg, transparent, rgba(5,2,12,.9), transparent);
+  transform: rotate(-19deg); filter: blur(1px);
+}
+#mangaImpact.on { animation: mangaFreeze 1.16s cubic-bezier(.2,.8,.2,1) forwards; }
+@keyframes mangaFreeze {
+  0%   { opacity: 0; transform: scale(1.16); }
+  7%   { opacity: 1; transform: scale(1.02); }      /* Anschlag „rastet ein" */
+  12%  { transform: scale(1); }
+  72%  { opacity: 1; transform: scale(1); }          /* eingefrorener Halt (Zeitlupe) */
+  100% { opacity: 0; transform: scale(1); }
+}
+
 /* ---------- ❤️ Herzen-Erholung am Lagerfeuer ---------- */
 #hearts.rest { animation: heartsRest 1s ease-out; }
 @keyframes heartsRest {

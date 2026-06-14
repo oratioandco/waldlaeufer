@@ -127,6 +127,30 @@ if (import.meta.env.DEV) {
       spawnMob({ pos, dir: fwd }, true);
       return 'boss ' + floor;
     },
+    /* Schatten-Hieb isoliert testen (Manga-Einschlag): __dbg.strike() */
+    async strike() {
+      G.hearts = 5;
+      const mob = await import('./creatures/mob.js');
+      const { shadowStrike } = await import('./challenges/blitz.js');
+      shadowStrike();
+      return 'strike M.group=' + (!!mob.M.group);
+    },
+    /* Statischer Einschlag-Rahmen für Screenshots: erstarrt + Overlay hält */
+    async freeze() {
+      const mob = await import('./creatures/mob.js');
+      mob.solidify(1); mob.tintRage(1); mob.flashModel(.18);
+      const mi = document.getElementById('mangaImpact');
+      mi.classList.remove('on'); void mi.offsetWidth; mi.classList.add('on');
+      mi.style.animationPlayState = 'paused';
+      return 'freeze';
+    },
+    async unfreeze() {
+      const mob = await import('./creatures/mob.js');
+      mob.solidify(0); mob.tintRage(0); mob.flashModel(0);
+      const mi = document.getElementById('mangaImpact');
+      mi.style.animationPlayState = ''; mi.classList.remove('on');
+      return 'unfreeze';
+    },
     /* Lager-Sichtung mit allen Wächtern (ruhige Sandbox-Lichtung) */
     async camp() {
       await this._sandbox([0, 3.7, 12], [0, 1.4, 0]);
@@ -164,15 +188,20 @@ function loop(t) {
     rigFocus.set(0, 2.2, 0);
   }
 
+  /* Zeitlupe für den Manga-Einschlag: die UMGEBUNG (Mob-Schweben, Partikel,
+     Begleiter, Atmosphäre) kriecht, während die choreografierte Angriffs-
+     Animation (updateAnims) in Echtzeit weiterläuft → der erstarrte Geist
+     wirkt eingefroren, die Welt drumherum in Slow-Motion. */
+  const sdt = dt * (G.timeScale ?? 1);
   updateGrass(time);
   updateWater(time);
-  updateMob(time, dt);
-  if (gameStarted) updateCompanion(dt, time);
+  updateMob(time, sdt);
+  if (gameStarted) updateCompanion(sdt, time);
   updateSky(dt);
-  updateAtmosphere(dt, time);
+  updateAtmosphere(sdt, time);
   updateCards(dt);
-  updatePollen(time, dt);
-  updateShards(dt);
+  updatePollen(time, sdt);
+  updateShards(sdt);
   /* Snapshot-Iteration: neu gestartete Animationen gehen nie verloren */
   updateAnims(dt);
 
