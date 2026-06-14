@@ -38,6 +38,7 @@ import { startAmbience } from './audio/ambience.js';
 import { loadVoiceManifest } from './audio/tts.js';
 import { playTitleMusic, playLevelMusic } from './audio/music.js';
 import { listProfiles, createProfile, selectProfile, saveActive } from './meta/save.js';
+import { rankFor, masteredFromSave } from './learning/engine.js';
 import { initScenes, playScene } from './story/scenes.js';
 import { INTRO, UI_LINES } from './story/content.js';
 import { sayStory } from './audio/tts.js';
@@ -309,7 +310,9 @@ function renderStartProfiles() {
     const name = document.createElement('span');
     name.textContent = '▶ ' + p.name;
     const meta = document.createElement('small');
-    meta.textContent = p.data ? `Gebiet ${p.data.floor} · 💎 ${p.data.gems}` : 'Neu';
+    /* Lese-Rang aus dem Spielstand (Motivation auf dem Startbildschirm) */
+    const rank = p.data ? rankFor(masteredFromSave(p.data.learning)).name : '';
+    meta.textContent = p.data ? `🏅 ${rank} · Gebiet ${p.data.floor} · 💎 ${p.data.gems}` : 'Neu';
     b.append(name, meta);
     b.addEventListener('pointerdown', () => { selectProfile(p.id); startGame(); });
     list.appendChild(b);

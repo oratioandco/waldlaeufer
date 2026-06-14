@@ -47,6 +47,37 @@ export function tierMastery(t) {
   const ok = list.filter(w => LEX[w.w].box >= 2).length;
   return ok / list.length;
 }
+
+/* ---------- Lese-Rang (Motivation, KEINE Schwierigkeit) ----------
+   Steigt mit der ANZAHL beherrschter Wörter (Box≥2). Belohnt Lese-
+   Volumen/Beherrschung, nie Tempo – therapiesicher. */
+export const RANKS = [
+  { name: 'Späher', need: 0 },
+  { name: 'Waldläufer', need: 4 },
+  { name: 'Fährtenleser', need: 10 },
+  { name: 'Waldhüter', need: 20 },
+  { name: 'Waldkundige', need: 32 },
+  { name: 'Waldmeister', need: 48 }
+];
+export function masteredCount() {
+  return Object.values(LEX).filter(s => s.box >= 2).length;
+}
+/* Rang aus einer Beherrschungs-Zahl (live ODER aus Spielstand) */
+export function rankFor(mastered) {
+  let idx = 0;
+  for (let i = 0; i < RANKS.length; i++) if (mastered >= RANKS[i].need) idx = i;
+  const next = RANKS[idx + 1] || null;
+  return {
+    idx, name: RANKS[idx].name, mastered,
+    next: next ? { name: next.name, need: next.need, remaining: Math.max(0, next.need - mastered) } : null
+  };
+}
+export function readingRank() { return rankFor(masteredCount()); }
+/* Beherrschte Wörter aus serialisiertem Lernstand zählen (Startbildschirm) */
+export function masteredFromSave(learning) {
+  if (!learning || !learning.words) return 0;
+  return Object.values(learning.words).filter(v => (v.b || 0) >= 2).length;
+}
 function maybeUnlock() {
   while (activeTier < 4 && tierMastery(activeTier) >= .7) activeTier++;
 }

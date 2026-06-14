@@ -1,11 +1,11 @@
 /* ---------- Overlays: Pause, Einstellungen, Gebiet geschafft,
    Eltern-Panel mit Live-Lern-Report ---------- */
 import { G } from '../state.js';
-import { SESSION, activeTier, tierMastery, TIER_NAMES, getCustomWords, setCustomWords } from '../learning/engine.js';
+import { SESSION, activeTier, tierMastery, TIER_NAMES, getCustomWords, setCustomWords, readingRank } from '../learning/engine.js';
 import { getHistory, exportActiveProfile, importProfile } from '../meta/save.js';
 import WORDS from '../learning/words.json';
 import { SHOP_ITEMS, isOwned, isEquipped, buyItem, toggleEquip } from '../meta/cosmetics.js';
-import { shopItemLine, SHOP_FIXED } from '../learning/speech-lines.js';
+import { shopItemLine, SHOP_FIXED, RANK_UP } from '../learning/speech-lines.js';
 import { renderHUD } from './hud.js';
 import { BOSSES } from '../creatures/data.js';
 import { planFloor, advance } from '../world/stations.js';
@@ -38,10 +38,13 @@ export function openPause() {
 }
 export function openAdult() {
   const quote = SESSION.words ? Math.round(SESSION.clean / SESSION.words * 100) : 0;
+  const rank = readingRank();
   document.getElementById('reportStats').innerHTML =
     `<p style="margin:4px 0 10px">Wörter geübt: <b style="color:#9fe86f">${SESSION.words}</b>
      &nbsp;·&nbsp; davon fehlerfrei: <b style="color:#9fe86f">${quote}%</b>
-     &nbsp;·&nbsp; aktive Stufe: <b style="color:#9fe86f">${activeTier}</b></p>`;
+     &nbsp;·&nbsp; aktive Stufe: <b style="color:#9fe86f">${activeTier}</b></p>
+     <p style="margin:0 0 10px">🏅 Lese-Rang: <b style="color:#ffd9a0">${rank.name}</b>
+     &nbsp;·&nbsp; beherrschte Wörter (Box≥2): <b style="color:#9fe86f">${rank.mastered}</b>${rank.next ? ` &nbsp;·&nbsp; noch ${rank.next.remaining} bis ${rank.next.name}` : ''}</p>`;
   document.getElementById('reportBars').innerHTML = [1, 2, 3, 4].map(t => {
     const m = Math.round(tierMastery(t) * 100);
     return `<div class="mbarWrap"><span>${TIER_NAMES[t]}</span>
@@ -154,7 +157,11 @@ export function openSettings() { ovOn('setOv'); }
    Rein kosmetisch – die Lern-Engine bleibt unberührt. */
 let shopArmed = null;
 function renderShop() {
-  document.getElementById('shopGems').innerHTML = `Deine Kristalle: 💎 <b>${G.gems}</b>`;
+  const owned = SHOP_ITEMS.filter(it => isOwned(it.id)).length;
+  const done = owned >= SHOP_ITEMS.length;
+  document.getElementById('shopGems').innerHTML =
+    `💎 <b>${G.gems}</b> &nbsp;·&nbsp; Sammlung: <b style="color:#ffd9a0">${owned}/${SHOP_ITEMS.length}</b>`
+    + (done ? ' 🏆' : '');
   const grid = document.getElementById('shopGrid');
   grid.innerHTML = '';
   SHOP_ITEMS.forEach(it => {
@@ -208,9 +215,14 @@ export function showFloorClear() {
   sndWin();
   const quote = FLOOR_QUOTES[(G.floor - 1) % FLOOR_QUOTES.length];
   const boss = BOSSES[Math.min(G.floor - 1, BOSSES.length - 1)];
+  /* Lese-Rang: Motivation aus beherrschten Wörtern (nie Schwierigkeit) */
+  const rank = readingRank();
+  const rankUp = rank.idx > (G.rankSeen || 0);
   document.getElementById('floorSub').innerHTML =
     `Du hast den Schatten gebrochen –<br><b style="color:#e9d5ff">${boss.freed}</b> ist wieder frei und beschützt den Wald:` +
-    (G.companion ? `<br><i style="color:#b8ffd9">${G.companion.icon} „${quote}"</i>` : '');
+    (G.companion ? `<br><i style="color:#b8ffd9">${G.companion.icon} „${quote}"</i>` : '') +
+    `<br><span style="color:#ffd9a0">🏅 Lese-Rang: <b>${rank.name}</b></span>` +
+    (rank.next ? ` <small style="color:#bcdcff">· noch ${rank.next.remaining} bis ${rank.next.name}</small>` : ' · höchster Rang!');
   document.getElementById('trophyRow').textContent = G.trophies.join(' ');
   document.getElementById('floorStats').innerHTML = `
     <div class="stat"><div class="n">${G.gems}</div><div class="l">💎 GESAMT</div></div>
@@ -221,6 +233,11 @@ export function showFloorClear() {
   const allFreed = G.floor % 6 === 0;
   const seq = [{ voice: 'narrator', text: allFreed ? FLOOR_DONE_ALL : FLOOR_DONE }];
   if (G.companion && !allFreed) seq.push({ voice: 'companion', text: quote });
+  if (rankUp) {
+    G.rankSeen = rank.idx; saveActive();
+    seq.push({ voice: 'narrator', text: RANK_UP });
+    setTimeout(() => announce('🏅 NEUER RANG: ' + rank.name.toUpperCase(), 1900), 1500);
+  }
   sayStorySeq(seq);
 }
 function nextFloor() {

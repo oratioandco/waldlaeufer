@@ -100,6 +100,7 @@ function collectAll() {
     companion: G.companion, seenIntro: G.seenIntro,
     freedSpecies: G.freedSpecies,
     cosmetics: G.cosmetics,
+    rankSeen: G.rankSeen,
     learning: serializeLearning()
   };
 }
@@ -112,5 +113,6 @@ function restoreAll(d) {
   G.seenIntro = !!d.seenIntro;
   G.freedSpecies = d.freedSpecies || {};
   G.cosmetics = d.cosmetics || null;
+  G.rankSeen = d.rankSeen || 0;
   restoreLearning(d.learning);
 }

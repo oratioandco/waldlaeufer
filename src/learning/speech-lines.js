@@ -29,6 +29,9 @@ export const FIXED_GAMEPLAY = [
 /* ---------- Lager: Begleiter-Tausch (Begleiter-Stimme) ---------- */
 export const CAMP_SWAP = 'Juhu, ich komme mit dir!';
 
+/* ---------- Lese-Rang-Aufstieg (Erzähler) ---------- */
+export const RANK_UP = 'Glückwunsch! Du bist im Lesen aufgestiegen.';
+
 /* ---------- Glühwürmchen-Jagd (reines Belohnungsspiel, Erzähler) ---------- */
 export const FIREFLY_LINES = [
   'Glühwürmchen-Jagd! Tipp so viele wie du kannst, schnell hintereinander für mehr Punkte!',

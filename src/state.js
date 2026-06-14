@@ -7,6 +7,7 @@ export const G = {
   befehlSeq: [], befehlPos: 0, befehlSentence: '',
   companion: null, seenIntro: false,
   freedSpecies: {}, /* Tierart → Anzahl befreit (fürs Lager) */
+  rankSeen: 0, /* zuletzt gefeierter Lese-Rang (für Aufstiegs-Feier) */
   /* Dev-Sandbox: legt die Encounter-Statemaschine still, damit Lager &
      Minispiele isoliert getestet werden können (nie in Produktion gesetzt) */
   sandbox: false
