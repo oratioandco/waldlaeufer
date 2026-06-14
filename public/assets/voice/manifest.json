@@ -835,7 +835,6 @@
  "narrator|Volltreffer!": "narrator-f781569cad.mp3",
  "narrator|Toll geangelt! Deine Silben sitzen.": "narrator-2533a7c8ea.mp3",
  "companion|Juhu, ich komme mit dir!": "companion-d2926f04c7.mp3",
- "narrator|Bogenschießen! Halt den Finger zum Spannen, ziel und lass los.": "narrator-27fd4ad7ea.mp3",
  "narrator|Triff das Wort:": "narrator-93d0587bfd.mp3",
  "narrator|Spann den Bogen weiter!": "narrator-0bea154699.mp3",
  "narrator|Daneben – probier es nochmal!": "narrator-79c43d5853.mp3",
@@ -859,5 +858,6 @@
  "word|Geh zum braunen Stamm.": "word-b86cf01aa3.mp3",
  "narrator|Glückwunsch! Du bist im Lesen aufgestiegen.": "narrator-c7934f0fe3.mp3",
  "boss|Mein Schatten trifft dich!": "boss-d452234ba7.mp3",
- "narrator|Am Lagerfeuer erholst du dich. Deine Herzen sind wieder voll.": "narrator-fa68153236.mp3"
+ "narrator|Am Lagerfeuer erholst du dich. Deine Herzen sind wieder voll.": "narrator-fa68153236.mp3",
+ "narrator|Bogenschießen! Streich nach unten zum Spannen, ziel nach links und rechts und lass los.": "narrator-638c43da46.mp3"
 }

@@ -67,7 +67,7 @@ export const HOPPER_LINES = [
 
 /* ---------- Wort-Bogenschießen (Erzähler-Zeilen) ---------- */
 export const ARCHERY_LINES = [
-  'Bogenschießen! Halt den Finger zum Spannen, ziel und lass los.',
+  'Bogenschießen! Streich nach unten zum Spannen, ziel nach links und rechts und lass los.',
   'Triff das Wort:',
   'Spann den Bogen weiter!',
   'Daneben – probier es nochmal!',

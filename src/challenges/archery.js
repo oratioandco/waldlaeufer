@@ -43,12 +43,15 @@ let savedRigPos = new THREE.Vector3(), savedRigFocus = new THREE.Vector3();
 let onDoneCb = null;
 const ray = new THREE.Raycaster();
 const aimPlane = new THREE.Plane();
-let drawing = false, power = 0, aimX = 0, aimY = 0;
+/* Bedienung: RUNTERSTREICHEN spannt (Pfeil zieht nach hinten), LINKS/RECHTS
+   zielt; vertikal wird auf Zielscheiben-Höhe gezielt. */
+let drawing = false, power = 0, aimX = 0, startY = 0, aimTargetY = 0;
 
 const SPAN = 6.5;        /* seitliche Spreizung der Scheiben */
 const DIST = 10.5;       /* näher → Scheiben & Wörter größer/lesbarer */
 const DISC_R = 1.95;     /* Scheibenradius */
 const MIN_POWER = .45;   /* darunter fällt der Pfeil zu kurz */
+const DRAW_PX = 210;     /* so viel Runterstreichen = volle Kraft */
 
 /* ---------- Zielscheiben-Textur (konzentrische Ringe) ---------- */
 let discTex = null;
@@ -109,12 +112,15 @@ export function startArchery(onDone) {
   addEventListener('pointermove', onMove);
   addEventListener('pointerup', onUp);
 
-  sayStorySeq([{ voice: 'narrator', text: 'Bogenschießen! Halt den Finger zum Spannen, ziel und lass los.' }]);
+  sayStorySeq([{ voice: 'narrator', text: 'Bogenschießen! Streich nach unten zum Spannen, ziel nach links und rechts und lass los.' }]);
 
   master = { _alive: true, update(dt) {
     if (!master || !master._alive) return true;
-    followBow(); /* Bogen vor der Kamera halten (First-Person) */
-    if (drawing) { power = Math.min(1, power + dt / .7); updatePowerUI(); }
+    /* Ziel-Höhe = Bildschirm-Y der Scheibenreihe (links/rechts wird gezielt) */
+    const bp = base.clone().project(camera);
+    aimTargetY = (-bp.y * .5 + .5) * innerHeight;
+    if (drawing) updateReticle();
+    followBow(); /* vertikaler POV-Bogen, dreht mit dem Zielen, spannt mit der Kraft */
     /* Scheiben schaukeln sanft seitlich (Zielen mit Timing = Geschick) */
     targets.forEach(t => {
       t.sway += dt * t.swaySpeed;
@@ -164,85 +170,93 @@ function nextRound() {
   sayStorySeq([{ voice: 'narrator', text: 'Triff das Wort:' }, { voice: 'word', text: target.w }]);
 }
 
-/* ---------- Eingabe: Spannen → Zielen → Loslassen ---------- */
-function setAim(e) {
-  aimX = e.clientX; aimY = e.clientY;
+/* ---------- Eingabe: RUNTERSTREICHEN spannt, LINKS/RECHTS zielt ---------- */
+function updateReticle() {
   const r = document.getElementById('archReticle');
-  r.style.left = aimX + 'px'; r.style.top = aimY + 'px';
+  r.style.left = aimX + 'px'; r.style.top = aimTargetY + 'px'; /* vertikal auf Ziel-Höhe */
 }
-/* ---------- First-Person-Bogen (3D, vor der Kamera gehalten) ----------
-   Der Spieler sieht den Bogen, als hielte er ihn: Limb + Sehne + Pfeil.
-   Beim Halten zieht die Sehne den Pfeil zur Kamera (Spannen); beim
-   Loslassen verschwindet der gehaltene Pfeil und der 3D-Pfeil fliegt. */
+/* ---------- Vertikaler POV-Bogen (3D, wie gehalten) ----------
+   Der Spieler sieht den Bogen aufrecht vor sich. RUNTERSTREICHEN zieht den
+   Pfeil + die Sehne nach hinten (zur Kamera). LINKS/RECHTS dreht den Bogen
+   zum Zielen. Loslassen → der 3D-Pfeil fliegt zum Ziel. */
 let bowRig = null, bowString = null, bowArrow = null;
 function buildBow() {
   const rig = new THREE.Group();
   const brown = toonMat({ color: 0x6e4b2a });
   const light = toonMat({ color: 0xd4d9df });
-  /* Limb: Halbbogen in der XY-Ebene, Öffnung zur Sehnenseite */
-  const limb = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.028, 8, 36, Math.PI), brown);
-  limb.rotation.z = -Math.PI / 2;
+  /* Limb: AUFRECHTER Bogen (Spitzen oben/unten), wölbt nach LINKS
+     (wie in der linken Hand gehalten – rechts bleibt frei zum Zielen) */
+  const limb = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.028, 8, 40, Math.PI), brown);
+  limb.rotation.z = Math.PI / 2;
   rig.add(limb);
-  /* Sehne: 3 Punkte (oben → Nock → unten), Nock wird gezogen */
+  /* kleiner Griff in der Mitte */
+  const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.2, 8), toonMat({ color: 0x4a3320 }));
+  rig.add(grip);
+  /* Sehne: oben → Nock → unten; Nock wird beim Spannen nach +Z (zur Kamera) gezogen */
   const sg = new THREE.BufferGeometry().setFromPoints([
     new THREE.Vector3(0, 0.5, 0), new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -0.5, 0)]);
   bowString = new THREE.Line(sg, new THREE.LineBasicMaterial({ color: 0xf3f3ee }));
   rig.add(bowString);
   /* Pfeil: Schaft entlang -Z (zeigt ins Bild → fliegt zum Ziel) + Spitze + Federn */
   const arr = new THREE.Group();
-  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 1.05, 6), light);
-  shaft.rotation.x = Math.PI / 2; shaft.position.z = -0.52; arr.add(shaft);
-  const tip = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.1, 8), light);
-  tip.rotation.x = -Math.PI / 2; tip.position.z = -1.07; arr.add(tip);
-  [-1, 1].forEach(s => {
-    const f = new THREE.Mesh(new THREE.BoxGeometry(0.002, 0.07, 0.12), toonMat({ color: 0xe0533a }));
-    f.position.set(s * 0.02, 0, 0.0); arr.add(f);
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 1.15, 6), light);
+  shaft.rotation.x = Math.PI / 2; shaft.position.z = -0.57; arr.add(shaft);
+  const tip = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.12, 8), light);
+  tip.rotation.x = -Math.PI / 2; tip.position.z = -1.18; arr.add(tip);
+  [0, 1].forEach(i => {
+    const f = new THREE.Mesh(new THREE.BoxGeometry(i ? 0.002 : 0.12, i ? 0.12 : 0.002, 0.14), toonMat({ color: 0xe0533a }));
+    f.position.set(0, 0, 0.02); arr.add(f);
   });
   arr.visible = false; bowArrow = arr; rig.add(arr);
-  rig.scale.setScalar(0.78);
+  rig.scale.setScalar(0.72);
   return rig;
 }
 function updateBow(pw) {
   if (!bowString) return;
-  const nockZ = pw * 0.42; /* Nock zieht zur Kamera (+Z) = Spannen */
+  const nockZ = pw * 0.6; /* je mehr Kraft, desto weiter der Nock zur Kamera = nach hinten */
   const pos = bowString.geometry.attributes.position;
   pos.setXYZ(1, 0, 0, nockZ); pos.needsUpdate = true;
   if (bowArrow) bowArrow.position.z = nockZ;
 }
-/* Bogen jedes Frame an die Kamera koppeln (gehalten, leicht gezielt) */
+/* Jeden Frame: aufrecht vor der Kamera, dreht links/rechts mit dem Zielen */
 export function followBow() {
   if (!bowRig) return;
+  const aimN = aimX / Math.max(1, innerWidth) - 0.5;          /* -0.5 (links) … +0.5 (rechts) */
   bowRig.position.copy(camera.position);
   bowRig.quaternion.copy(camera.quaternion);
-  bowRig.translateX(0.08); bowRig.translateY(-0.62); bowRig.translateZ(-1.5);
-  bowRig.rotateZ(-0.08); bowRig.rotateY(-0.03);
+  /* aufrecht, etwas links gehalten; GLEITET seitlich mit dem Zielen + leichter Schwenk */
+  bowRig.translateX(-0.16 + aimN * 0.8); bowRig.translateY(-0.42); bowRig.translateZ(-1.5);
+  bowRig.rotateY(-aimN * 0.32);
+  updateBow(drawing ? power : 0);
 }
 function onDown(e) {
   if (G.mode !== 'archery' || busyShot) return;
-  drawing = true; power = 0;
-  setAim(e);
+  drawing = true; power = 0; startY = e.clientY; aimX = e.clientX;
+  updateReticle();
   document.getElementById('archReticle').style.display = 'block';
   document.getElementById('archPower').classList.add('on');
   if (bowArrow) bowArrow.visible = true; /* Pfeil einlegen */
-  updateBow(0);
   sndTap();
 }
-function onMove(e) { if (drawing) setAim(e); }
+function onMove(e) {
+  if (!drawing) return;
+  aimX = e.clientX;
+  power = Math.max(0, Math.min(1, (e.clientY - startY) / DRAW_PX)); /* runter = spannen */
+  updateReticle(); updatePowerUI();
+}
 function updatePowerUI() {
   document.getElementById('archPowerFill').style.height = Math.round(power * 100) + '%';
   document.getElementById('archReticle').classList.toggle('charged', power >= MIN_POWER);
-  updateBow(power);
 }
 function onUp(e) {
   if (!drawing) return;
   drawing = false;
-  setAim(e);
+  if (e) { aimX = e.clientX; power = Math.max(0, Math.min(1, (e.clientY - startY) / DRAW_PX)); }
   document.getElementById('archPower').classList.remove('on');
   document.getElementById('archPowerFill').style.height = '0%';
   document.getElementById('archReticle').style.display = 'none';
   document.getElementById('archReticle').classList.remove('charged');
   if (bowArrow) bowArrow.visible = false; /* gehaltener Pfeil weg → 3D-Pfeil fliegt */
-  updateBow(0);
   shoot(power);
   power = 0;
 }
@@ -251,8 +265,8 @@ function shoot(pw) {
   if (busyShot) { if (import.meta.env.DEV) _lastShot = { blocked: true, hits: 0, uv: null }; return; }
   busyShot = true;
   sndCast();
-  /* Ziel-Punkt: Kamerastrahl durch das Fadenkreuz auf die Zielebene */
-  const ndc = new THREE.Vector2((aimX / innerWidth) * 2 - 1, -(aimY / innerHeight) * 2 + 1);
+  /* Ziel-Punkt: Kamerastrahl durch (aimX, Ziel-Höhe) auf die Zielebene */
+  const ndc = new THREE.Vector2((aimX / innerWidth) * 2 - 1, -(aimTargetY / innerHeight) * 2 + 1);
   ray.setFromCamera(ndc, camera);
   const aimPt = new THREE.Vector3();
   if (!ray.ray.intersectPlane(aimPlane, aimPt)) aimPt.copy(base);
