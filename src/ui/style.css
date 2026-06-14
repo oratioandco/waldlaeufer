@@ -363,3 +363,19 @@ button:disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.6); }
 #treaProg { font: 700 16px Verdana, sans-serif; color: #ffd9a0; min-width: 44px; text-align: center; }
 #treaHorn, #treaQuit { border: none; cursor: pointer; font-size: 20px; line-height: 1;
   width: 40px; height: 40px; border-radius: 12px; color: #fff; background: rgba(255,255,255,.12); }
+
+/* ---------- Minispiel-Beenden: deutlicher, roter Button ---------- */
+#fishQuit, #archQuit, #ffQuit, #hopQuit, #treaQuit {
+  width: 46px; height: 46px; font-size: 22px; font-weight: 700;
+  background: rgba(200,60,52,.9); color: #fff;
+  box-shadow: 0 2px 10px rgba(180,40,32,.5), inset 0 0 0 2px rgba(255,255,255,.25);
+}
+#fishQuit:active, #archQuit:active, #ffQuit:active, #hopQuit:active, #treaQuit:active { transform: scale(.9); }
+
+/* ---------- 🏹 sichtbarer Bogen ---------- */
+#archBow {
+  position: fixed; left: 50%; bottom: 54px; transform: translateX(-50%);
+  width: 150px; height: 140px; z-index: 7; display: none; pointer-events: none;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,.4));
+}
+#archBow.on { display: block; }

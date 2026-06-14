@@ -45,9 +45,9 @@ const ray = new THREE.Raycaster();
 const aimPlane = new THREE.Plane();
 let drawing = false, power = 0, aimX = 0, aimY = 0;
 
-const SPAN = 7;          /* seitliche Spreizung der Scheiben */
-const DIST = 13;         /* Abstand der Scheiben zur Kamera */
-const DISC_R = 1.7;      /* Scheibenradius */
+const SPAN = 6.5;        /* seitliche Spreizung der Scheiben */
+const DIST = 10.5;       /* näher → Scheiben & Wörter größer/lesbarer */
+const DISC_R = 1.95;     /* Scheibenradius */
 const MIN_POWER = .45;   /* darunter fällt der Pfeil zu kurz */
 
 /* ---------- Zielscheiben-Textur (konzentrische Ringe) ---------- */
@@ -100,6 +100,7 @@ export function startArchery(onDone) {
   document.getElementById('campBar')?.classList.remove('on');
   document.getElementById('archBar').classList.add('on');
   document.getElementById('archHint').classList.add('on');
+  document.getElementById('archBow').classList.add('on');
   document.getElementById('archHorn').onclick = () => { if (target) sayGame(target.w); };
   document.getElementById('archQuit').onclick = () => finish(true);
 
@@ -137,10 +138,10 @@ function spawnTarget(word, isTarget, offset) {
   const disc = new THREE.Mesh(new THREE.CircleGeometry(DISC_R, 48), toonMat({ map: dartTexture() }));
   disc.userData.isDisc = true;
   grp.add(disc);
-  /* Wort als Karte über der Scheibe (freiwillige Lesehilfe) */
+  /* Wort als große, klar lesbare Karte über der Scheibe */
   const card = makeFloatingCard(word);
-  card.scale.setScalar(.5);
-  card.position.set(0, DISC_R + .9, .05);
+  card.scale.setScalar(1.05);
+  card.position.set(0, DISC_R + 1.25, .05);
   grp.add(card);
   scene.add(grp);
   const t = { grp, disc, w: word, isTarget, offset,
@@ -168,18 +169,34 @@ function setAim(e) {
   const r = document.getElementById('archReticle');
   r.style.left = aimX + 'px'; r.style.top = aimY + 'px';
 }
+/* Sichtbarer Bogen: Sehne + Pfeil ziehen mit der Kraft nach hinten */
+function drawBow(pw) {
+  const nockX = 128 + pw * 44;
+  const str = document.getElementById('archString');
+  if (str) str.setAttribute('points', `128,14 ${nockX.toFixed(1)},80 128,146`);
+  const arrow = document.getElementById('archArrow');
+  const head = document.getElementById('archHead');
+  if (arrow && head) {
+    const tip = nockX - 95;
+    arrow.setAttribute('x1', nockX.toFixed(1)); arrow.setAttribute('x2', tip.toFixed(1));
+    head.setAttribute('points', `${tip.toFixed(1)},80 ${(tip + 14).toFixed(1)},73 ${(tip + 14).toFixed(1)},87`);
+  }
+}
 function onDown(e) {
   if (G.mode !== 'archery' || busyShot) return;
   drawing = true; power = 0;
   setAim(e);
   document.getElementById('archReticle').style.display = 'block';
   document.getElementById('archPower').classList.add('on');
+  document.getElementById('archArrowG').style.display = ''; /* Pfeil eingelegt */
+  drawBow(0);
   sndTap();
 }
 function onMove(e) { if (drawing) setAim(e); }
 function updatePowerUI() {
   document.getElementById('archPowerFill').style.height = Math.round(power * 100) + '%';
   document.getElementById('archReticle').classList.toggle('charged', power >= MIN_POWER);
+  drawBow(power);
 }
 function onUp(e) {
   if (!drawing) return;
@@ -189,6 +206,9 @@ function onUp(e) {
   document.getElementById('archPowerFill').style.height = '0%';
   document.getElementById('archReticle').style.display = 'none';
   document.getElementById('archReticle').classList.remove('charged');
+  /* Bogen schnellt zurück, Pfeil ist weg (fliegt in 3D) */
+  document.getElementById('archArrowG').style.display = 'none';
+  drawBow(0);
   shoot(power);
   power = 0;
 }
@@ -293,6 +313,8 @@ function finish(early) {
   document.getElementById('archBar').classList.remove('on');
   document.getElementById('archHint').classList.remove('on');
   document.getElementById('archPower').classList.remove('on');
+  document.getElementById('archBow').classList.remove('on');
+  document.getElementById('archArrowG').style.display = 'none';
   document.getElementById('archReticle').style.display = 'none';
   if (canvas) canvas.removeEventListener('pointerdown', onDown);
   removeEventListener('pointermove', onMove);
