@@ -13,7 +13,8 @@ import { G } from '../state.js';
 import { ANIMALS, BOSSES } from '../creatures/data.js';
 import { loadModelOnce, pickClip } from '../creatures/models.js';
 import { BOSS_DEFEAT, COMPANION_CHEER } from '../story/content.js';
-import { CAMP_SWAP } from '../learning/speech-lines.js';
+import { CAMP_SWAP, CAMP_REST } from '../learning/speech-lines.js';
+import { renderHearts } from '../ui/hud.js';
 import { sayStory } from '../audio/tts.js';
 import { sndTap } from '../audio/sfx.js';
 import { toonMat } from '../engine/materials.js';
@@ -42,6 +43,14 @@ export function enterCamp() {
   campTargets = [];
   companionMark = null;
   G.state = 'camp'; G.mode = 'camp'; G.busy = false;
+  /* Am Lagerfeuer erholt sich der Waldläufer: Herzen sichtbar auffüllen
+     (erklärt, WARUM Herzen zurückkommen – Playtest-Frage). */
+  if (G.hearts < 5) {
+    G.hearts = 5; renderHearts();
+    const hearts = document.getElementById('hearts');
+    if (hearts) { hearts.classList.remove('rest'); void hearts.offsetWidth; hearts.classList.add('rest'); }
+    setTimeout(() => sayStory('narrator', CAMP_REST), 700);
+  }
 
   /* Lagerfeuer: Holz, Glut-Glühen, steigende Funken, warmes Licht */
   for (let i = 0; i < 4; i++) {

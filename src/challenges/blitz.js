@@ -9,7 +9,7 @@ import { addAnim, easeOut } from '../engine/anims.js';
 import { burst } from '../engine/effects.js';
 import { G } from '../state.js';
 import { nextShield, shieldStats } from '../learning/engine.js';
-import { M, setMobHp } from '../creatures/mob.js';
+import { M, setMobHp, flashModel } from '../creatures/mob.js';
 import { stationDone } from '../world/stations.js';
 import { renderHearts } from '../ui/hud.js';
 import { announce, flyText, flashRed } from '../ui/feedback.js';
@@ -17,7 +17,7 @@ import { spawnGemReward } from './reward.js';
 import { ovOn } from '../ui/overlays.js';
 import { sndChest, sndBlock, sndHurt, sndHeart, sndTap, tone } from '../audio/sfx.js';
 import { sayGame, sayStory } from '../audio/tts.js';
-import { shieldWas } from '../learning/speech-lines.js';
+import { shieldWas, BOSS_HIT } from '../learning/speech-lines.js';
 import { UI_LINES } from '../story/content.js';
 import { startWordChallenge } from './spell.js';
 import { killMob } from './combat.js';
@@ -120,23 +120,32 @@ function blitzFailed() {
     announce('PUH – DER SCHILD HÄLT!', 1000);
     setTimeout(() => startWordChallenge('spell'), 900);
   } else {
-    sndHurt(); flashRed(); screenShake(1.2);
+    /* SCHATTEN-HIEB: der Gegner ATTACKIERT (externalisiert – nie „du hast
+       falsch gelesen"). Dramatisch: Schatten-Klauen über den Schirm,
+       starker Ruck, der Geist stürzt vor und blitzt dunkel auf. */
+    sndHurt(); flashRed(); screenShake(2.2);
+    const ss = document.getElementById('shadowSlash');
+    if (ss) { ss.classList.remove('hit'); void ss.offsetWidth; ss.classList.add('hit'); }
+    announce('🌑 SCHATTEN-HIEB!', 1100);
+    if (G.mob && G.mob.boss) sayStory('boss', BOSS_HIT, true); /* nur der Boss höhnt */
+    flashModel(.85); setTimeout(() => flashModel(0), 220);
     if (M.group) {
       const grp = M.group;
       const oz = grp.position.clone();
-      const lunge = oz.clone().lerp(rigPos, .35);
+      const lunge = oz.clone().lerp(rigPos, .6); /* tieferer, bedrohlicher Stoß */
       addAnim({ t: 0, update(dt) {
-        this.t += dt * 5;
+        this.t += dt * 6.5;
         const k = Math.sin(Math.min(Math.PI, this.t));
         grp.position.lerpVectors(oz, lunge, k);
-        if (this.t >= Math.PI) { grp.position.copy(oz); return true; } return false;
+        grp.scale.setScalar(1 + k * .18); /* schwillt beim Zuschlagen an */
+        if (this.t >= Math.PI) { grp.position.copy(oz); grp.scale.setScalar(1); return true; } return false;
       } });
     }
     G.hearts--; renderHearts(); sndHeart();
     if (G.hearts <= 0) {
       setTimeout(() => { ovOn('deadOv'); sayStory('narrator', UI_LINES.dead); }, 700);
     }
-    else setTimeout(() => startWordChallenge('spell'), 900);
+    else setTimeout(() => startWordChallenge('spell'), 1000);
   }
 }
 function openChest(st, g) {

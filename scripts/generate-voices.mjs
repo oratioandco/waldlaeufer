@@ -13,7 +13,7 @@
 import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync, unlinkSync } from 'fs';
 import { createHash } from 'crypto';
 import { INTRO, BOSS_DEFEAT, BOSS_RAGE, COMPANION_CHEER, FLOOR_QUOTES, FLOOR_DONE, FLOOR_DONE_ALL, UI_LINES, bossIntroScene, companionJoinScene } from '../src/story/content.js';
-import { BEFEHL_VERBS, zauberePhrase, syllableRead, shieldWas, befehlOne, befehlTwo, befehlHelp, FIXED_GAMEPLAY, shopItemLine, SHOP_FIXED, FISHING_LINES, CAMP_SWAP, RANK_UP, ARCHERY_LINES, FIREFLY_LINES, HOPPER_LINES, TREASURE_INTRO, TREASURE_WIN, TREASURE_CLUES } from '../src/learning/speech-lines.js';
+import { BEFEHL_VERBS, zauberePhrase, syllableRead, shieldWas, befehlOne, befehlTwo, befehlHelp, FIXED_GAMEPLAY, shopItemLine, SHOP_FIXED, FISHING_LINES, CAMP_SWAP, CAMP_REST, RANK_UP, BOSS_HIT, ARCHERY_LINES, FIREFLY_LINES, HOPPER_LINES, TREASURE_INTRO, TREASURE_WIN, TREASURE_CLUES } from '../src/learning/speech-lines.js';
 import { SHOP_ITEMS } from '../src/meta/cosmetics.js';
 import { COLORS } from '../src/world/colors.js';
 
@@ -131,6 +131,9 @@ FISHING_LINES.forEach(t => add('narrator', t));
 add('companion', CAMP_SWAP);
 /* Lese-Rang-Aufstieg (Erzähler) */
 add('narrator', RANK_UP);
+/* Schatten-Hieb (Boss) + Lagerfeuer-Erholung (Erzähler) */
+add('boss', BOSS_HIT);
+add('narrator', CAMP_REST);
 /* Wort-Bogenschießen: feste Erzähler-Zeilen */
 ARCHERY_LINES.forEach(t => add('narrator', t));
 /* Glühwürmchen-Jagd: feste Erzähler-Zeilen */

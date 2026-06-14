@@ -392,3 +392,27 @@ button:disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.6); }
   z-index: 7; display: none; pointer-events: none;
 }
 #fishLineSvg.on { display: block; }
+
+/* ---------- 🌑 Schatten-Hieb (Boss-Angriff) ---------- */
+#shadowSlash {
+  position: fixed; inset: 0; z-index: 8; pointer-events: none; opacity: 0;
+  background:
+    linear-gradient(118deg, transparent 38%, rgba(18,6,28,.62) 44%, transparent 49%),
+    linear-gradient(118deg, transparent 49%, rgba(18,6,28,.55) 55%, transparent 60%),
+    linear-gradient(118deg, transparent 60%, rgba(18,6,28,.5) 66%, transparent 71%),
+    radial-gradient(circle at 50% 45%, transparent 42%, rgba(8,3,16,.66) 100%);
+}
+#shadowSlash.hit { animation: shadowHit .5s ease-out; }
+@keyframes shadowHit {
+  0%   { opacity: 0; transform: scale(1.12) translateX(7%); }
+  18%  { opacity: 1; }
+  100% { opacity: 0; transform: scale(1) translateX(-5%); }
+}
+
+/* ---------- ❤️ Herzen-Erholung am Lagerfeuer ---------- */
+#hearts.rest { animation: heartsRest 1s ease-out; }
+@keyframes heartsRest {
+  0% { filter: drop-shadow(0 2px 2px rgba(0,0,0,.45)); transform: scale(1); }
+  40% { filter: drop-shadow(0 0 16px rgba(255,120,140,.95)); transform: scale(1.18); }
+  100% { filter: drop-shadow(0 2px 2px rgba(0,0,0,.45)); transform: scale(1); }
+}

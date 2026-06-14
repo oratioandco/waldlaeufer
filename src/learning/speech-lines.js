@@ -32,6 +32,13 @@ export const CAMP_SWAP = 'Juhu, ich komme mit dir!';
 /* ---------- Lese-Rang-Aufstieg (Erzähler) ---------- */
 export const RANK_UP = 'Glückwunsch! Du bist im Lesen aufgestiegen.';
 
+/* ---------- Schatten-Hieb des Bosses (externalisiert: DER BOSS greift an,
+   nicht 'du hast falsch gelesen') ---------- */
+export const BOSS_HIT = 'Mein Schatten trifft dich!';
+
+/* ---------- Lagerfeuer-Erholung (erklärt das Herzen-Auffüllen) ---------- */
+export const CAMP_REST = 'Am Lagerfeuer erholst du dich. Deine Herzen sind wieder voll.';
+
 /* ---------- Glühwürmchen-Jagd (reines Belohnungsspiel, Erzähler) ---------- */
 export const FIREFLY_LINES = [
   'Glühwürmchen-Jagd! Tipp so viele wie du kannst, schnell hintereinander für mehr Punkte!',
