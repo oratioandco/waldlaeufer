@@ -192,6 +192,14 @@
   <span id="fishWord"></span>
   <button id="fishQuit" title="Zurück ins Lager">✕</button>
 </div>
+<!-- echte Angel (Rute unten rechts) + Leine, die die gefangene Silbe einholt -->
+<svg id="fishLineSvg"><line id="fishLine" x1="0" y1="0" x2="0" y2="0" stroke="#f3f3ee" stroke-width="2.5" stroke-dasharray="1 6" stroke-linecap="round" style="display:none"/></svg>
+<svg id="fishRod" viewBox="0 0 120 160" aria-hidden="true">
+  <line x1="22" y1="150" x2="100" y2="18" stroke="#6e4b2a" stroke-width="8" stroke-linecap="round"/>
+  <line x1="24" y1="148" x2="98" y2="20" stroke="#a4774a" stroke-width="2.5" stroke-linecap="round" opacity=".6"/>
+  <circle cx="44" cy="116" r="10" fill="#5e4528"/>
+  <circle cx="44" cy="116" r="4" fill="#caa86a"/>
+</svg>
 
 <!-- Wort-Bogenschießen: Ziel-Wort + 📯 + Aussteigen; Fadenkreuz + Kraftbalken -->
 <div id="archBar">
@@ -202,16 +210,6 @@
 <div id="archReticle"></div>
 <div id="archPower"><div id="archPowerFill"></div></div>
 <div id="archHint">Halten zum Spannen · zielen · loslassen</div>
-<!-- sichtbarer Bogen, der beim Halten gespannt wird -->
-<svg id="archBow" viewBox="0 0 170 160" aria-hidden="true">
-  <path id="archLimb" d="M128,14 Q66,80 128,146" fill="none" stroke="#7a5a36" stroke-width="10" stroke-linecap="round"/>
-  <path d="M128,14 Q70,80 128,146" fill="none" stroke="#a4774a" stroke-width="3" stroke-linecap="round" opacity=".6"/>
-  <polyline id="archString" points="128,14 128,80 128,146" fill="none" stroke="#f3f3ee" stroke-width="2.5"/>
-  <g id="archArrowG" style="display:none">
-    <line id="archArrow" x1="128" y1="80" x2="34" y2="80" stroke="#cfd4da" stroke-width="4.5"/>
-    <polygon id="archHead" points="34,80 48,73 48,87" fill="#b9c0c8"/>
-  </g>
-</svg>
 
 <!-- Glühwürmchen-Jagd: Zähler, Combo, Restzeit (reines Belohnungsspiel) -->
 <div id="ffBar">

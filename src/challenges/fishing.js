@@ -13,7 +13,7 @@
    • Es wird KEIN Leitner-Trial gewertet (reine Belohnung, kein Test).
    ===================================================================== */
 import * as THREE from 'three';
-import { scene } from '../engine/renderer.js';
+import { scene, camera } from '../engine/renderer.js';
 import { rigPos, rigFocus, camPos } from '../engine/camera.js';
 import { addAnim, easeOut } from '../engine/anims.js';
 import { G } from '../state.js';
@@ -22,8 +22,21 @@ import { spawnGemReward } from './reward.js';
 import { toonMat } from '../engine/materials.js';
 import { activeTier, poolFor, allWords } from '../learning/engine.js';
 import { sayStory, sayGame, sayStorySeq, stopSpeech } from '../audio/tts.js';
-import { sndCard, sndTap, sndWin } from '../audio/sfx.js';
+import { sndCard, sndTap, sndWin, tone } from '../audio/sfx.js';
 import { announce } from '../ui/feedback.js';
+
+/* Rutenspitze (Bildschirm) aus dem #fishRod-SVG (robust gegen Layout) */
+function rodTipScreen() {
+  const r = document.getElementById('fishRod').getBoundingClientRect();
+  return [r.left + r.width * (100 / 120), r.top + r.height * (18 / 160)];
+}
+/* Weltpunkt nahe der Rutenspitze (für den Einhol-Flug der Silbe) */
+function rodWorld() {
+  const [sx, sy] = rodTipScreen();
+  const v = new THREE.Vector3((sx / innerWidth) * 2 - 1, -(sy / innerHeight) * 2 + 1, .5);
+  v.unproject(camera);
+  return camPos.clone().addScaledVector(v.sub(camPos).normalize(), 3.2);
+}
 
 export let fishTargets = [];
 let pond = null, fishCards = [], master = null;
@@ -83,6 +96,8 @@ export function startFishing(onDone) {
   G.state = 'fish'; G.mode = 'fish'; G.busy = false;
   document.getElementById('campBar')?.classList.remove('on');
   const bar = document.getElementById('fishBar'); bar.classList.add('on');
+  document.getElementById('fishRod').classList.add('on');
+  document.getElementById('fishLineSvg').classList.add('on');
   document.getElementById('fishHorn').onclick = () => { if (target) sayGame(target.w); };
   document.getElementById('fishQuit').onclick = () => finish(true);
 
@@ -163,19 +178,31 @@ export function tapFish(mesh) {
   if (c.syl === expected) {
     c.caught = true;
     sndCard();
+    tone(330, .16, 'square', .05, 0, 320); /* Reel-Zip beim Anbeißen */
     sayGame(c.syl); /* Silbe vorsprechen (Laut-Schrift-Kopplung) */
     expectIdx++;
     renderFishWord();
-    /* gefangene Silbe steigt funkelnd auf und verschwindet */
+    /* gefangene Silbe wird an der LEINE zur Angel eingeholt */
     fishTargets = fishTargets.filter(m => m !== c.mesh);
     fishCards = fishCards.filter(x => x !== c);
-    let t = 0; const m = c.mesh;
+    const m = c.mesh;
+    const lineEl = document.getElementById('fishLine');
+    lineEl.style.display = '';
+    const from = m.position.clone(), to = rodWorld();
+    let t = 0;
     addAnim({ update(dt) {
-      t += dt * 2.2;
-      m.position.y += dt * 2.4;
-      m.scale.setScalar(Math.max(.001, CARD_SC * (1 - t)));
+      t += dt * 1.8;
+      const k = easeOut(Math.min(1, t));
+      m.position.lerpVectors(from, to, k);
+      m.scale.setScalar(Math.max(.001, CARD_SC * (1 - k * .9)));
       m.lookAt(camPos.x, m.position.y, camPos.z);
-      if (t >= 1) { scene.remove(m); return true; }
+      /* 2D-Leine: Rutenspitze → eingeholte Silbe */
+      const pr = m.position.clone().project(camera);
+      const [rx, ry] = rodTipScreen();
+      lineEl.setAttribute('x1', rx.toFixed(0)); lineEl.setAttribute('y1', ry.toFixed(0));
+      lineEl.setAttribute('x2', ((pr.x * .5 + .5) * innerWidth).toFixed(0));
+      lineEl.setAttribute('y2', ((-pr.y * .5 + .5) * innerHeight).toFixed(0));
+      if (t >= 1) { scene.remove(m); lineEl.style.display = 'none'; return true; }
       return false;
     } });
     if (expectIdx >= target.s.length) completeWord();
@@ -203,6 +230,9 @@ function completeWord() {
 
 function finish(early) {
   const bar = document.getElementById('fishBar'); bar.classList.remove('on');
+  document.getElementById('fishRod').classList.remove('on');
+  document.getElementById('fishLineSvg').classList.remove('on');
+  document.getElementById('fishLine').style.display = 'none';
   if (master && master._stop) master._stop();
   master = null;
   clearFish();
