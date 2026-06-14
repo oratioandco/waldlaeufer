@@ -27,11 +27,28 @@ export function startWordChallenge(mode) {
   G.idx = 0; G.errors = 0; G.busy = false;
   clearCards();
 
+  /* FADING-PROMPT nach Leitner-Box: das Scaffolding wird mit der
+     Beherrschung entzogen (schwerer über Prompt-Entzug, NICHT über
+     schwerere Wörter – Therapie-Invariante).
+       Box 0–1: Silben sichtbar (volles Modell zum Lesen)
+       Box 2–3: nur das GANZE WORT (Kind segmentiert selbst)
+       Box 4:   nichts sichtbar (nur Audio – freier Abruf)
+     Die Silben-Slots bleiben als Fortschritt und füllen sich beim Tippen. */
   const sw = document.getElementById('spellWord');
   sw.innerHTML = '';
+  const box = G.word.box || 0;
+  const showSyl = box <= 1;
+  const showWord = box === 2 || box === 3;
+  if (showWord) {
+    const wl = document.createElement('div');
+    wl.className = 'wword'; wl.textContent = G.word.w;
+    sw.appendChild(wl);
+  }
   G.word.s.forEach((syl, i) => {
     const d = document.createElement('div');
-    d.className = 'wslot'; d.dataset.i = i; d.textContent = syl;
+    d.className = 'wslot' + (showSyl ? '' : ' blank');
+    d.dataset.i = i;
+    d.textContent = showSyl ? syl : '';
     sw.appendChild(d);
   });
 
@@ -88,7 +105,7 @@ export function tapCard(r) {
     sndCard();
     sayGame(u.syl, false, true); /* Silben-Echo: optional → bei schnellem Spiel kein Stau */
     const slot = document.querySelector(`.wslot[data-i="${G.idx}"]`);
-    if (slot) slot.classList.add('lit', G.idx % 2 === 0 ? 'a' : 'b');
+    if (slot) { slot.textContent = u.syl; slot.classList.remove('blank'); slot.classList.add('lit', G.idx % 2 === 0 ? 'a' : 'b'); }
     const start = r.position.clone();
     const dest = rigPos.clone().add(new THREE.Vector3(0, -2.2, 0));
     let t = 0;

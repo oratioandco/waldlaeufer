@@ -14,6 +14,10 @@ Diese Prinzipien sind das Fundament. Kein Feature darf sie verwässern.
    Reihenfolge zusammengesetzt. Zweifarbige Silbengliederung (alternierend),
    erhöhter Buchstabenabstand (Crowding-Reduktion, Zorzi et al. PNAS 2012),
    Verdana o.ä. serifenlos.
+   **Fading-Prompt (Prompt-Entzug nach Leitner-Box):** Box 0–1 zeigt die
+   Silben als Modell, Box 2–3 nur das ganze Wort (Kind segmentiert selbst),
+   Box 4 nur Audio (freier Abruf). Die Slots füllen sich beim Tippen.
+   Schwieriger über ENTZUG des Scaffoldings, NIE über schwerere Wörter.
 2. **Leitner-Lern-Engine (in Referenzdatei implementiert & getestet):**
    - Jedes Wort hat Box 0–4. Fehlerfrei → Box+1, Fehler → Box−1.
    - Fehlerwörter werden nach 2–3 anderen Wörtern wiedervorgelegt

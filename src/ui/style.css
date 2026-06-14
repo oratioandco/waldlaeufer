@@ -54,6 +54,9 @@ button{font-family:inherit;cursor:pointer}
   font-size:26px;font-weight:bold;letter-spacing:.13em;color:rgba(255,255,255,.55);
   background:rgba(20,38,28,.66);border:1px solid rgba(255,255,255,.22);transition:all .25s;backdrop-filter:blur(5px);
   text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.wword{flex-basis:100%;text-align:center;font:bold 30px Verdana,sans-serif;letter-spacing:.13em;
+  color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6);margin-bottom:2px}
+.wslot.blank{border-style:dashed;border-color:rgba(255,255,255,.32);color:transparent}
 .wslot.lit{color:#fff}
 .wslot.lit.a{background:rgba(24,112,72,.85);border-color:#46d68a;box-shadow:0 0 18px rgba(70,214,138,.55);color:#dcffe9}
 .wslot.lit.b{background:rgba(150,74,22,.85);border-color:#ff9a4d;box-shadow:0 0 18px rgba(255,154,77,.55);color:#ffe3c7}
