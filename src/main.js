@@ -117,6 +117,16 @@ if (import.meta.env.DEV) {
     async fireflies() { await this._sandbox(); const m = await import('./challenges/fireflies.js'); this.mod = m; m.startFireflies(); return 'fireflies'; },
     async hopper() { await this._sandbox(); const m = await import('./challenges/hopper.js'); this.mod = m; m.startHopper(); return 'hopper'; },
     async treasure() { await this._sandbox(); const m = await import('./challenges/treasure.js'); this.mod = m; m.startTreasure(); return 'treasure'; },
+    /* Boss-Sichtung: __dbg.boss(1..6) zeigt die verdorbene Gestalt */
+    async boss(floor = 1) {
+      await this._sandbox([0, 3.7, 12], [0, 2.4, -2]);
+      G.floor = floor;
+      const { spawnMob } = await import('./creatures/mob.js');
+      const fwd = rigFocus.clone().sub(rigPos).setY(0).normalize();
+      const pos = rigPos.clone().addScaledVector(fwd, 9); pos.y = 0;
+      spawnMob({ pos, dir: fwd }, true);
+      return 'boss ' + floor;
+    },
     /* Lager-Sichtung mit allen Wächtern (ruhige Sandbox-Lichtung) */
     async camp() {
       await this._sandbox([0, 3.7, 12], [0, 1.4, 0]);

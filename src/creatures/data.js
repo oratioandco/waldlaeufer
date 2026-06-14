@@ -13,12 +13,18 @@ export const ANIMALS = [
    model = echtes 3D-Modell für Befreiungs-Moment + Lager (wo vorhanden). */
 export const BOSSES = [
   { name: 'SCHATTEN-WOLF',   freed: 'Der Graue Wolf',     sym: '🐺', trophy: '🐺', hp: 140,
+    form: 'wolf',   dark: 0x3a3550, aura: 0x6a78c9,
     model: { key: 'g_wolf', url: '/assets/models/animals/Wolf.glb', scale: .55 } },
-  { name: 'SCHATTEN-BÄRIN',  freed: 'Die Alte Bärin',     sym: '🐻', trophy: '🐻', hp: 160 },
+  { name: 'SCHATTEN-BÄRIN',  freed: 'Die Alte Bärin',     sym: '🐻', trophy: '🐻', hp: 160,
+    form: 'baerin', dark: 0x4a3340, aura: 0xc9836a },
   { name: 'SCHATTEN-FUCHS',  freed: 'Der Rote Fuchs',     sym: '🦊', trophy: '🦊', hp: 180,
+    form: 'fuchs',  dark: 0x4e2d3a, aura: 0xd9683c,
     model: { key: 'g_fox', url: '/assets/models/animals/Fox.glb', scale: .5 } },
-  { name: 'SCHATTEN-ADLER',  freed: 'Der Steinadler',     sym: '🦅', trophy: '🦅', hp: 200 },
+  { name: 'SCHATTEN-ADLER',  freed: 'Der Steinadler',     sym: '🦅', trophy: '🦅', hp: 200,
+    form: 'adler',  dark: 0x2e3c52, aura: 0x6ab0d9 },
   { name: 'SCHATTEN-HIRSCH', freed: 'Der Silberhirsch',   sym: '🦌', trophy: '🦌', hp: 230,
+    form: 'hirsch', dark: 0x3e3a2c, aura: 0x9ad06a,
     model: { key: 'g_stag', url: '/assets/models/animals/Stag.glb', scale: .52 } },
-  { name: 'DER SCHWARZE KÖNIG', freed: 'Der Gute König',  sym: '👑', trophy: '👑', hp: 260 }
+  { name: 'DER SCHWARZE KÖNIG', freed: 'Der Gute König',  sym: '👑', trophy: '👑', hp: 260,
+    form: 'koenig', dark: 0x241838, aura: 0x9b59c9 }
 ];

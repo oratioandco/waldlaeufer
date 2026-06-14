@@ -18,6 +18,41 @@ import { ANIMALS, BOSSES } from './data.js';
 import { MODELS, loadModelOnce, pickClip } from './models.js';
 import { sndGrowl } from '../audio/sfx.js';
 import { announce } from '../ui/feedback.js';
+import { toonMat } from '../engine/materials.js';
+
+/* ---------- Distinkte Wächter-Silhouetten (verdorbene Schatten-Gestalten) ----------
+   Jeder Boss kriegt eigene Form-Merkmale aus dunklen Toon-Meshes, an die
+   lookAt-gedrehte Gruppe gehängt (Ohren/Schnauze nach +z = zur Kamera,
+   Geweih/Krone nach +y = oben). So fühlt sich jeder Wächter eigen an. */
+function bossFeatures(form, group, R, color) {
+  const mat = toonMat({ color: new THREE.Color(color).multiplyScalar(0.6), side: THREE.DoubleSide });
+  const cone = (r, h) => new THREE.Mesh(new THREE.ConeGeometry(r, h, 7), mat);
+  const ball = (r) => new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10), mat);
+  const cyl = (r1, r2, h) => new THREE.Mesh(new THREE.CylinderGeometry(r1, r2, h, 6), mat);
+  const put = (m, x, y, z, rx = 0, ry = 0, rz = 0) => { m.position.set(x, y, z); m.rotation.set(rx, ry, rz); group.add(m); return m; };
+  if (form === 'wolf' || form === 'fuchs') {
+    const big = form === 'fuchs' ? 1.3 : 1;          /* Fuchs = größere, spitzere Ohren */
+    [-1, 1].forEach(s => put(cone(R * .32 * big, R * .85 * big), s * R * .5, R * .95, R * .15, 0, 0, s * -.32));
+    put(cone(R * .42, R * .85), 0, R * .02, R * 1.0, Math.PI / 2, 0, 0); /* Schnauze nach vorn */
+  } else if (form === 'baerin') {
+    [-1, 1].forEach(s => put(ball(R * .33), s * R * .55, R * .9, R * .12)); /* runde Ohren */
+    put(ball(R * .55), 0, -R * .12, R * .98);                               /* breite Schnauze */
+  } else if (form === 'adler') {
+    [-1, 1].forEach(s => { const w = cone(R * .62, R * 2.5); w.scale.set(1, 1, .2); put(w, s * R * 1.15, R * .25, -R * .25, 0, 0, s * (Math.PI / 2.1)); });
+    put(cone(R * .3, R * .8), 0, 0, R * 1.05, Math.PI / 2, 0, 0);           /* Schnabel */
+  } else if (form === 'hirsch') {
+    [-1, 1].forEach(s => {
+      put(cyl(R * .07, R * .1, R * 1.4), s * R * .4, R * 1.35, 0, 0, 0, s * .28);  /* Geweih-Stange */
+      put(cyl(R * .04, R * .06, R * .65), s * R * .72, R * 1.7, 0, 0, 0, s * 1.0); /* Spross 1 */
+      put(cyl(R * .04, R * .06, R * .55), s * R * .28, R * 2.0, 0, 0, 0, s * -.35);/* Spross 2 */
+    });
+  } else if (form === 'koenig') {
+    for (let i = 0; i < 7; i++) {                                            /* Dornen-Krone */
+      const a = (i / 7) * Math.PI * 2;
+      put(cone(R * .14, R * .62), Math.cos(a) * R * .6, R * 1.05, Math.sin(a) * R * .6 + R * .15);
+    }
+  }
+}
 
 export const M = { group: null, mat: null, shadow: null };
 
@@ -72,8 +107,8 @@ export function spawnMob(st, isBoss) {
 
   /* Schattengeist-Blob (Augen zur Kamera via lookAt unten) */
   const fb = animal.fb;
-  const baseR = isBoss ? 2.5 : 1.9;
-  M.mat = blobMaterial(isBoss ? 0x2a2140 : fb.color, isBoss ? .8 : fb.amp);
+  const baseR = isBoss ? (def.form === 'koenig' ? 2.7 : 2.35) : 1.9;
+  M.mat = blobMaterial(isBoss ? def.dark : fb.color, isBoss ? .8 : fb.amp);
   const body = new THREE.Mesh(new THREE.SphereGeometry(baseR, 48, 36), M.mat);
   body.scale.y = isBoss ? 1.15 : fb.squash;
   M.group.add(body);
@@ -92,18 +127,11 @@ export function spawnMob(st, isBoss) {
   const hoverY = 2.5;
 
   if (isBoss) {
-    const aura = glowSprite(0x9b59c9, 10); aura.material.opacity = .5;
+    const aura = glowSprite(def.aura, 10); aura.material.opacity = .5;
     aura.position.y = 0;
     M.group.add(aura);
-    const cv = document.createElement('canvas'); cv.width = cv.height = 256;
-    const ctx = cv.getContext('2d');
-    ctx.font = '190px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.shadowColor = '#c084fc'; ctx.shadowBlur = 36;
-    ctx.fillStyle = '#f3e8ff'; ctx.fillText(def.sym, 128, 140);
-    const sym = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false }));
-    /* ÜBER dem Geist schweben lassen (Blob-Radius ~2.9) – nicht darin */
-    sym.scale.set(2.3, 2.3, 1); sym.position.set(0, 4.3, 0);
-    M.group.add(sym);
+    /* eigene verdorbene Gestalt je Wächter (Ohren/Geweih/Flügel/Krone …) */
+    bossFeatures(def.form, M.group, baseR, def.dark);
   }
   /* Schatten STANDALONE auf dem Boden – NICHT als Kind der Gruppe, sonst
      erbt der flache Schatten deren lookAt-Rotation + Spawn-Skalierung und
