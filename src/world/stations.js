@@ -69,8 +69,12 @@ function makeWaterMat() {
         float foamLine=0.085+0.025*sin(vUv.x*40.0+uTime*1.8);
         float foam=1.0-smoothstep(0.0,foamLine,edge);
         c=mix(c,vec3(0.96,0.99,1.0),foam*0.85);
-        gl_FragColor=vec4(c,0.94);
-      }`
+        /* Körper VOLL deckend (kein Boden durch), nur die Ufer weich
+           ausblenden → verschmilzt mit dem Gras statt harter Kante */
+        float a=smoothstep(0.0,0.06,edge);
+        gl_FragColor=vec4(c,a);
+      }`,
+    polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2
   });
   waterMats.push(m);
   return m;
@@ -145,11 +149,12 @@ function discTexture() {
 }
 function junctionPatch(pos) {
   const m = toonMat({ color: biome.path, map: discTexture(), transparent: true });
-  m.depthWrite = false;
+  m.depthWrite = false; m.alphaTest = .02;
+  m.polygonOffset = true; m.polygonOffsetFactor = -3; m.polygonOffsetUnits = -3;
   const disc = new THREE.Mesh(new THREE.CircleGeometry(3.6, 22), m);
+  disc.renderOrder = 1;
   disc.rotation.x = -Math.PI / 2;
-  disc.position.set(pos.x, .026, pos.z); /* knapp unter dem Weg → Weg-Spuren liegen oben */
-  disc.receiveShadow = true;
+  disc.position.set(pos.x, .05, pos.z); /* knapp unter dem Weg → Weg-Spuren liegen oben */
   return disc;
 }
 
@@ -250,10 +255,15 @@ function buildSegment(st, from) {
   for (let i = 0; i < uv.count; i++) uv.setY(i, uv.getY(i) * tiles);
   const pathMat = toonMat({ color: biome.path, map: pathTexture(), transparent: true });
   pathMat.alphaTest = .02;
+  /* polygonOffset = Decal-Standard: zieht den Weg leicht zur Kamera, damit
+     er NIE mit dem (welligen) Boden z-fightet → kein Flackern mehr */
+  pathMat.polygonOffset = true; pathMat.polygonOffsetFactor = -4; pathMat.polygonOffsetUnits = -4;
+  pathMat.depthWrite = false;
   const path = new THREE.Mesh(pathGeo, pathMat);
+  path.renderOrder = 1;
   path.rotation.x = -Math.PI / 2;
   const mid = from.clone().add(st.pos).multiplyScalar(.5);
-  path.position.set(mid.x, .03, mid.z);
+  path.position.set(mid.x, .06, mid.z);
   path.rotation.z = Math.atan2(dir.x, dir.z);
   path.receiveShadow = true;
   st.group.add(path);
@@ -337,7 +347,8 @@ function buildStation(st) {
   if (st.type === 'TOR') {
     const water = new THREE.Mesh(new THREE.PlaneGeometry(26, 4.6, 32, 6), makeWaterMat());
     water.rotation.x = -Math.PI / 2;
-    water.position.set(st.pos.x, .05, st.pos.z);
+    water.position.set(st.pos.x, .12, st.pos.z); /* über Boden-Wellen + über dem Weg */
+    water.renderOrder = 2;
     water.rotation.z = Math.atan2(st.dir.x, st.dir.z);
     st.group.add(water);
     for (let k = 0; k < 6; k++) {

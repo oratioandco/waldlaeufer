@@ -105,8 +105,12 @@ export function spawnMob(st, isBoss) {
     sym.scale.set(2.3, 2.3, 1); sym.position.set(0, 4.3, 0);
     M.group.add(sym);
   }
+  /* Schatten STANDALONE auf dem Boden – NICHT als Kind der Gruppe, sonst
+     erbt der flache Schatten deren lookAt-Rotation + Spawn-Skalierung und
+     kippt/flackert (Playtest-Bug). Liegt fest flach unter dem Gegner. */
   M.shadow = blobShadow(5);
-  M.group.add(M.shadow);
+  M.shadow.position.set(st.pos.x, .06, st.pos.z);
+  scene.add(M.shadow);
 
   M.group.userData.hoverY = hoverY;
   M.group.position.copy(st.pos); M.group.position.y = hoverY;
@@ -136,7 +140,9 @@ export function spawnMob(st, isBoss) {
   if (isBoss) announce('BOSS!', 1100);
 }
 export function despawnMobVisual() {
-  scene.remove(M.group); M.group = null; M.shadow = null; M.mat = null;
+  scene.remove(M.group);
+  if (M.shadow) scene.remove(M.shadow);
+  M.group = null; M.shadow = null; M.mat = null;
 }
 export function setMobHp() {
   document.getElementById('mobHpFill').style.width = Math.max(0, (G.mob.hp / G.mob.max * 100)) + '%';
@@ -146,6 +152,7 @@ export function setMobHp() {
    erscheint und entkommt (Blickrichtung = Bewegungsrichtung). */
 export function freeMobVisual() {
   const grp = M.group;
+  const shadow = M.shadow;
   const boss = G.mob && G.mob.boss ? G.mob.def : null;
   const animal = G.mob && !G.mob.boss ? G.mob.animal : null;
   M.group = null; M.shadow = null; M.mat = null;
@@ -154,7 +161,8 @@ export function freeMobVisual() {
     t += dt * 4;
     grp.scale.setScalar(Math.max(.001, 1 - t));
     grp.rotation.y += dt * 9;
-    if (t >= 1) { scene.remove(grp); return true; }
+    if (shadow) shadow.material.opacity = Math.max(0, 1 - t); /* Schatten mit auflösen */
+    if (t >= 1) { scene.remove(grp); if (shadow) scene.remove(shadow); return true; }
     return false;
   } });
   if (animal) revealFreedAnimal(animal, grp.position.clone());
@@ -285,7 +293,10 @@ export function removeKingSilhouette() {
 export function updateMob(time) {
   if (M.mat) M.mat.uniforms.uTime.value = time;
   if (M.group && G.mob) {
-    M.group.position.y = M.group.userData.hoverY + Math.sin(time * 1.6) * .18;
-    if (M.shadow) M.shadow.position.y = .06 - M.group.position.y;
+    const bob = Math.sin(time * 1.6) * .18;
+    M.group.position.y = M.group.userData.hoverY + bob;
+    /* Schatten liegt fest am Boden; nur dezent kleiner, wenn der Geist
+       höher schwebt (wirkt wie echter Wurfschatten) */
+    if (M.shadow) M.shadow.scale.setScalar(1 - bob * .35);
   }
 }
