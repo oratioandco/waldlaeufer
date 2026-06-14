@@ -23,7 +23,7 @@ import { updateCompanion } from './creatures/companion.js';
 import { cards, updateCards } from './challenges/cards.js';
 import { tapCard, speakSpell } from './challenges/spell.js';
 import { tapBefehl, befehlTargets } from './challenges/befehl.js';
-import { campTargets, tapCamp } from './world/camp.js';
+import { campTargets, tapCamp, enterCamp } from './world/camp.js';
 import { fishTargets, tapFish } from './challenges/fishing.js';
 import { fireflyTargets, tapFirefly } from './challenges/fireflies.js';
 import { tapHop } from './challenges/hopper.js';
@@ -269,7 +269,22 @@ document.getElementById('hornBtn').addEventListener('click', speakSpell);
 document.getElementById('reviveBtn').addEventListener('click', revive);
 addEventListener('pagehide', saveActive);
 
-function startGame() {
+/* Das aktuelle Gebiet vom Anfang spielen (auch nach Lager-Hub-Verlassen) */
+function beginCurrentFloor() {
+  const from = G.stations[0] ? G.stations[0].from : null;
+  if (from) { rigPos.set(from.x, 3.7, from.z); rigFocus.copy(G.stations[0].pos); rigFocus.y = 2.2; }
+  else { rigPos.set(0, 3.7, 14); rigFocus.set(0, 2.2, 0); }
+  camPos.copy(rigPos); camFocus.copy(rigFocus);
+  G.stIdx = -1;
+  announce('GEBIET ' + G.floor, 1200);
+  if (innerHeight > innerWidth) setTimeout(() => {
+    announce('🔄 Quer halten!', 1600);
+    sayStory('narrator', UI_LINES.rotate);
+  }, 1600);
+  setTimeout(advance, 1400);
+}
+
+function startGame(toCamp) {
   ac();
   gameStarted = true;
   playLevelMusic(G.floor);
@@ -286,6 +301,15 @@ function startGame() {
   camPos.copy(rigPos); camFocus.copy(rigFocus);
   resetPath(); /* Titel-Kulisse hat den Pfad verschoben */
   planFloor();
+  /* Wiedereinstieg direkt INS LAGER (Hub): Minispiele/Tauschplatz/Begleiter.
+     „Weiter in den Wald" spielt dann das aktuelle Gebiet vom Anfang. */
+  if (toCamp && G.stations.length) {
+    const last = G.stations[G.stations.length - 1];
+    rigPos.set(last.pos.x, 3.7, last.pos.z + 6); camPos.copy(rigPos);
+    G.campReturn = beginCurrentFloor;
+    enterCamp();
+    return;
+  }
   const begin = () => {
     announce('GEBIET ' + G.floor, 1200);
     if (innerHeight > innerWidth) setTimeout(() => {
@@ -315,6 +339,8 @@ function renderStartProfiles() {
   const profiles = listProfiles();
   list.innerHTML = '';
   profiles.forEach(p => {
+    const wrap = document.createElement('div');
+    wrap.className = 'profileRow';
     const b = document.createElement('button');
     b.className = 'profileBtn';
     const name = document.createElement('span');
@@ -325,7 +351,21 @@ function renderStartProfiles() {
     meta.textContent = p.data ? `🏅 ${rank} · Gebiet ${p.data.floor} · 💎 ${p.data.gems}` : 'Neu';
     b.append(name, meta);
     b.addEventListener('pointerdown', () => { selectProfile(p.id); startGame(); });
-    list.appendChild(b);
+    wrap.appendChild(b);
+    /* Wer schon gespielt hat, darf direkt ins Lager (Minispiele, Tauschplatz,
+       Begleiter) – „Weiter in den Wald" startet das aktuelle Gebiet vom Anfang. */
+    if (p.data) {
+      const camp = document.createElement('button');
+      camp.className = 'profileCampBtn';
+      camp.textContent = '🏕';
+      camp.title = 'Ins Lager';
+      camp.addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        selectProfile(p.id); startGame(true);
+      });
+      wrap.appendChild(camp);
+    }
+    list.appendChild(wrap);
   });
   newPlayerMode = !profiles.length;
   row.style.display = newPlayerMode ? 'block' : 'none';

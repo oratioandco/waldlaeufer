@@ -265,7 +265,10 @@ export function wireOverlays() {
     enterCamp();
   });
   document.getElementById('campLeaveBtn').addEventListener('click', () => {
-    leaveCamp(nextFloor);
+    /* Vom Startbildschirm aus betreten → „Weiter in den Wald" spielt das
+       aktuelle Gebiet vom Anfang (G.campReturn). Sonst weiter ins nächste. */
+    const ret = G.campReturn; G.campReturn = null;
+    leaveCamp(ret || nextFloor);
   });
   document.getElementById('shopBtn').addEventListener('click', openShop);
   document.getElementById('shopCloseBtn').addEventListener('click', () => ovOff('shopOv'));

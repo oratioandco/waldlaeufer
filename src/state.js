@@ -8,6 +8,7 @@ export const G = {
   companion: null, seenIntro: false,
   freedSpecies: {}, /* Tierart → Anzahl befreit (fürs Lager) */
   rankSeen: 0, /* zuletzt gefeierter Lese-Rang (für Aufstiegs-Feier) */
+  campReturn: null, /* Lager-Verlassen-Aktion (Hub vom Startbildschirm) */
   /* Dev-Sandbox: legt die Encounter-Statemaschine still, damit Lager &
      Minispiele isoliert getestet werden können (nie in Produktion gesetzt) */
   sandbox: false
