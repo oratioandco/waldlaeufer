@@ -70,7 +70,10 @@ export function startWordChallenge(mode) {
     r.position.y = r.userData.baseY;
   });
 
-  setTimeout(() => sayGame(zauberePhrase(G.word.w)), 320);
+  /* Neues Wort: KRITISCH → unterbricht veraltetes Audio (z.B. Jubel vom
+     letzten Treffer), damit der aktuelle Lese-Prompt nie hinterherhängt
+     (Boss-Tempo!). */
+  setTimeout(() => sayGame(zauberePhrase(G.word.w), true), 320);
 }
 export function speakSpell() {
   if (G.mode === 'befehl' && G.befehlSentence) { sayGame(G.befehlSentence); return; }
@@ -83,7 +86,7 @@ export function tapCard(r) {
   if (u.correctIndex === G.idx) {
     u.dead = true;
     sndCard();
-    sayGame(u.syl);
+    sayGame(u.syl, false, true); /* Silben-Echo: optional → bei schnellem Spiel kein Stau */
     const slot = document.querySelector(`.wslot[data-i="${G.idx}"]`);
     if (slot) slot.classList.add('lit', G.idx % 2 === 0 ? 'a' : 'b');
     const start = r.position.clone();

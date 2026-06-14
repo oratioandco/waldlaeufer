@@ -13,7 +13,7 @@ const SFX = [
   /* Gameplay-Kern */
   { f: 'card-correct',   d: 0.8, p: 'Soft magical chime pluck, warm wooden marimba note with a tiny sparkle tail, positive feedback, children s game, short' },
   { f: 'card-wrong',     d: 1.0, p: 'Soft gentle magical fizzle, small puff of air with two descending friendly woodwind notes, mild, no harshness' },
-  { f: 'spell-cast',     d: 1.0, p: 'Quick clean magical whoosh, a glowing energy orb launching forward with a bright shimmer trail, polished fantasy game spell sound, no voices' },
+  { f: 'spell-cast',     d: 0.8, p: 'Short bright friendly magic cast: a soft crystalline chime with a gentle airy sparkle whoosh as a glowing orb launches, warm pleasing wand cast, child-friendly fantasy game, clean, no harshness, no voices' },
   { f: 'spell-hit',      d: 1.0, p: 'Round magical impact: soft deep boom with glittering fairy dust sparkles scattering, satisfying video game hit confirm, pleasing, no harshness, no voices' },
   { f: 'shield-correct', d: 1.0, p: 'Bright crystal shield ting, magical deflection chime, heroic, short' },
   { f: 'player-hit',     d: 1.0, p: 'Soft cartoonish bonk with a brief dizzy wobble, mild setback sound for a kids game, not scary' },
@@ -22,7 +22,7 @@ const SFX = [
   { f: 'critical-sting', d: 1.0, p: 'Powerful magical critical hit sting, bright triumphant zing with sparkle burst, short and punchy' },
   { f: 'victory-fanfare', d: 3.0, p: 'Short triumphant fanfare with woodwinds, harp and light percussion, forest fantasy, joyful children s game victory' },
   /* Welt & Stationen */
-  { f: 'ghost-appear',   d: 1.5, p: 'Playful shadow spirit whoosh with a soft mischievous grumble, magical dark puff, slightly spooky but kid-friendly' },
+  { f: 'ghost-appear',   d: 1.2, p: 'Soft shadow spirit appearing: a gentle whoomph of dark magic smoke with a brief wobbling shimmer and a tiny cute spooky note, kid-friendly, mysterious but not scary, clean, no voices' },
   { f: 'animal-free',    d: 2.5, p: 'Magical liberation shimmer, rising harp glissando with fluttering bird wings taking off, joyful release' },
   { f: 'bridge-grow',    d: 2.0, p: 'Wooden planks magically growing and snapping into place, creaking wood with magical shimmer' },
   { f: 'chest-open',     d: 1.5, p: 'Old wooden treasure chest creaking open followed by a golden sparkle reveal' },

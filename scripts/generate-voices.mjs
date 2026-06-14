@@ -27,10 +27,32 @@ const VOICE_IDS = {
   word:      '5KvpaGteYkNayiswuX2h'  // Lehrer-Stimme: Wörter, Silben, Gameplay-Sätze
 };
 const MODEL = 'eleven_multilingual_v2';
-/* Aussprache-Übersteuerung für Problemsilben: GESPROCHEN wird der
-   rechte Wert, der Manifest-Key (und die Karte) bleibt der linke.
-   Bei weiteren Englisch-Fallen hier ergänzen. */
-const PRONOUNCE = { 'Py': 'Pü' };
+/* ---------- Aussprache-Korrektur (Token-Respelling) ----------
+   GESPROCHEN wird der respellte Wert (deutsche Dehnungs-Schreibung bzw.
+   anti-englische Schreibung), der Manifest-Key/die Karte bleiben der
+   Originaltext. Greift als WORT-WEISE Ersetzung in JEDEM 'word'-Text
+   (also auch in „Zaubere: …" und „Ro, se. …"); nur betroffene Clips
+   werden neu generiert. Therapeutisch wichtig: offene betonte Silben
+   haben im Deutschen einen LANGEN Vokal (Dehnungs-h / ie). */
+/* NUR eindeutig sichere Fälle (gemeldet im Playtest). Token-Ersetzung
+   greift überall → daher nur Tokens, die in JEDEM Vorkommen gleich
+   ausgesprochen werden:
+   • anti-englisch: Py→Pü, Rose→Rohse, Igel→Ihgel (ganze Wörter)
+   • gel→gell: hartes deutsches g (Igel, Vogel, Hagel) statt engl. „dʒel"
+   • Ne/Bie: NUR in Nebel/Biene, betont-lang → Dehnung erlaubt
+   ACHTUNG: kurze Tokens wie Ra/Na/Ro NICHT aufnehmen – sie sind in
+   anderen Wörtern UNBETONT-kurz (Rakete, Naturforscher, Rosine)! */
+const SAY = {
+  'Py': 'Pü',
+  'Rose': 'Rohse',
+  'Igel': 'Ihgel', 'gel': 'gell',
+  'Nebel': 'Nehbel', 'Ne': 'Neh',
+  'Biene': 'Biehne', 'Bie': 'Bieh'
+};
+/* wort-weise Ersetzung (Buchstaben-Token), Interpunktion bleibt erhalten */
+function applySay(text) {
+  return text.replace(/[A-Za-zÄÖÜäöüß]+/g, w => Object.prototype.hasOwnProperty.call(SAY, w) ? SAY[w] : w);
+}
 const OUT = 'public/assets/voice';
 
 /* ---------- API-Key aus .env oder Umgebung ---------- */
@@ -126,7 +148,7 @@ let made = 0, skipped = 0;
 for (const { voice, text, ctx } of lines) {
   /* Voice-ID im Hash: Stimme in VOICE_IDS tauschen → Clips regenerieren automatisch.
      Kontext im Hash: geänderte Konditionierung regeneriert die Silbe */
-  const speak = (voice === 'word' && PRONOUNCE[text]) || text;
+  const speak = voice === 'word' ? applySay(text) : text;
   const ctxKey = (ctx ? '|' + (ctx.prev || '') + '|' + (ctx.next || '') : '') +
     (speak !== text ? '|p:' + speak : '');
   const id = createHash('md5').update(VOICE_IDS[voice] + '|' + text + ctxKey).digest('hex').slice(0, 10);

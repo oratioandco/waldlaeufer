@@ -120,8 +120,9 @@ export function mobTurn() {
   const round = Math.floor((G.floor - 1) / 6);
   if (!phase2 && Math.random() < Math.max(.3, .5 - round * .08)) { setTimeout(() => startWordChallenge('spell'), 500); return; }
   sndGrowl();
-  /* hörbares Angriffs-Signal – optional: entfällt, wenn gerade gesprochen wird */
-  sayGame(UI_LINES.shieldAlert, false, true);
+  /* Angriffs-Anmoderation: KRITISCH → unterbricht veraltetes Audio, damit
+     der Schild-Alarm IMMER kommt (vorher optional → wurde verschluckt) */
+  sayGame(UI_LINES.shieldAlert, true);
   {
     let t = 0;
     addAnim({ update(dt) {
