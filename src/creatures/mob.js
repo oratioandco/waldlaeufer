@@ -31,27 +31,39 @@ function bossFeatures(form, group, hc, hr, mat) {
   const put = (m, x, y, z, rx = 0, ry = 0, rz = 0) => {
     m.position.set(hc.x + x, hc.y + y, hc.z + z); m.rotation.set(rx, ry, rz); group.add(m); return m;
   };
-  if (form === 'wolf' || form === 'fuchs') {
-    const big = form === 'fuchs' ? 1.35 : 1;            /* Fuchs = größere, spitzere Ohren */
-    [-1, 1].forEach(s => put(cone(hr * .46 * big, hr * 1.35 * big), s * hr * .5, hr * .82, -hr * .1, 0, 0, s * -.26));
-    put(cone(hr * .52, hr * 1.25), 0, -hr * .16, hr * .98, Math.PI / 2, 0, 0); /* Schnauze nach vorn */
+  if (form === 'wolf') {
+    /* große aufrechte Spitzohren + lange Raubtier-Schnauze */
+    [-1, 1].forEach(s => put(cone(hr * .42, hr * 1.7), s * hr * .52, hr * .98, -hr * .12, s * .12, 0, s * -.3));
+    put(cone(hr * .42, hr * 1.6), 0, -hr * .4, hr * .72, Math.PI / 2.25, 0, 0); /* lange Schnauze, leicht gesenkt */
+  } else if (form === 'fuchs') {
+    /* RIESIGE spitze Lauscher (Fuchs-Signatur) + schmale spitze Schnauze */
+    [-1, 1].forEach(s => put(cone(hr * .5, hr * 2.4), s * hr * .62, hr * 1.25, -hr * .1, s * .14, 0, s * -.42));
+    put(cone(hr * .3, hr * 1.8), 0, -hr * .36, hr * .8, Math.PI / 2.2, 0, 0);
   } else if (form === 'baerin') {
-    [-1, 1].forEach(s => put(ball(hr * .42), s * hr * .78, hr * .72, -hr * .05)); /* runde Ohren */
-    put(ball(hr * .58), 0, -hr * .22, hr * .9);                                   /* breite Schnauze */
+    /* kleine runde Ohren + breite stumpfe Schnauze mit Nase */
+    [-1, 1].forEach(s => put(ball(hr * .4), s * hr * .82, hr * .84, -hr * .04));
+    put(ball(hr * .62), 0, -hr * .26, hr * .82);
+    put(ball(hr * .28), 0, -hr * .44, hr * 1.18);
   } else if (form === 'adler') {
-    put(cone(hr * .4, hr * 1.05), 0, -hr * .12, hr * .95, Math.PI / 2, 0, 0);     /* Schnabel */
-    [-1, 1].forEach(s => { const b = cone(hr * .26, hr * .55); put(b, s * hr * .4, hr * .55, hr * .1); }); /* Federohren */
+    /* scharfer Hakenschnabel + Brauenfedern */
+    put(cone(hr * .34, hr * 1.4), 0, -hr * .28, hr * .82, Math.PI / 2.35, 0, 0);
+    put(ball(hr * .18), 0, -hr * .12, hr * 1.05); /* Schnabelwurzel */
+    [-1, 1].forEach(s => put(cone(hr * .2, hr * .8), s * hr * .5, hr * .72, -hr * .05, 0, 0, s * -.22));
   } else if (form === 'hirsch') {
-    put(cone(hr * .5, hr * 1.25), 0, -hr * .12, hr * 1.0, Math.PI / 2, 0, 0);     /* lange Schnauze */
+    /* lange Schnauze + GROSSES verzweigtes Schatten-Geweih (Signatur) */
+    put(cone(hr * .4, hr * 1.6), 0, -hr * .32, hr * .85, Math.PI / 2.25, 0, 0);
     [-1, 1].forEach(s => {
-      put(cyl(hr * .12, hr * .17, hr * 2.0), s * hr * .5, hr * 1.35, 0, 0, 0, s * .3);  /* Geweih-Stange */
-      put(cyl(hr * .08, hr * .12, hr * 1.05), s * hr * .98, hr * 2.1, 0, 0, 0, s * 1.0); /* Spross 1 */
-      put(cyl(hr * .08, hr * .12, hr * .9), s * hr * .34, hr * 2.55, 0, 0, 0, s * -.32); /* Spross 2 */
+      put(cyl(hr * .14, hr * .2, hr * 2.7), s * hr * .42, hr * 1.75, -hr * .1, 0, 0, s * .34);   /* Hauptstange */
+      put(cyl(hr * .09, hr * .13, hr * 1.5), s * hr * 1.12, hr * 2.7, -hr * .1, 0, 0, s * 1.0);   /* Spross 1 */
+      put(cyl(hr * .09, hr * .13, hr * 1.35), s * hr * .5, hr * 3.15, -hr * .1, 0, 0, s * -.3);    /* Spross 2 */
+      put(cyl(hr * .08, hr * .11, hr * 1.05), s * hr * 1.55, hr * 3.5, -hr * .1, 0, 0, s * .72);   /* Spross 3 */
     });
   } else if (form === 'koenig') {
-    for (let i = 0; i < 7; i++) {                                                 /* Dornen-Krone */
-      const a = (i / 7) * Math.PI * 2;
-      put(cone(hr * .22, hr * 1.0), Math.cos(a) * hr * .82, hr * .9, Math.sin(a) * hr * .82 + hr * .12);
+    /* hohe, gezackte Dornenkrone (abwechselnd lang/kurz) */
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2;
+      const tall = (i % 2 === 0) ? 1.6 : 1.0;
+      put(cone(hr * .2, hr * tall), Math.cos(a) * hr * .8, hr * 1.0, Math.sin(a) * hr * .8 + hr * .1);
     }
   }
 }
@@ -81,39 +93,66 @@ function buildBossBody(form, R) {
     const m = new THREE.Mesh(new THREE.SphereGeometry(r, 26, 20), M.mat);
     m.position.set(x, y, z); m.scale.set(sx, sy, sz); grp.add(m); return m;
   };
-  /* WICHTIG: Die Kamera blickt frontal auf den Gegner → die Silhouette muss
-     in der BILD-Ebene (x hoch/breit) lesbar sein, nicht in der Tiefe (z).
-     Darum: Kopf klar OBEN, Körper darunter, Merkmale breit (Ohren/Geweih/
-     Flügel/Krone spannen seitlich auf). */
-  let hc; /* Kopfzentrum */
-  if (form === 'wolf' || form === 'fuchs' || form === 'baerin') {
-    /* sitzendes Raubtier von vorn: Kopf über schmalerem Oberkörper */
-    mass(R * .74, 0, -.32 * R, -.05 * R, .96, 1.04, .9);     /* Rumpf (sitzend) */
-    mass(R * .58, 0, .42 * R, .12 * R, 1.06, .82, .82);      /* Schultern */
-    hc = new THREE.Vector3(0, 1.04 * R, .2 * R);
-    mass(R * .5, hc.x, hc.y, hc.z, 1.02, .94, 1.0);          /* Kopf oben */
-    /* zwei Schatten-Pfoten vorn unten */
-    [-1, 1].forEach(s => mass(R * .22, s * .34 * R, -.62 * R, .42 * R, 1, .9, 1));
+  /* Rauch-Schweif: nach unten spitz zulaufender Kegel → der Körper läuft als
+     Geist in Wisps aus, statt mit einem runden „Schneemann"-Boden zu enden.
+     topY innerhalb des Körpers, damit die Basis-Scheibe verdeckt bleibt. */
+  const tail = (topR, topY, len, sx = 1, sz = 1) => {
+    const c = new THREE.Mesh(new THREE.ConeGeometry(topR, len, 18), M.mat);
+    c.position.set(0, topY - len * .5, 0); c.rotation.x = Math.PI; c.scale.set(sx, 1, sz); grp.add(c); return c;
+  };
+  /* WICHTIG: Kamera blickt FRONTAL → Silhouette in der BILD-Ebene lesbar
+     machen (Kopf oben, Merkmale seitlich breit). Körper = EINE fließende
+     Tropfen-/Geistform (Massen stark überlappt, unten als Rauch auslaufend),
+     kein Stapel sichtbar getrennter Kugeln. Proportionen je Wächter eigen. */
+  let hc;
+  if (form === 'wolf') {
+    /* schlankes, geducktes Raubtier, Kopf vorgestreckt */
+    mass(R * .56, 0, .34 * R, .04 * R, .8, 1.14, .96);   /* schlanker Rumpf */
+    tail(R * .48, .04 * R, R * 1.05, .8, .92);           /* Rauchschweif */
+    hc = new THREE.Vector3(0, 1.04 * R, .26 * R);
+    mass(R * .38, hc.x, hc.y, hc.z, 1.0, .8, 1.28);      /* länglicher Kopf */
+  } else if (form === 'fuchs') {
+    /* klein & schlank – die riesigen Ohren dominieren */
+    mass(R * .46, 0, .32 * R, .04 * R, .72, 1.06, .84);  /* kleiner Rumpf */
+    tail(R * .4, .04 * R, R * .95, .72, .85);
+    hc = new THREE.Vector3(0, .94 * R, .24 * R);
+    mass(R * .32, hc.x, hc.y, hc.z, .95, .8, 1.28);      /* spitzer Kopf */
+  } else if (form === 'baerin') {
+    /* massig, breit, gedrungen */
+    mass(R * .82, 0, .18 * R, 0, 1.14, 1.04, 1.0);       /* breiter Rumpf */
+    mass(R * .6, 0, .66 * R, .06 * R, 1.16, .84, .92);   /* massige Schultern */
+    tail(R * .72, -.06 * R, R * .9, 1.06, .96);
+    hc = new THREE.Vector3(0, 1.16 * R, .12 * R);
+    mass(R * .46, hc.x, hc.y, hc.z, 1.06, .9, 1.06);     /* breiter Kopf */
   } else if (form === 'adler') {
-    /* aufrechter Greif: schmaler Körper, breite Schwingen seitlich */
-    mass(R * .56, 0, -.2 * R, 0, .82, 1.18, .8);             /* Rumpf */
-    mass(R * .4, 0, .5 * R, .1 * R, .9, .85, .85);           /* Brust */
-    hc = new THREE.Vector3(0, 1.0 * R, .16 * R);
-    mass(R * .4, hc.x, hc.y, hc.z, 1, .96, 1.05);            /* Kopf */
-    [-1, 1].forEach(s => { const w = new THREE.Mesh(new THREE.ConeGeometry(R * .6, R * 2.7, 9), M.mat);
-      w.scale.set(1, 1, .16); w.position.set(s * R * 1.05, R * .2, -R * .15); w.rotation.z = s * (Math.PI / 2.0); grp.add(w); });
+    /* aufrecht & schmal – die Schwingen sind die Silhouette */
+    mass(R * .42, 0, .3 * R, 0, .78, 1.28, .82);         /* schmaler Rumpf */
+    tail(R * .32, .0 * R, R * .85, .7, .8);              /* Schwanzfedern */
+    hc = new THREE.Vector3(0, 1.06 * R, .12 * R);
+    mass(R * .36, hc.x, hc.y, hc.z, .96, .98, 1.0);      /* Kopf */
+    [-1, 1].forEach(s => {
+      [[1.15, .3, 2.8, .02], [.95, -.05, 2.3, -.28]].forEach(([px, py, ln, drop]) => {
+        const w = new THREE.Mesh(new THREE.ConeGeometry(R * .5, R * ln, 9), M.mat);
+        w.scale.set(1, 1, .13); w.position.set(s * R * px, R * py, -R * .1);
+        w.rotation.z = s * (Math.PI / 2.0 + drop); grp.add(w);
+      });
+    });
   } else if (form === 'hirsch') {
-    /* hoher Hirsch: schlanker Hals, Kopf oben, Geweih breit darüber */
-    mass(R * .58, 0, -.22 * R, 0, .82, 1.12, .92);           /* Rumpf */
-    mass(R * .34, 0, .56 * R, .12 * R, .74, 1.18, .74);      /* hoher Hals (verbunden) */
-    hc = new THREE.Vector3(0, 1.06 * R, .18 * R);
-    mass(R * .34, hc.x, hc.y, hc.z, .92, .98, 1.12);         /* schmaler Kopf */
+    /* hoch & schlank, langer Hals – das Geweih krönt */
+    mass(R * .48, 0, .16 * R, 0, .76, 1.16, .96);        /* schlanker Rumpf */
+    tail(R * .4, -.08 * R, R * .95, .72, .85);
+    mass(R * .26, 0, .76 * R, .14 * R, .64, 1.18, .7);   /* langer Hals */
+    hc = new THREE.Vector3(0, 1.26 * R, .22 * R);
+    mass(R * .3, hc.x, hc.y, hc.z, .88, .88, 1.32);      /* langer schmaler Kopf */
   } else { /* koenig */
-    /* hoch aufragende verhüllte Gestalt, breite Schultern, Krone */
-    mass(R * .88, 0, -.42 * R, 0, 1.04, 1.16, .92);          /* Umhang (breite Basis) */
-    mass(R * .62, 0, .46 * R, 0, 1.0, .96, .82);             /* Schultern */
-    hc = new THREE.Vector3(0, 1.18 * R, .08 * R);
-    mass(R * .42, hc.x, hc.y, hc.z, .94, 1.02, .94);         /* Kopf unter Krone */
+    /* hoch aufragende, verhüllte Gestalt mit breiten Schultern + Arm-Wisps */
+    mass(R * .68, 0, .28 * R, 0, 1.06, 1.18, .92);       /* Umhang-Torso */
+    mass(R * .64, 0, .72 * R, 0, 1.2, .78, .86);         /* breite Schultern */
+    tail(R * .78, -.05 * R, R * .95, 1.04, .92);         /* langer Umhang-Wisp */
+    hc = new THREE.Vector3(0, 1.28 * R, .04 * R);
+    mass(R * .4, hc.x, hc.y, hc.z, .92, 1.06, .92);      /* Kopf unter der Krone */
+    [-1, 1].forEach(s => { const a = new THREE.Mesh(new THREE.ConeGeometry(R * .24, R * 1.35, 10), M.mat);
+      a.position.set(s * R * .84, R * .52, R * .12); a.rotation.z = s * .55; grp.add(a); }); /* erhobene Arme */
   }
   return hc;
 }
@@ -193,11 +232,13 @@ export function spawnMob(st, isBoss) {
     const hc = buildBossBody(def.form, baseR);
     /* Merkmale teilen ein eigenes (kaum waberndes) Schatten-Material, das
        MIT erstarrt – scharfe Ohren/Geweih, aber gleicher Solidify/Tint */
-    const featMat = blobMaterial(def.dark, .12); M.mats.push(featMat);
-    const hr = baseR * (def.form === 'koenig' ? .44 : def.form === 'hirsch' ? .37
-      : def.form === 'adler' ? .4 : .5);
+    const featMat = blobMaterial(def.dark, .2); M.mats.push(featMat);
+    /* Kopfradius je Wächter (passend zu buildBossBody) → Ohren/Augen sitzen */
+    const HR = { wolf: .38, fuchs: .32, baerin: .46, adler: .36, hirsch: .3, koenig: .4 };
+    const hr = baseR * (HR[def.form] || .4);
     bossFeatures(def.form, M.group, hc, hr, featMat);
-    addEyes(M.group, hc.x, hc.y + hr * .12, hc.z + hr * .82, .26, hr * .42, 0xff2e4d);
+    const eyeR = Math.min(.24, hr * .6);
+    addEyes(M.group, hc.x, hc.y + hr * .14, hc.z + hr * .86, eyeR, hr * .5, 0xff2e4d);
     const aura = glowSprite(def.aura, 10); aura.material.opacity = .5;
     aura.position.y = 0;
     M.group.add(aura);
