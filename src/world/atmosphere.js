@@ -7,7 +7,8 @@
    Zusatzpässe, iPad-sicher.
    ===================================================================== */
 import * as THREE from 'three';
-import { scene, sun, hemi } from '../engine/renderer.js';
+import { scene, sun, hemi, torch } from '../engine/renderer.js';
+import { rigPos, rigFocus } from '../engine/camera.js';
 import { QUALITY, qTier } from '../engine/quality.js';
 import { glowTex, glowSprite } from '../engine/textures.js';
 import { skyMat, sunSprite } from './sky.js';
@@ -169,6 +170,16 @@ export function updateAtmosphere(dt, time) {
   scene.fog.color.copy(cur.fog);
   scene.fog.near = cur.fogN; scene.fog.far = cur.fogF;
   scene.background.copy(cur.hor);
+  /* „Unsichtbare Fackel": folgt dem Spieler, etwas nach vorn auf den Pfad
+     versetzt; in dunklen/dämmrigen Gebieten kräftiger, damit befreite Tiere
+     & Pfad sichtbar bleiben. */
+  if (torch) {
+    const dark = 1 - Math.min(1, Math.max(0, (cur.sunI - .55) / .8)); /* 0 hell … 1 düster */
+    const fwdX = rigFocus.x - rigPos.x, fwdZ = rigFocus.z - rigPos.z;
+    const fl = Math.hypot(fwdX, fwdZ) || 1;
+    torch.position.set(rigPos.x + (fwdX / fl) * 4, 3.0, rigPos.z + (fwdZ / fl) * 4);
+    torch.intensity = (0.45 + dark * 3.2) * Math.PI;
+  }
   /* Gras folgt Licht & Nebel (sonst leuchtet es nachts) */
   setGrassEnv(Math.min(1.1, .25 + (cur.sunI / 1.35) * .75 * (cur.hemiI / .85)) * (rage * .7 + .3),
     cur.fog, cur.fogN, cur.fogF);

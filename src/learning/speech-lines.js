@@ -18,8 +18,8 @@ export const befehlTwo = (a, b) =>
 export const befehlHelp = color => `Such die ${color} Blume.`;
 
 export const FIXED_GAMEPLAY = [
-  'Ein Bach! Zaubere das Wort, dann wächst die Brücke.',
-  'Die Brücke wächst!',
+  'Ein Bach! Zaubere das Wort, dann entsteht eine Brücke.',
+  'Die Brücke steht!',
   'Eine Truhe! Merk dir das Schlüsselwort.',
   'Richtig! Die Truhe öffnet sich.',
   'Richtig! Du hast den Angriff abgewehrt.',

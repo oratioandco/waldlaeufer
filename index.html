@@ -26,7 +26,7 @@
       <input id="newName" maxlength="12" autocomplete="off" placeholder="Dein Name">
     </div>
     <button class="play" id="startBtn">⚔ &nbsp;LOS GEHT'S</button>
-    <button class="ghost adultLink">Info für Erwachsene</button>
+    <button class="ghost aboutLink">ℹ️&nbsp; Über das Spiel · Für Eltern &amp; Fachleute</button>
   </div>
 </div>
 
@@ -162,6 +162,58 @@
   </div>
 </div>
 
+<!-- Über das Spiel: Stakeholder-Erklärung (Ziel + Funktionsweise + Lerntherapie) -->
+<div class="ov" id="aboutOv">
+  <div class="card" id="aboutCard">
+    <div class="logo" style="font-size:34px;text-align:center;margin-bottom:2px">WALD<span class="hot">LÄUFER</span></div>
+    <h2 class="ovTitle" style="text-align:center">Was Waldläufer ist – und wie es wirkt</h2>
+
+    <h3>🎯 Das Ziel</h3>
+    <p>Waldläufer ist ein Lese-Abenteuer für Kinder mit Lese-Rechtschreib-Störung (LRS).
+    Es sieht aus und spielt sich wie ein Fantasy-Spiel – die Leseförderung ist
+    <b>unsichtbar in die Spielmechanik eingebaut</b>. Das Kind erlebt Erfolg und Motivation
+    statt Übungsdruck; geübt wird trotzdem strukturiert und nach lerntherapeutischen Prinzipien.</p>
+
+    <h3>🕹 Wie es funktioniert</h3>
+    <p>Das Kind wandert durch sechs Waldgebiete, befreit verzauberte Tiere und erlöst die sechs
+    „Wächter des Waldes". Jede Begegnung ist eine Leseaufgabe – als Zauber, Schild oder Auftrag
+    verkleidet. <b>Fortschritt im Spiel = Fortschritt beim Lesen.</b></p>
+
+    <h3>📖 Drei Leseebenen – als drei Spielmechaniken</h3>
+    <p><b>Zaubern &amp; Brücken</b> – Dekodieren: Wörter Silbe für Silbe zusammensetzen.<br>
+    <b>Schildwort-Blitzlesen</b> – Automatisierung: häufige Funktionswörter blitzschnell wiedererkennen.<br>
+    <b>Flüsterblumen &amp; Schatzkarte</b> – Sinnentnahme: einen Satz lesen und in Handlung umsetzen.</p>
+
+    <h3>🧪 Die lerntherapeutischen Prinzipien</h3>
+    <p><b>Silbensynthese (Reuter-Liehr).</b> Wörter entstehen aus Silbenkarten. Zweifarbige
+    Silbengliederung und erhöhter Buchstabenabstand reduzieren visuelles Crowding
+    (Zorzi et al., PNAS 2012).</p>
+    <p><b>Spaced Repetition mit Mastery-Gating (Leitner-Prinzip).</b> Jedes Wort hat eine
+    Beherrschungsstufe; Fehlerwörter kehren <b>verteilt</b> zurück (wirksamer als sofortiges
+    Wiederholen). Neue Wörter erst, wenn die aktuelle Stufe zu rund 70&nbsp;% sitzt.</p>
+    <p><b>Fading-Prompt (Scaffolding-Entzug).</b> Anfangs werden die Silben als Modell gezeigt,
+    später nur das ganze Wort, schließlich nur noch Audio. Schwieriger wird es über
+    <b>weniger Hilfe</b> – nie über schwerere Wörter, als die Lernstufe vorgibt.</p>
+    <p><b>Fehler kosten nie Fortschritt.</b> Statt Bestrafung gibt es gestufte Hilfe
+    (Wort vorsprechen, dann Silbe). Fehlerfreies Lesen wird mit Treffern und Combos belohnt.</p>
+    <p><b>Audio-First.</b> Kein kindgerichteter Text ist Pflicht-Lesehürde; alles wird vorgelesen.
+    Gelesen wird nur der eigentliche Therapie-Inhalt (Silben, Wörter, Befehlssätze).
+    Die Stimme koppelt Laut- und Schriftbild.</p>
+
+    <h3>👪 Für Eltern &amp; Therapeut:innen</h3>
+    <p>Im Eltern-Panel seht ihr einen Live-Report (geübte Wörter, Fehlerfrei-Quote, Beherrschung
+    je Stufe) und die Sitzungs-Historie. Ihr könnt eigene Förderwörter eintragen oder fertige
+    Wortschatz-Pakete wählen und den Spielstand für den Gerätewechsel sichern. Es gibt
+    <b>kein Konto und kein Backend</b> – alle Lerndaten bleiben auf dem Gerät.</p>
+    <button class="play" id="aboutToPanelBtn" style="margin-top:6px">📈&nbsp; Eltern-Panel öffnen</button>
+
+    <div class="note">Waldläufer ist eine motivierende Ergänzung und ersetzt keine integrative
+    Lerntherapie. Die Wortlisten lassen sich 1:1 durch die aktuellen Förderwörter der
+    Therapeut:in ersetzen.</div>
+    <button class="play" style="margin-top:14px" id="aboutCloseBtn">SCHLIESSEN</button>
+  </div>
+</div>
+
 <div class="ov" id="sceneOv">
   <div id="sceneCard">
     <div id="sceneIcon">🌲</div>
@@ -181,13 +233,17 @@
 
 <div id="campBar">
   <span id="campTitle">🏕 DEIN LAGER</span>
-  <button class="play" id="fishBtn">🎣 &nbsp;SILBEN-ANGELN</button>
-  <button class="play" id="archBtn">🏹 &nbsp;BOGENSCHIESSEN</button>
-  <button class="play" id="ffBtn">✨ &nbsp;GLÜHWÜRMCHEN</button>
-  <button class="play" id="hopBtn">🍄 &nbsp;PILZ-HÜPFER</button>
-  <button class="play" id="treaBtn">🗺 &nbsp;SCHATZKARTE</button>
-  <button class="play" id="shopBtn">💎 &nbsp;TAUSCHPLATZ</button>
-  <button class="play" id="campLeaveBtn">🌲 &nbsp;WEITER IN DEN WALD</button>
+  <div class="campRow">
+    <button class="campCard" id="fishBtn"><span class="ci">🎣</span><span class="cl">Silben-Angeln</span></button>
+    <button class="campCard" id="archBtn"><span class="ci">🏹</span><span class="cl">Bogenschießen</span></button>
+    <button class="campCard" id="ffBtn"><span class="ci">✨</span><span class="cl">Glühwürmchen</span></button>
+    <button class="campCard" id="hopBtn"><span class="ci">🍄</span><span class="cl">Pilz-Hüpfer</span></button>
+  </div>
+  <div class="campRow campNav">
+    <button class="play" id="campLeaveBtn">🌲 &nbsp;Zurück in den Wald</button>
+    <button class="play" id="treaBtn">🗺 &nbsp;Schatzkarte</button>
+    <button class="play" id="shopBtn">💎 &nbsp;Tauschplatz</button>
+  </div>
 </div>
 
 <!-- Silben-Angeln: Ziel-Wort (freiwillige Lesehilfe) + 📯 + Aussteigen -->

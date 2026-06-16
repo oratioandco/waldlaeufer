@@ -482,7 +482,7 @@ function arrive(st) {
     /* Boss stellt sich vor (vorgelesen), dann beginnt der Kampf */
     setTimeout(() => playScene(bossIntroScene(G.floor), () => startWordChallenge('spell')), 1000);
   }
-  else if (st.type === 'TOR') { setCreek(true); announce('DER BACH!', 900); sayGame('Ein Bach! Zaubere das Wort, dann wächst die Brücke.'); setTimeout(() => startWordChallenge('gate'), 800); }
+  else if (st.type === 'TOR') { setCreek(true); announce('DER BACH!', 900); sayGame('Ein Bach! Zaubere das Wort, dann entsteht eine Brücke.'); setTimeout(() => startWordChallenge('gate'), 800); }
   else if (st.type === 'TRUHE') { setTimeout(startChest, 500); }
   else if (st.type === 'BEFEHL') { setTimeout(() => startBefehl(st), 500); }
 }

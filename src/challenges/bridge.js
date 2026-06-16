@@ -11,7 +11,7 @@ import { spawnGemReward } from './reward.js';
 export function openBridge() {
   const st = G.stations[G.stIdx];
   sndBridge();
-  sayGame('Die Brücke wächst!');
+  sayGame('Die Brücke steht!');
   burst(st.pos.clone().add(new THREE.Vector3(0, .6, 0)), 14, [0x8a5f33, 0xb6f7c2]);
   st.objs.planks.forEach((plank, k) => {
     let t = -k * .18;

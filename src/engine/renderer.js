@@ -9,7 +9,7 @@ import { QUALITY, qTier, effectivePR } from './quality.js';
 
 THREE.ColorManagement.enabled = false;
 
-export let scene = null, camera = null, renderer = null, sun = null, sunTarget = null, hemi = null;
+export let scene = null, camera = null, renderer = null, sun = null, sunTarget = null, hemi = null, torch = null;
 export let raycaster = null, pointer = null;
 
 let rtScene = null, rtA = null, rtB = null, postCam = null, postScene = null, postQuad = null;
@@ -45,6 +45,13 @@ export function initRenderer() {
   scene.add(sun);
   sunTarget = new THREE.Object3D(); scene.add(sunTarget);
   sun.target = sunTarget;
+
+  /* „Unsichtbare Fackel": warmes Licht am Spieler, das den Pfad & befreite
+     Tiere in dunklen Gebieten erhellt. Position folgt rigPos im Loop;
+     Intensität wird je nach Tageszeit/Biom-Dunkelheit hochgeregelt. */
+  torch = new THREE.PointLight(0xffd39a, 0, 24, 1.6);
+  torch.castShadow = false;
+  scene.add(torch);
 
   raycaster = new THREE.Raycaster(); pointer = new THREE.Vector2();
   addEventListener('resize', () => {

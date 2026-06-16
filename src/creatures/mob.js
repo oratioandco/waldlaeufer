@@ -160,6 +160,13 @@ function sampleWraith(form, R) {
     });
     wisp(0, 1.22 * R, .4 * R, 0, 1.1 * R, 1.05 * R, 6, .3, .05 * R);    /* Schnauze */
     head = { x: 0, y: 1.28 * R, z: .4 * R };
+  } else if (form === 'ghost') {
+    /* normaler Schattengeist: kompakter Nebelkörper + kleine Spitzohren */
+    blob(0, .46 * R, 0, .56 * R, .62 * R, .56 * R, 30, .56);
+    blob(0, .98 * R, .1 * R, .4 * R, .38 * R, .42 * R, 16, .5);
+    wisp(0, .16 * R, 0, 0, -.85 * R, 0, 13, .4, .15 * R);              /* Rauchschweif */
+    sym(s => wisp(s * .3 * R, 1.12 * R, 0, s * .44 * R, 1.78 * R, -.05 * R, 8, .34, .07 * R)); /* Spitzohren */
+    head = { x: 0, y: .96 * R, z: .42 * R };
   } else { /* koenig */
     /* hoch aufragend, breite Schultern, gezackte Krone, erhobene Arme */
     blob(0, .3 * R, 0, .6 * R, .8 * R, .55 * R, 44, .56);              /* Umhang-Torso */
@@ -300,8 +307,6 @@ export function spawnMob(st, isBoss) {
   /* Größenkontrast je Wächter (Bärin/König groß, Fuchs klein) → distinkter */
   const BR = { wolf: 2.2, fuchs: 1.85, baerin: 2.55, adler: 2.15, hirsch: 2.3, koenig: 2.6 };
   const baseR = isBoss ? (BR[def.form] || 2.2) : 1.9;
-  M.mat = blobMaterial(isBoss ? def.dark : fb.color, isBoss ? .7 : fb.amp);
-  M.mats = [M.mat];
   const hoverY = 2.5;
 
   if (isBoss) {
@@ -313,11 +318,11 @@ export function spawnMob(st, isBoss) {
     aura.position.y = baseR * .5; aura.renderOrder = 7;
     M.group.add(aura);
   } else {
-    /* normaler Schattengeist: kompakte Blob-Kugel */
-    const body = new THREE.Mesh(new THREE.SphereGeometry(baseR, 48, 36), M.mat);
-    body.scale.y = fb.squash;
-    M.group.add(body);
-    addGlowEyes(M.group, 0, baseR * .28, baseR * .86, .22, baseR * .38, fb.eye);
+    /* normaler Schattengeist: ebenfalls dunkler Nebel (kein bunter Blob mehr),
+       nur ein zarter Hauch der Tierfarbe bleibt drin */
+    const dark = new THREE.Color(0x241f33).lerp(new THREE.Color(fb.color), .22).getHex();
+    const head = buildMistWraith({ form: 'ghost', dark }, baseR);
+    addGlowEyes(M.group, head.x, head.y, head.z, baseR * .085, baseR * .2, 0xff3344);
   }
   /* Schatten STANDALONE auf dem Boden – NICHT als Kind der Gruppe, sonst
      erbt der flache Schatten deren lookAt-Rotation + Spawn-Skalierung und

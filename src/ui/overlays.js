@@ -256,6 +256,10 @@ function nextFloor() {
 export function wireOverlays() {
   document.querySelectorAll('.adultLink').forEach(b => b.addEventListener('click', openAdult));
   document.getElementById('adultCloseBtn').addEventListener('click', () => ovOff('adultOv'));
+  /* „Über das Spiel" (Stakeholder-Erklärung) – vom Startbildschirm */
+  document.querySelectorAll('.aboutLink').forEach(b => b.addEventListener('click', () => ovOn('aboutOv')));
+  document.getElementById('aboutCloseBtn').addEventListener('click', () => ovOff('aboutOv'));
+  document.getElementById('aboutToPanelBtn').addEventListener('click', () => { ovOff('aboutOv'); openAdult(); });
   document.getElementById('resumeBtn').addEventListener('click', () => ovOff('pauseOv'));
   document.getElementById('restartBtn').addEventListener('click', () => location.reload());
   document.getElementById('nextFloorBtn').addEventListener('click', nextFloor);
