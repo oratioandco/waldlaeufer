@@ -4,7 +4,7 @@
    auf Vite + ES-Module. Therapie-Invarianten siehe CLAUDE.md.
    ===================================================================== */
 import './ui/style.css';
-import { initRenderer, renderFrame, raycaster, pointer, camera } from './engine/renderer.js';
+import { initRenderer, renderFrame, raycaster, pointer, camera, renderer } from './engine/renderer.js';
 import { autoGovern } from './engine/quality.js';
 import { initTextures } from './engine/textures.js';
 import { updateAnims, clearAnims } from './engine/anims.js';
@@ -50,6 +50,7 @@ let gameStarted = false;
 if (import.meta.env.DEV) {
   window.__dbg = {
     G, cards: () => cards, camera: () => camera,
+    mem: () => ({ geo: renderer.info.memory.geometries, tex: renderer.info.memory.textures, calls: renderer.info.render.calls }),
     /* Biome-Sichtung: direkt in ein Gebiet springen */
     jumpFloor(n) {
       G.floor = n;

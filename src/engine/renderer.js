@@ -22,7 +22,9 @@ export function initRenderer() {
 
   camera = new THREE.PerspectiveCamera(56, innerWidth / innerHeight, .1, 180);
 
-  renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance',
+    /* nur DEV: hält den Zeichenpuffer fürs Screenshot-Greifen (canvas.toDataURL) */
+    preserveDrawingBuffer: !!import.meta.env.DEV });
   renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
   renderer.setSize(innerWidth, innerHeight);
   renderer.setPixelRatio(effectivePR());

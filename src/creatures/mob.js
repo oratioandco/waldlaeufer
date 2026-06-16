@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import { scene, renderer } from '../engine/renderer.js';
 import { rigPos } from '../engine/camera.js';
 import { addAnim, easeOut, easeInOut } from '../engine/anims.js';
-import { glowSprite, blobShadow } from '../engine/textures.js';
+import { glowSprite, blobShadow, disposeTree } from '../engine/textures.js';
 import { GLSL_NOISE } from '../world/terrain.js';
 import { G } from '../state.js';
 import { ANIMALS, BOSSES } from './data.js';
@@ -34,7 +34,9 @@ import { announce } from '../ui/feedback.js';
 function mistMaterial(colorHex, swirl) {
   const dpr = (renderer && renderer.getPixelRatio) ? renderer.getPixelRatio() : 1;
   const m = new THREE.ShaderMaterial({
-    transparent: true, depthWrite: false, fog: false,
+    /* depthTest:false → der schwebende Schatten wird NIE vom Pfad/Boden
+       verdeckt (er liegt als Geist über der Welt, wie die Wortkarten). */
+    transparent: true, depthWrite: false, depthTest: false, fog: false,
     uniforms: {
       uTime: { value: 0 }, uAmp: { value: swirl }, uBaseAmp: { value: swirl },
       uColor: { value: new THREE.Color(colorHex) }, uFlash: { value: 0 },
@@ -43,11 +45,11 @@ function mistMaterial(colorHex, swirl) {
     vertexShader: `
       uniform float uTime;uniform float uAmp;uniform float uBaseAmp;uniform float uDpr;
       attribute float aSeed;attribute float aSize;
-      varying float vSolid;
+      varying float vSolid;varying float vSeed;
       ${GLSL_NOISE}
       void main(){
         float solid=clamp(1.0-uAmp/max(uBaseAmp,0.001),0.0,1.0);
-        vSolid=solid;
+        vSolid=solid; vSeed=aSeed;
         vec3 p=position;
         float t=uTime;
         vec3 q=position*0.55+vec3(aSeed,t*0.16,t*0.11);
@@ -59,15 +61,19 @@ function mistMaterial(colorHex, swirl) {
         gl_Position=projectionMatrix*mv;
       }`,
     fragmentShader: `
-      uniform vec3 uColor;uniform float uFlash;uniform float uTint;
-      varying float vSolid;
+      uniform vec3 uColor;uniform float uFlash;uniform float uTint;uniform float uTime;
+      varying float vSolid;varying float vSeed;
+      ${GLSL_NOISE}
       void main(){
-        float d=length(gl_PointCoord-0.5);
-        float edge=mix(0.46,0.18,vSolid);          /* solid → härtere Kante */
-        float a=smoothstep(0.5,0.5-edge,d);
+        vec2 uv=gl_PointCoord-0.5;
+        float d=length(uv);
+        /* prozedural-fransige Wolke statt runder Kreis (animiert) */
+        float n=vnoise(vec3(uv*3.4+vSeed, uTime*0.3+vSeed));
+        float edge=mix(0.52,0.22,vSolid);
+        float a=smoothstep(0.5,0.5-edge, d+(n-0.5)*0.55);
         if(a<0.02)discard;
-        a*=mix(0.42,0.68,vSolid);                  /* dichter Rauch (sichtbar!) */
-        vec3 col=uColor*0.4;                        /* dunkler Nebel (fast schwarz) */
+        a*=mix(0.38,0.62,vSolid);                   /* viele Lagen → dichter Rauch */
+        vec3 col=uColor*0.4;                         /* dunkler Nebel (fast schwarz) */
         col=mix(col,vec3(1.0,0.12,0.16),uTint*0.6);
         col=mix(col,vec3(1.0),uFlash);
         gl_FragColor=vec4(col,a);
@@ -175,6 +181,22 @@ function sampleWraith(form, R) {
    Liefert die Kopfposition für die leuchtenden Augen. */
 function buildMistWraith(def, R) {
   const { P, head } = sampleWraith(def.form, R);
+  /* Verbindungs-Nebel: große, weiche Füll-Puffs schließen die Lücken →
+     eine ZUSAMMENHÄNGENDE Rauchmasse. Bevorzugt den RUMPF (nicht die
+     Wisp-Spitzen) → mehr „Schatten-Körper", Merkmale bleiben fein. */
+  const fillN = Math.floor(P.length * .45);
+  const bodyTop = head.y * .72;       /* nur unterer Rumpf wird verdichtet → Kopf/Merkmale frei */
+  for (let i = 0; i < fillN; i++) {
+    let p, tries = 0;
+    do { p = P[(Math.random() * P.length) | 0]; tries++; }
+    while (tries < 6 && (Math.abs(p.x) > .55 * R || p.y > bodyTop || p.y < -.6 * R));
+    P.push({
+      x: p.x + (Math.random() - .5) * .24 * R,
+      y: p.y + (Math.random() - .5) * .24 * R,
+      z: p.z + (Math.random() - .5) * .24 * R,
+      s: p.s * (1.7 + Math.random() * .9)
+    });
+  }
   const N = P.length;
   const pos = new Float32Array(N * 3), seed = new Float32Array(N), size = new Float32Array(N);
   for (let i = 0; i < N; i++) {
@@ -189,20 +211,24 @@ function buildMistWraith(def, R) {
   M.mats = [M.mat];
   const cloud = new THREE.Points(geo, M.mat);
   cloud.frustumCulled = false;
+  cloud.renderOrder = 8; /* über der Welt, unter Augen(11+)/Karten(10) */
   M.group.add(cloud);
   return head;
 }
 
-/* ---------- Leuchtende Schatten-Augen (Kern + additiver Glow) ---------- */
+/* ---------- Leuchtende Schatten-Augen: kleiner, heißer Kern + starker Glow ---------- */
 function addGlowEyes(group, cx, cy, cz, r, spread, color) {
   [-1, 1].forEach(sx => {
+    /* kleiner, fast weiß-glühender Kern */
     const core = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10),
-      new THREE.MeshBasicMaterial({ color, depthTest: false }));
-    core.position.set(cx + sx * spread, cy, cz); core.renderOrder = 12;
+      new THREE.MeshBasicMaterial({ color: 0xffe0e4, depthTest: false }));
+    core.position.set(cx + sx * spread, cy, cz); core.renderOrder = 13;
     group.add(core);
-    const glow = glowSprite(color, r * 4); glow.material.opacity = .8;
-    glow.position.copy(core.position); glow.renderOrder = 11;
-    group.add(glow);
+    /* zwei eng begrenzte Glow-Lagen → kleine, aber kräftig leuchtende Augen */
+    const inner = glowSprite(color, r * 3.2); inner.material.opacity = 1; inner.material.depthTest = false;
+    inner.position.copy(core.position); inner.renderOrder = 12; group.add(inner);
+    const outer = glowSprite(color, r * 5.5); outer.material.opacity = .45; outer.material.depthTest = false;
+    outer.position.copy(core.position); outer.renderOrder = 11; group.add(outer);
   });
 }
 
@@ -281,10 +307,10 @@ export function spawnMob(st, isBoss) {
   if (isBoss) {
     /* Wächter = Gestalt aus dunklem Nebel (volumetrische Punktwolke) */
     const head = buildMistWraith(def, baseR);
-    addGlowEyes(M.group, head.x, head.y, head.z, baseR * .12, baseR * .2, 0xff4d63);
+    addGlowEyes(M.group, head.x, head.y, head.z, baseR * .075, baseR * .17, 0xff3344);
     /* dezenter farbiger Energie-Schimmer im Kern (je Wächter) */
-    const aura = glowSprite(def.aura, baseR * 1.7); aura.material.opacity = .3;
-    aura.position.y = baseR * .5;
+    const aura = glowSprite(def.aura, baseR * 1.7); aura.material.opacity = .3; aura.material.depthTest = false;
+    aura.position.y = baseR * .5; aura.renderOrder = 7;
     M.group.add(aura);
   } else {
     /* normaler Schattengeist: kompakte Blob-Kugel */
@@ -328,8 +354,8 @@ export function spawnMob(st, isBoss) {
   if (isBoss) announce('BOSS!', 1100);
 }
 export function despawnMobVisual() {
-  scene.remove(M.group);
-  if (M.shadow) scene.remove(M.shadow);
+  scene.remove(M.group); disposeTree(M.group);
+  if (M.shadow) { scene.remove(M.shadow); disposeTree(M.shadow); }
   M.group = null; M.shadow = null; M.mat = null; M.mats = [];
 }
 export function setMobHp() {
@@ -350,7 +376,7 @@ export function freeMobVisual() {
     grp.scale.setScalar(Math.max(.001, 1 - t));
     grp.rotation.y += dt * 9;
     if (shadow) shadow.material.opacity = Math.max(0, 1 - t); /* Schatten mit auflösen */
-    if (t >= 1) { scene.remove(grp); if (shadow) scene.remove(shadow); return true; }
+    if (t >= 1) { scene.remove(grp); disposeTree(grp); if (shadow) { scene.remove(shadow); disposeTree(shadow); } return true; }
     return false;
   } });
   if (animal) revealFreedAnimal(animal, grp.position.clone());

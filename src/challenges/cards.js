@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { scene } from '../engine/renderer.js';
 import { camPos } from '../engine/camera.js';
 import { cardFrame } from '../meta/cosmetics.js';
+import { disposeTree } from '../engine/textures.js';
 
 export let cards = [];
 
@@ -62,8 +63,8 @@ export function makeFloatingCard(text) {
   m.userData = { syl: text };
   return m;
 }
-export function clearCards() { cards.forEach(r => scene.remove(r)); cards = []; }
-export function removeCard(r) { scene.remove(r); }
+export function clearCards() { cards.forEach(r => { scene.remove(r); disposeTree(r); }); cards = []; }
+export function removeCard(r) { scene.remove(r); disposeTree(r); }
 
 /* Übrige Karten (Distraktoren) sanft ausblenden statt instant zu
    entfernen – schlagartiges Verschwinden wirkt wie ein Glitch */
@@ -77,7 +78,7 @@ export function dismissCards(addAnim) {
       t += dt * 2.2;
       r.scale.setScalar(Math.max(.001, 1 - t));
       r.position.y = sy - t * .8;
-      if (t >= 1) { scene.remove(r); return true; }
+      if (t >= 1) { scene.remove(r); disposeTree(r); return true; }
       return false;
     } });
   });

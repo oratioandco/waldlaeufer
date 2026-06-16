@@ -6,7 +6,7 @@
 import * as THREE from 'three';
 import { scene } from '../engine/renderer.js';
 import { addAnim, easeOut } from '../engine/anims.js';
-import { glowSprite } from '../engine/textures.js';
+import { glowSprite, disposeTree } from '../engine/textures.js';
 import { G } from '../state.js';
 import { renderHUD } from '../ui/hud.js';
 import { gemFlightToHud } from '../ui/feedback.js';
@@ -38,7 +38,7 @@ export function spawnGemReward(start, count, onDone) {
     }
     if (t >= 1.15) {
       const pos = grp.position.clone();
-      scene.remove(grp);
+      scene.remove(grp); disposeTree(grp);
       gemFlightToHud(pos, () => collectGems(count, onDone));
       return true;
     }
@@ -57,7 +57,7 @@ function spawnRays(pos) {
       t += dt * 2.2;
       r.scale.set(3.6 * (1 + t), .5 * Math.max(.05, 1 - t), 1);
       r.material.opacity = Math.max(0, 1 - t);
-      if (t >= 1) { scene.remove(r); return true; }
+      if (t >= 1) { scene.remove(r); disposeTree(r); return true; }
       return false;
     } });
   }

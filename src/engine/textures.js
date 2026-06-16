@@ -25,6 +25,22 @@ function makeShadowTex() {
   ctx.fillStyle = g; ctx.fillRect(0, 0, 128, 128);
   return new THREE.CanvasTexture(cv);
 }
+/* Gibt Geometrie + Material(ien) (+ deren Texturen) eines Objekts/Baums frei.
+   GPU-Leak-Schutz: ohne dispose() bleiben Buffer/Texturen im Treiber liegen –
+   über eine lange Sitzung (viele Karten/Gegner) friert das Gerät sonst ein.
+   Die GETEILTEN Sprites-Texturen (glowTex/shadowTex) werden NIE freigegeben,
+   sonst rendern alle weiteren Sprites/Schatten kaputt. */
+export function disposeTree(obj) {
+  if (!obj) return;
+  obj.traverse(o => {
+    if (o.geometry) o.geometry.dispose();
+    const mats = Array.isArray(o.material) ? o.material : (o.material ? [o.material] : []);
+    for (const m of mats) {
+      if (m.map && m.map !== glowTex && m.map !== shadowTex) m.map.dispose();
+      if (m.dispose) m.dispose();
+    }
+  });
+}
 export function glowSprite(color, scale) {
   const sp = new THREE.Sprite(new THREE.SpriteMaterial({
     map: glowTex, color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));

@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import { scene } from './renderer.js';
 import { QUALITY, qTier } from './quality.js';
-import { glowSprite } from './textures.js';
+import { glowSprite, disposeTree } from './textures.js';
 import { rigPos } from './camera.js';
 import { addAnim } from './anims.js';
 import { sndCast } from '../audio/sfx.js';
@@ -48,7 +48,7 @@ export function shootSpell(target, onHit) {
       tr.userData.v = new THREE.Vector3(0, 0, 0); tr.userData.life = .32;
       scene.add(tr); shards.push(tr);
     }
-    if (k >= 1) { scene.remove(orb); onHit(); return true; }
+    if (k >= 1) { scene.remove(orb); disposeTree(orb); onHit(); return true; }
     return false;
   } });
 }
@@ -61,6 +61,6 @@ export function updateShards(dt) {
     c.userData.life -= dt;
     if (c.material && c.material.opacity !== undefined && c.userData.life < .4)
       c.material.opacity = Math.max(0, c.userData.life / .4);
-    if (c.userData.life <= 0) { scene.remove(c); shards.splice(i, 1); }
+    if (c.userData.life <= 0) { scene.remove(c); disposeTree(c); shards.splice(i, 1); }
   }
 }
