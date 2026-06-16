@@ -8,7 +8,7 @@
    M bündelt alle veränderlichen Visual-Referenzen des aktiven Gegners.
    ===================================================================== */
 import * as THREE from 'three';
-import { scene } from '../engine/renderer.js';
+import { scene, renderer } from '../engine/renderer.js';
 import { rigPos } from '../engine/camera.js';
 import { addAnim, easeOut, easeInOut } from '../engine/anims.js';
 import { glowSprite, blobShadow } from '../engine/textures.js';
@@ -19,142 +19,191 @@ import { MODELS, loadModelOnce, pickClip } from './models.js';
 import { sndGrowl } from '../audio/sfx.js';
 import { announce } from '../ui/feedback.js';
 
-/* ---------- Distinkte Wächter-Merkmale (verdorbene Schatten-Gestalten) ----------
-   Die Form-Merkmale (Ohren/Schnauze/Schnabel/Geweih/Krone) hängen am KOPF
-   (hc = Kopfzentrum, hr = Kopfradius) und sind auf den Kopf skaliert – nicht
-   mehr auf eine Kugel geklebt. mat ist ein geteiltes Schatten-Material
-   (erstarrt mit dem Rest). +z = zur Kamera, +y = oben. */
-function bossFeatures(form, group, hc, hr, mat) {
-  const cone = (r, h, seg = 9) => new THREE.Mesh(new THREE.ConeGeometry(r, h, seg), mat);
-  const ball = (r) => new THREE.Mesh(new THREE.SphereGeometry(r, 14, 12), mat);
-  const cyl = (r1, r2, h) => new THREE.Mesh(new THREE.CylinderGeometry(r1, r2, h, 7), mat);
-  const put = (m, x, y, z, rx = 0, ry = 0, rz = 0) => {
-    m.position.set(hc.x + x, hc.y + y, hc.z + z); m.rotation.set(rx, ry, rz); group.add(m); return m;
-  };
-  if (form === 'wolf') {
-    /* große aufrechte Spitzohren + lange Raubtier-Schnauze */
-    [-1, 1].forEach(s => put(cone(hr * .42, hr * 1.7), s * hr * .52, hr * .98, -hr * .12, s * .12, 0, s * -.3));
-    put(cone(hr * .42, hr * 1.6), 0, -hr * .4, hr * .72, Math.PI / 2.25, 0, 0); /* lange Schnauze, leicht gesenkt */
-  } else if (form === 'fuchs') {
-    /* RIESIGE spitze Lauscher (Fuchs-Signatur) + schmale spitze Schnauze */
-    [-1, 1].forEach(s => put(cone(hr * .5, hr * 2.4), s * hr * .62, hr * 1.25, -hr * .1, s * .14, 0, s * -.42));
-    put(cone(hr * .3, hr * 1.8), 0, -hr * .36, hr * .8, Math.PI / 2.2, 0, 0);
-  } else if (form === 'baerin') {
-    /* kleine runde Ohren + breite stumpfe Schnauze mit Nase */
-    [-1, 1].forEach(s => put(ball(hr * .4), s * hr * .82, hr * .84, -hr * .04));
-    put(ball(hr * .62), 0, -hr * .26, hr * .82);
-    put(ball(hr * .28), 0, -hr * .44, hr * 1.18);
-  } else if (form === 'adler') {
-    /* scharfer Hakenschnabel + Brauenfedern */
-    put(cone(hr * .34, hr * 1.4), 0, -hr * .28, hr * .82, Math.PI / 2.35, 0, 0);
-    put(ball(hr * .18), 0, -hr * .12, hr * 1.05); /* Schnabelwurzel */
-    [-1, 1].forEach(s => put(cone(hr * .2, hr * .8), s * hr * .5, hr * .72, -hr * .05, 0, 0, s * -.22));
-  } else if (form === 'hirsch') {
-    /* lange Schnauze + GROSSES verzweigtes Schatten-Geweih (Signatur) */
-    put(cone(hr * .4, hr * 1.6), 0, -hr * .32, hr * .85, Math.PI / 2.25, 0, 0);
-    [-1, 1].forEach(s => {
-      put(cyl(hr * .14, hr * .2, hr * 2.7), s * hr * .42, hr * 1.75, -hr * .1, 0, 0, s * .34);   /* Hauptstange */
-      put(cyl(hr * .09, hr * .13, hr * 1.5), s * hr * 1.12, hr * 2.7, -hr * .1, 0, 0, s * 1.0);   /* Spross 1 */
-      put(cyl(hr * .09, hr * .13, hr * 1.35), s * hr * .5, hr * 3.15, -hr * .1, 0, 0, s * -.3);    /* Spross 2 */
-      put(cyl(hr * .08, hr * .11, hr * 1.05), s * hr * 1.55, hr * 3.5, -hr * .1, 0, 0, s * .72);   /* Spross 3 */
-    });
-  } else if (form === 'koenig') {
-    /* hohe, gezackte Dornenkrone (abwechselnd lang/kurz) */
-    for (let i = 0; i < 8; i++) {
-      const a = (i / 8) * Math.PI * 2;
-      const tall = (i % 2 === 0) ? 1.6 : 1.0;
-      put(cone(hr * .2, hr * tall), Math.cos(a) * hr * .8, hr * 1.0, Math.sin(a) * hr * .8 + hr * .1);
-    }
-  }
-}
+/* ======================================================================
+   WÄCHTER ALS GESTALT AUS DUNKLEM NEBEL
+   Kein Stapel aus Grundkörpern mehr: Der Boss ist eine VOLUMETRISCHE
+   Rauch-/Nebelwolke (GPU-animierte Punktwolke). Die Kreatur entsteht aus
+   der FORM des Nebels + ein paar Wisp-Strähnen (Ohren/Geweih/Schwingen)
+   und den leuchtenden Augen. Das prozedurale Wabern ist der Shader.
+   ====================================================================== */
 
-/* ---------- Schatten-Augen + Kawaii-Glanz, vorn am Kopf ---------- */
-function addEyes(group, cx, cy, cz, r, spread, eyeColor) {
-  [-1, 1].forEach(sx => {
-    const e = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10),
-      new THREE.MeshBasicMaterial({ color: eyeColor }));
-    e.position.set(cx + sx * spread, cy, cz);
-    group.add(e);
-    const glint = new THREE.Mesh(new THREE.SphereGeometry(r * .35, 8, 6),
-      new THREE.MeshBasicMaterial({ color: 0xffffff }));
-    glint.position.set(cx + sx * spread - sx * .08, cy + r * .35, cz + r * .55);
-    group.add(glint);
+/* Nebel-Material: weiche Rauchpartikel (Points). Gleiche Uniform-Namen wie
+   das Blob-Material → flashModel/tintRage/solidify/updateMob wirken 1:1.
+   solidify (uAmp→0) lässt den Nebel zur dichteren, schärferen Gestalt
+   ERSTARREN (Manga-Hieb). */
+function mistMaterial(colorHex, swirl) {
+  const dpr = (renderer && renderer.getPixelRatio) ? renderer.getPixelRatio() : 1;
+  const m = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, fog: false,
+    uniforms: {
+      uTime: { value: 0 }, uAmp: { value: swirl }, uBaseAmp: { value: swirl },
+      uColor: { value: new THREE.Color(colorHex) }, uFlash: { value: 0 },
+      uTint: { value: 0 }, uDpr: { value: dpr }
+    },
+    vertexShader: `
+      uniform float uTime;uniform float uAmp;uniform float uBaseAmp;uniform float uDpr;
+      attribute float aSeed;attribute float aSize;
+      varying float vSolid;
+      ${GLSL_NOISE}
+      void main(){
+        float solid=clamp(1.0-uAmp/max(uBaseAmp,0.001),0.0,1.0);
+        vSolid=solid;
+        vec3 p=position;
+        float t=uTime;
+        vec3 q=position*0.55+vec3(aSeed,t*0.16,t*0.11);
+        vec3 n=vec3(fbm(q),fbm(q+vec3(11.0,3.0,7.0)),fbm(q+vec3(5.0,9.0,1.0)))-0.5;
+        p+=n*uAmp;                                  /* roiling Rauch */
+        p.y+=sin(t*0.6+aSeed)*uAmp*0.35;            /* langsames Heben */
+        vec4 mv=modelViewMatrix*vec4(p,1.0);
+        gl_PointSize=aSize*(0.95+0.45*solid)*uDpr*(330.0/-mv.z);
+        gl_Position=projectionMatrix*mv;
+      }`,
+    fragmentShader: `
+      uniform vec3 uColor;uniform float uFlash;uniform float uTint;
+      varying float vSolid;
+      void main(){
+        float d=length(gl_PointCoord-0.5);
+        float edge=mix(0.46,0.18,vSolid);          /* solid → härtere Kante */
+        float a=smoothstep(0.5,0.5-edge,d);
+        if(a<0.02)discard;
+        a*=mix(0.42,0.68,vSolid);                  /* dichter Rauch (sichtbar!) */
+        vec3 col=uColor*0.4;                        /* dunkler Nebel (fast schwarz) */
+        col=mix(col,vec3(1.0,0.12,0.16),uTint*0.6);
+        col=mix(col,vec3(1.0),uFlash);
+        gl_FragColor=vec4(col,a);
+      }`
   });
+  m.userData.baseAmp = swirl;
+  return m;
 }
 
-/* ---------- Verdorbene Wächter-Gestalt: schwebendes Schatten-Wesen ----------
-   Mehrere Schatten-Massen (Hinterleib, Brust, Hals, vorgestreckter Kopf)
-   bilden eine echte Tier-Silhouette statt einer Kugel mit aufgesteckten
-   Ohren. Alle Massen teilen sich M.mat → erstarren gemeinsam. Liefert das
-   Kopfzentrum zurück (für Merkmale + Augen). */
-function buildBossBody(form, R) {
-  const grp = M.group;
-  const mass = (r, x, y, z, sx = 1, sy = 1, sz = 1) => {
-    const m = new THREE.Mesh(new THREE.SphereGeometry(r, 26, 20), M.mat);
-    m.position.set(x, y, z); m.scale.set(sx, sy, sz); grp.add(m); return m;
+/* Form-Sampler: liefert Rauchpunkte (Hüllform je Wächter) + Kopfposition.
+   blob = gefüllte Ellipsoid-Wolke (zentrumsbetont); wisp = ausgefranste
+   Strähne (Ohren/Geweih/Schwingen/Schweif). +z = zur Kamera, +y = oben. */
+function sampleWraith(form, R) {
+  const P = [];
+  const D = 2.0; /* Dichte-Faktor: genug Überlappung für einen dichten Nebelkern */
+  const blob = (cx, cy, cz, rx, ry, rz, n0, sz) => {
+    const n = Math.round(n0 * D);
+    for (let i = 0; i < n; i++) {
+      let x, y, z, l;
+      do { x = Math.random() * 2 - 1; y = Math.random() * 2 - 1; z = Math.random() * 2 - 1; l = x * x + y * y + z * z; } while (l > 1);
+      const b = Math.sqrt(Math.random());                       /* Zentrum dichter */
+      P.push({ x: cx + x * rx * b, y: cy + y * ry * b, z: cz + z * rz * b, s: sz * (0.6 + 0.9 * Math.random()) });
+    }
   };
-  /* Rauch-Schweif: nach unten spitz zulaufender Kegel → der Körper läuft als
-     Geist in Wisps aus, statt mit einem runden „Schneemann"-Boden zu enden.
-     topY innerhalb des Körpers, damit die Basis-Scheibe verdeckt bleibt. */
-  const tail = (topR, topY, len, sx = 1, sz = 1) => {
-    const c = new THREE.Mesh(new THREE.ConeGeometry(topR, len, 18), M.mat);
-    c.position.set(0, topY - len * .5, 0); c.rotation.x = Math.PI; c.scale.set(sx, 1, sz); grp.add(c); return c;
-  };
-  /* WICHTIG: Kamera blickt FRONTAL → Silhouette in der BILD-Ebene lesbar
-     machen (Kopf oben, Merkmale seitlich breit). Körper = EINE fließende
-     Tropfen-/Geistform (Massen stark überlappt, unten als Rauch auslaufend),
-     kein Stapel sichtbar getrennter Kugeln. Proportionen je Wächter eigen. */
-  let hc;
-  if (form === 'wolf') {
-    /* schlankes, geducktes Raubtier, Kopf vorgestreckt */
-    mass(R * .56, 0, .34 * R, .04 * R, .8, 1.14, .96);   /* schlanker Rumpf */
-    tail(R * .48, .04 * R, R * 1.05, .8, .92);           /* Rauchschweif */
-    hc = new THREE.Vector3(0, 1.04 * R, .26 * R);
-    mass(R * .38, hc.x, hc.y, hc.z, 1.0, .8, 1.28);      /* länglicher Kopf */
-  } else if (form === 'fuchs') {
-    /* klein & schlank – die riesigen Ohren dominieren */
-    mass(R * .46, 0, .32 * R, .04 * R, .72, 1.06, .84);  /* kleiner Rumpf */
-    tail(R * .4, .04 * R, R * .95, .72, .85);
-    hc = new THREE.Vector3(0, .94 * R, .24 * R);
-    mass(R * .32, hc.x, hc.y, hc.z, .95, .8, 1.28);      /* spitzer Kopf */
-  } else if (form === 'baerin') {
-    /* massig, breit, gedrungen */
-    mass(R * .82, 0, .18 * R, 0, 1.14, 1.04, 1.0);       /* breiter Rumpf */
-    mass(R * .6, 0, .66 * R, .06 * R, 1.16, .84, .92);   /* massige Schultern */
-    tail(R * .72, -.06 * R, R * .9, 1.06, .96);
-    hc = new THREE.Vector3(0, 1.16 * R, .12 * R);
-    mass(R * .46, hc.x, hc.y, hc.z, 1.06, .9, 1.06);     /* breiter Kopf */
-  } else if (form === 'adler') {
-    /* aufrecht & schmal – die Schwingen sind die Silhouette */
-    mass(R * .42, 0, .3 * R, 0, .78, 1.28, .82);         /* schmaler Rumpf */
-    tail(R * .32, .0 * R, R * .85, .7, .8);              /* Schwanzfedern */
-    hc = new THREE.Vector3(0, 1.06 * R, .12 * R);
-    mass(R * .36, hc.x, hc.y, hc.z, .96, .98, 1.0);      /* Kopf */
-    [-1, 1].forEach(s => {
-      [[1.15, .3, 2.8, .02], [.95, -.05, 2.3, -.28]].forEach(([px, py, ln, drop]) => {
-        const w = new THREE.Mesh(new THREE.ConeGeometry(R * .5, R * ln, 9), M.mat);
-        w.scale.set(1, 1, .13); w.position.set(s * R * px, R * py, -R * .1);
-        w.rotation.z = s * (Math.PI / 2.0 + drop); grp.add(w);
+  const wisp = (x0, y0, z0, x1, y1, z1, n0, sz, jit) => {
+    const n = Math.round(n0 * D);
+    for (let i = 0; i < n; i++) {
+      const t = i / (n - 1);
+      P.push({
+        x: x0 + (x1 - x0) * t + (Math.random() - 0.5) * jit,
+        y: y0 + (y1 - y0) * t + (Math.random() - 0.5) * jit,
+        z: z0 + (z1 - z0) * t + (Math.random() - 0.5) * jit,
+        s: sz * (0.6 + 0.6 * Math.random()) * (1.0 - 0.22 * t)  /* zur Spitze etwas feiner */
       });
+    }
+  };
+  const sym = (fn) => { fn(1); fn(-1); };
+  let head;
+  if (form === 'wolf') {
+    /* schlankes Raubtier mit hohen, dichten Spitzohren */
+    blob(0, .4 * R, 0, .46 * R, .62 * R, .48 * R, 30, .52);
+    blob(0, 1.0 * R, .16 * R, .38 * R, .4 * R, .42 * R, 18, .48);
+    wisp(0, .12 * R, 0, 0, -1.05 * R, 0, 16, .44, .16 * R);            /* Rauchschweif */
+    sym(s => wisp(s * .3 * R, 1.2 * R, 0, s * .52 * R, 2.25 * R, -.06 * R, 16, .46, .07 * R)); /* hohe Spitzohren */
+    wisp(0, .86 * R, .5 * R, 0, .74 * R, 1.05 * R, 8, .4, .07 * R);    /* Schnauze */
+    head = { x: 0, y: .98 * R, z: .42 * R };
+  } else if (form === 'fuchs') {
+    /* KLEIN, aber mit riesigen, dominanten Lauschern */
+    blob(0, .34 * R, 0, .34 * R, .44 * R, .36 * R, 16, .42);
+    blob(0, .82 * R, .14 * R, .28 * R, .3 * R, .36 * R, 12, .42);
+    wisp(0, .08 * R, 0, 0, -.9 * R, 0, 12, .34, .13 * R);
+    sym(s => wisp(s * .3 * R, .95 * R, 0, s * .78 * R, 2.85 * R, -.04 * R, 22, .5, .07 * R)); /* RIESIGE Ohren */
+    wisp(0, .74 * R, .42 * R, 0, .64 * R, 1.1 * R, 8, .34, .06 * R);   /* spitze Schnauze */
+    head = { x: 0, y: .8 * R, z: .42 * R };
+  } else if (form === 'baerin') {
+    /* MASSIG & breit – der Größenkontrast ist die Signatur */
+    blob(0, .34 * R, 0, .82 * R, .8 * R, .74 * R, 60, .62);            /* riesiger Rumpf */
+    blob(0, 1.04 * R, .08 * R, .58 * R, .52 * R, .56 * R, 36, .58);    /* breiter Kopf */
+    wisp(0, 0, 0, 0, -.95 * R, 0, 16, .5, .26 * R);
+    sym(s => blob(s * .56 * R, 1.42 * R, 0, .2 * R, .2 * R, .2 * R, 9, .44)); /* runde Ohren */
+    blob(0, .86 * R, .56 * R, .34 * R, .26 * R, .26 * R, 16, .46);     /* breite Schnauze */
+    head = { x: 0, y: 1.04 * R, z: .54 * R };
+  } else if (form === 'adler') {
+    /* schmaler Körper, WEIT gespannte dichte Schwingen (Signatur) */
+    blob(0, .46 * R, 0, .32 * R, .66 * R, .32 * R, 18, .42);
+    blob(0, 1.06 * R, .1 * R, .3 * R, .3 * R, .32 * R, 12, .4);
+    wisp(0, .14 * R, 0, 0, -.85 * R, 0, 12, .34, .1 * R);              /* Schwanzfedern */
+    sym(s => {                                                          /* große Schwingen */
+      wisp(s * .18 * R, .62 * R, -.04 * R, s * 1.85 * R, .9 * R, -.18 * R, 28, .54, .12 * R);
+      wisp(s * .18 * R, .4 * R, -.04 * R, s * 1.6 * R, -.05 * R, -.18 * R, 22, .48, .12 * R);
     });
+    wisp(0, .98 * R, .42 * R, 0, .88 * R, 1.08 * R, 6, .3, .05 * R);    /* Hakenschnabel */
+    head = { x: 0, y: 1.05 * R, z: .4 * R };
   } else if (form === 'hirsch') {
-    /* hoch & schlank, langer Hals – das Geweih krönt */
-    mass(R * .48, 0, .16 * R, 0, .76, 1.16, .96);        /* schlanker Rumpf */
-    tail(R * .4, -.08 * R, R * .95, .72, .85);
-    mass(R * .26, 0, .76 * R, .14 * R, .64, 1.18, .7);   /* langer Hals */
-    hc = new THREE.Vector3(0, 1.26 * R, .22 * R);
-    mass(R * .3, hc.x, hc.y, hc.z, .88, .88, 1.32);      /* langer schmaler Kopf */
+    /* hoch & schlank, GROSSES weit verzweigtes Geweih (Signatur) */
+    blob(0, .28 * R, 0, .34 * R, .58 * R, .38 * R, 20, .44);
+    wisp(0, -.05 * R, 0, 0, -.95 * R, 0, 12, .34, .1 * R);
+    blob(0, .82 * R, .12 * R, .2 * R, .44 * R, .22 * R, 12, .36);      /* langer Hals */
+    blob(0, 1.32 * R, .16 * R, .24 * R, .28 * R, .32 * R, 12, .4);
+    sym(s => {                                                          /* weit gespreiztes Geweih */
+      wisp(s * .18 * R, 1.55 * R, -.04 * R, s * .8 * R, 3.25 * R, -.08 * R, 24, .44, .07 * R);  /* Hauptstange */
+      wisp(s * .46 * R, 2.4 * R, -.04 * R, s * 1.3 * R, 3.0 * R, -.08 * R, 14, .38, .06 * R);   /* Spross 1 */
+      wisp(s * .62 * R, 2.78 * R, -.04 * R, s * .45 * R, 3.7 * R, -.08 * R, 12, .36, .05 * R);  /* Spross 2 */
+    });
+    wisp(0, 1.22 * R, .4 * R, 0, 1.1 * R, 1.05 * R, 6, .3, .05 * R);    /* Schnauze */
+    head = { x: 0, y: 1.28 * R, z: .4 * R };
   } else { /* koenig */
-    /* hoch aufragende, verhüllte Gestalt mit breiten Schultern + Arm-Wisps */
-    mass(R * .68, 0, .28 * R, 0, 1.06, 1.18, .92);       /* Umhang-Torso */
-    mass(R * .64, 0, .72 * R, 0, 1.2, .78, .86);         /* breite Schultern */
-    tail(R * .78, -.05 * R, R * .95, 1.04, .92);         /* langer Umhang-Wisp */
-    hc = new THREE.Vector3(0, 1.28 * R, .04 * R);
-    mass(R * .4, hc.x, hc.y, hc.z, .92, 1.06, .92);      /* Kopf unter der Krone */
-    [-1, 1].forEach(s => { const a = new THREE.Mesh(new THREE.ConeGeometry(R * .24, R * 1.35, 10), M.mat);
-      a.position.set(s * R * .84, R * .52, R * .12); a.rotation.z = s * .55; grp.add(a); }); /* erhobene Arme */
+    /* hoch aufragend, breite Schultern, gezackte Krone, erhobene Arme */
+    blob(0, .3 * R, 0, .6 * R, .8 * R, .55 * R, 44, .56);              /* Umhang-Torso */
+    blob(0, .94 * R, 0, .78 * R, .42 * R, .54 * R, 32, .54);           /* breite Schultern */
+    wisp(0, -.1 * R, 0, 0, -1.1 * R, 0, 18, .5, .22 * R);              /* Umhang-Wisp */
+    blob(0, 1.38 * R, .04 * R, .36 * R, .42 * R, .38 * R, 18, .46);
+    for (let i = 0; i < 8; i++) {                                       /* gezackte Krone */
+      const a = (i / 8) * Math.PI * 2, tall = (i % 2 === 0) ? 1.15 : .6;
+      wisp(Math.cos(a) * .52 * R, 1.66 * R, Math.sin(a) * .42 * R + .06 * R,
+        Math.cos(a) * .58 * R, (1.66 + tall) * R, Math.sin(a) * .46 * R + .06 * R, 7, .34, .04 * R);
+    }
+    sym(s => wisp(s * .6 * R, .8 * R, .12 * R, s * 1.12 * R, .05 * R, .24 * R, 16, .42, .09 * R)); /* erhobene Arme */
+    head = { x: 0, y: 1.38 * R, z: .38 * R };
   }
-  return hc;
+  return { P, head };
+}
+
+/* Baut die Nebelwolke (eine THREE.Points-Wolke, M.mat = Nebel-Material).
+   Liefert die Kopfposition für die leuchtenden Augen. */
+function buildMistWraith(def, R) {
+  const { P, head } = sampleWraith(def.form, R);
+  const N = P.length;
+  const pos = new Float32Array(N * 3), seed = new Float32Array(N), size = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    pos[i * 3] = P[i].x; pos[i * 3 + 1] = P[i].y; pos[i * 3 + 2] = P[i].z;
+    seed[i] = Math.random() * 6.2832; size[i] = P[i].s * R;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('aSeed', new THREE.BufferAttribute(seed, 1));
+  geo.setAttribute('aSize', new THREE.BufferAttribute(size, 1));
+  M.mat = mistMaterial(def.dark, R * .3);
+  M.mats = [M.mat];
+  const cloud = new THREE.Points(geo, M.mat);
+  cloud.frustumCulled = false;
+  M.group.add(cloud);
+  return head;
+}
+
+/* ---------- Leuchtende Schatten-Augen (Kern + additiver Glow) ---------- */
+function addGlowEyes(group, cx, cy, cz, r, spread, color) {
+  [-1, 1].forEach(sx => {
+    const core = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10),
+      new THREE.MeshBasicMaterial({ color, depthTest: false }));
+    core.position.set(cx + sx * spread, cy, cz); core.renderOrder = 12;
+    group.add(core);
+    const glow = glowSprite(color, r * 4); glow.material.opacity = .8;
+    glow.position.copy(core.position); glow.renderOrder = 11;
+    group.add(glow);
+  });
 }
 
 /* mats = alle Schatten-Materialien des aktiven Gegners (Körper + Merkmale).
@@ -222,32 +271,27 @@ export function spawnMob(st, isBoss) {
 
   /* Schattengeist (Augen zur Kamera via lookAt unten) */
   const fb = animal.fb;
-  const baseR = isBoss ? (def.form === 'koenig' ? 2.55 : 2.2) : 1.9;
+  /* Größenkontrast je Wächter (Bärin/König groß, Fuchs klein) → distinkter */
+  const BR = { wolf: 2.2, fuchs: 1.85, baerin: 2.55, adler: 2.15, hirsch: 2.3, koenig: 2.6 };
+  const baseR = isBoss ? (BR[def.form] || 2.2) : 1.9;
   M.mat = blobMaterial(isBoss ? def.dark : fb.color, isBoss ? .7 : fb.amp);
   M.mats = [M.mat];
   const hoverY = 2.5;
 
   if (isBoss) {
-    /* Echte Wächter-Silhouette aus mehreren Schatten-Massen statt Kugel */
-    const hc = buildBossBody(def.form, baseR);
-    /* Merkmale teilen ein eigenes (kaum waberndes) Schatten-Material, das
-       MIT erstarrt – scharfe Ohren/Geweih, aber gleicher Solidify/Tint */
-    const featMat = blobMaterial(def.dark, .2); M.mats.push(featMat);
-    /* Kopfradius je Wächter (passend zu buildBossBody) → Ohren/Augen sitzen */
-    const HR = { wolf: .38, fuchs: .32, baerin: .46, adler: .36, hirsch: .3, koenig: .4 };
-    const hr = baseR * (HR[def.form] || .4);
-    bossFeatures(def.form, M.group, hc, hr, featMat);
-    const eyeR = Math.min(.24, hr * .6);
-    addEyes(M.group, hc.x, hc.y + hr * .14, hc.z + hr * .86, eyeR, hr * .5, 0xff2e4d);
-    const aura = glowSprite(def.aura, 10); aura.material.opacity = .5;
-    aura.position.y = 0;
+    /* Wächter = Gestalt aus dunklem Nebel (volumetrische Punktwolke) */
+    const head = buildMistWraith(def, baseR);
+    addGlowEyes(M.group, head.x, head.y, head.z, baseR * .12, baseR * .2, 0xff4d63);
+    /* dezenter farbiger Energie-Schimmer im Kern (je Wächter) */
+    const aura = glowSprite(def.aura, baseR * 1.7); aura.material.opacity = .3;
+    aura.position.y = baseR * .5;
     M.group.add(aura);
   } else {
     /* normaler Schattengeist: kompakte Blob-Kugel */
     const body = new THREE.Mesh(new THREE.SphereGeometry(baseR, 48, 36), M.mat);
     body.scale.y = fb.squash;
     M.group.add(body);
-    addEyes(M.group, 0, baseR * .28, baseR * .86, .25, baseR * .38, fb.eye);
+    addGlowEyes(M.group, 0, baseR * .28, baseR * .86, .22, baseR * .38, fb.eye);
   }
   /* Schatten STANDALONE auf dem Boden – NICHT als Kind der Gruppe, sonst
      erbt der flache Schatten deren lookAt-Rotation + Spawn-Skalierung und
