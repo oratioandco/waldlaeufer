@@ -77,7 +77,7 @@ export const UI_LINES = {
   welcomeNew: 'Willkommen im großen Wald! Schreib deinen Namen – dann geht es los.',
   dead: 'Oh nein, umgehauen! Aber ein Waldläufer gibt niemals auf. Tippe auf den Blitz und steh wieder auf!',
   rotate: 'Dreh dein Tablet quer – dann siehst du den ganzen Wald!',
-  shieldAlert: 'Achtung! Merk dir das Schildwort.'
+  shieldAlert: 'Achtung! Merk dir das Abwehrwort.'
 };
 export const FLOOR_QUOTES = [
   'Ein Wächter ist zurück! Der Wald atmet auf.',

@@ -7,7 +7,7 @@
    ===================================================================== */
 import { sayStory, stopSpeech } from '../audio/tts.js';
 
-let queue = [], idx = 0, onDoneCb = null;
+let queue = [], idx = 0, onDoneCb = null, autoTimer = null;
 let TEXT_ON = false;
 try { TEXT_ON = localStorage.getItem('waldlaeufer.sceneText') === '1'; } catch (e) {}
 
@@ -47,11 +47,19 @@ function showStep() {
   document.getElementById('sceneIcon').textContent = s.icon;
   document.getElementById('sceneSpeaker').textContent = s.name;
   document.getElementById('sceneText').textContent = s.text;
-  /* WEITER = bewusstes Überspringen → laufende Zeile sofort abbrechen */
-  sayStory(s.voice, s.text, true);
   document.getElementById('sceneNextBtn').textContent = idx < queue.length - 1 ? '▶' : '⚔';
+  /* Tippen = bewusstes Überspringen (bricht die laufende Zeile sofort ab).
+     OHNE Tippen blättert die Szene automatisch weiter, sobald die Stimme die
+     Zeile ZU ENDE gesprochen hat → keine abgeschnittenen Audios mehr. */
+  clearTimeout(autoTimer);
+  const myIdx = idx;
+  const autoNext = () => { if (idx === myIdx && document.getElementById('sceneOv').classList.contains('on')) next(); };
+  sayStory(s.voice, s.text, true, false, () => { clearTimeout(autoTimer); autoTimer = setTimeout(autoNext, 600); });
+  /* Sicherheitsnetz (Stimme aus / Clip fehlt): nach geschätzter Lesedauer */
+  autoTimer = setTimeout(autoNext, Math.max(2800, s.text.length * 95) + 1200);
 }
 function next() {
+  clearTimeout(autoTimer);
   idx++;
   if (idx < queue.length) { showStep(); return; }
   document.getElementById('sceneOv').classList.remove('on');
@@ -60,6 +68,7 @@ function next() {
   if (cb) cb();
 }
 function skipScene() {
+  clearTimeout(autoTimer);
   stopSpeech();
   idx = queue.length;
   document.getElementById('sceneOv').classList.remove('on');

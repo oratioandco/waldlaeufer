@@ -38,7 +38,7 @@ export function startBlitz(ctx) {
   const ov = document.getElementById('parry');
   ov.classList.toggle('chest', ctx === 'chest');
   document.getElementById('parryTag').textContent =
-    ctx === 'chest' ? '🗝 Schlüsselwort!' : '⚠ Angriff – Schildwort!';
+    ctx === 'chest' ? '🗝 Schlüsselwort!' : '⚠ Angriff – Abwehrwort!';
   const w = document.getElementById('parryWord');
   const c = document.getElementById('parryChoices');
   c.innerHTML = ''; w.textContent = shieldItem.w;

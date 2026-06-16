@@ -58,10 +58,12 @@ function startJob(job) {
     if (done) return;
     done = true;
     clearTimeout(job._t);
+    const cb = job.onDone; job.onDone = null; /* nur bei echtem Ende, NICHT bei Interrupt */
     curAudio = null;
     current = null;
     if (queue.length) startJob(queue.shift());
     else duckAll(false);
+    if (cb) cb();
   };
   /* Sicherheitsnetz: falls onended/onend nie feuert (iOS-Eigenheiten),
      gibt der Timer die Queue wieder frei */
@@ -164,11 +166,15 @@ export function sayGame(text, interrupt = false, optional = false) {
   const f = clipFor('word', text);
   requestJob(f ? clipJob(f, text, .95, .9) : speechJob(text), interrupt, optional);
 }
-/* Story-Zeilen (Charakterstimmen) */
-export function sayStory(voiceKey, text, interrupt = false, optional = false) {
+/* Story-Zeilen (Charakterstimmen). onDone feuert NUR bei vollständigem
+   Abspielen (nicht bei Interrupt) → Szenen können automatisch weiterblättern,
+   ohne die Zeile abzuschneiden. */
+export function sayStory(voiceKey, text, interrupt = false, optional = false, onDone = null) {
   const v = VOICES[voiceKey] || VOICES.narrator;
   const f = clipFor(voiceKey, text);
-  requestJob(f ? clipJob(f, text, v.rate, v.pitch) : speechJob(text, v.rate, v.pitch), interrupt, optional);
+  const job = f ? clipJob(f, text, v.rate, v.pitch) : speechJob(text, v.rate, v.pitch);
+  job.onDone = onDone;
+  requestJob(job, interrupt, optional);
 }
 /* Mehrere Zeilen nacheinander (z.B. Erzähler + Begleiter-Zitat) */
 export function sayStorySeq(steps) {
