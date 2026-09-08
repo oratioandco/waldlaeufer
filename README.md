@@ -1,4 +1,4 @@
-# WALDLÄUFER 🌲
+# WALDLÄUFER 🌲 – spielerisches Lesetraining bei LRS
 
 Ein Lernspiel für Kinder mit LRS (Lese-Rechtschreib-Störung) — es sieht aus
 wie ein Abenteuerspiel, aber jede Mechanik ist eine verkleidete Leseübung.
